@@ -1,0 +1,44 @@
+---
+interface Props {
+  standalone?: boolean;
+  path?: string;
+}
+
+const { standalone = false, path = '' } = Astro.props;
+---
+
+<div id="waline" data-standalone={standalone ? 'true' : 'false'} data-waline-path={path}></div>
+
+<script>
+  import {init} from "@waline/client";
+  import {comment} from "../consts";
+  import "@waline/client/style";
+
+  let walineInstance;
+
+  function initWaline() {
+    const walineDoc = document.getElementById("waline");
+    const standalone = walineDoc?.dataset.standalone === 'true';
+    if ((!comment.enable && !standalone) || comment.type !== "waline" || !comment.walineConfig.serverUrl || !walineDoc) return;
+    // ClientRouter re-renders #waline on each navigation: destroy the previous
+    // instance (its element is gone) before mounting a fresh one.
+    walineInstance?.destroy();
+    walineInstance = init({
+      el: "#waline",
+      comment: true,
+      path: walineDoc.dataset.walinePath || window.location.pathname.replace(/\/$/, ""),
+      serverURL: comment.walineConfig.serverUrl,
+      lang: comment.walineConfig.lang,
+      pageSize: comment.walineConfig.pageSize,
+      pageview: comment.walineConfig.pageview, // 浏览量统计
+      reaction: comment.walineConfig.whiteList.includes(location.pathname)
+        ? false
+        : comment.walineConfig.reaction, // 开启反应
+      requiredMeta: comment.walineConfig.requiredMeta,
+      login: standalone ? 'disable' : 'enable',
+      dark: 'html[data-theme="dark"]',
+    });
+  }
+
+  document.addEventListener("astro:page-load", initWaline);
+</script>

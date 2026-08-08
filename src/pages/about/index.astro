@@ -1,0 +1,32 @@
+---
+import IndexPage from '@/layouts/IndexPage.astro';
+---
+
+<IndexPage title="About">
+  <article class="about-page markdown-body">
+    <p class="kicker">ABOUT ME</p>
+    <h1>About me</h1>
+    <p class="lede">A personal introduction will live here. This temporary copy can be replaced whenever the final profile is ready.</p>
+
+    <h2>What I do</h2>
+    <ul>
+      <li>Write about backend development, systems, and programming</li>
+      <li>Play games, watch animation and films, and read</li>
+      <li>Draw original characters and fan art</li>
+      <li>Build a personal site that can hold all of the above</li>
+    </ul>
+
+    <h2>Stack</h2>
+    <p>The migrated technical notes mainly cover Java, Spring Boot, MySQL, Redis, Kafka, Docker, and Linux. Work and project details can be added later.</p>
+
+    <h2>Favorites</h2>
+    <p>Works and references that shaped me will be collected here, with room to become a separate library later.</p>
+  </article>
+</IndexPage>
+
+<style>
+  .about-page { padding: 2rem 0; }
+  .about-page .kicker { color: rgb(var(--color-text-active)); font: 600 .72rem/1 jetbrains-mono, monospace; letter-spacing: .16em; }
+  .about-page h1 { margin: .6rem 0 1.5rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.04em; }
+  .about-page .lede { max-width: 42rem; font-size: 1.2rem; color: rgb(var(--color-text-dodge)); }
+</style>

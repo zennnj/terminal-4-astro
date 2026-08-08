@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import IndexPage from '@/layouts/IndexPage.astro';
+
+const works = (await getCollection('gallery'))
+  .filter((work) => !work.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const kindLabel = (kind: string) => ({ '同人': 'FAN ART', '原创': 'ORIGINAL', '插画': 'ILLUSTRATION' }[kind] ?? kind.toUpperCase());
+---
+
+<IndexPage title="Gallery">
+  <header class="gallery-head">
+    <div><p>GALLERY · VISUAL ARCHIVE</p><h1>Gallery</h1></div>
+    <div class="filters" role="group" aria-label="Artwork type">
+      <button class="active" data-filter="all">ALL</button>
+      <button data-filter="OC">OC</button>
+      <button data-filter="同人">FAN ART</button>
+    </div>
+  </header>
+
+  {works.length > 0 ? (
+    <div class="gallery-grid" id="gallery-grid">
+      {works.map((work) => (
+        <article class="work-card" data-kind={work.data.kind}>
+          <img src={work.data.image} alt={work.data.alt ?? work.data.title} loading="lazy" />
+          <div class="work-caption">
+            <div><span>{kindLabel(work.data.kind)}</span><h2>{work.data.title}</h2></div>
+            <p>{work.data.tags.map((tag) => `#${tag}`).join(' ')}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  ) : (
+    <div class="empty-state"><i class="ri-image-add-line"></i><h2>The frames are ready</h2><p>New artwork will appear here once it is added to the gallery.</p></div>
+  )}
+</IndexPage>
+
+<script>
+  function bindGalleryFilters() {
+    document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-filter]').forEach((item) => item.classList.remove('active'));
+        button.classList.add('active');
+        const filter = button.dataset.filter;
+        document.querySelectorAll<HTMLElement>('[data-kind]').forEach((card) => {
+          card.hidden = filter !== 'all' && card.dataset.kind !== filter;
+        });
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', bindGalleryFilters);
+</script>
+
+<style>
+  .gallery-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: 2rem 0; }
+  .gallery-head p { margin: 0; font: 600 .72rem/1 jetbrains-mono, monospace; letter-spacing: .16em; color: rgb(var(--color-text-active)); }
+  .gallery-head h1 { margin: .55rem 0 0; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.04em; }
+  .filters { display: flex; gap: .4rem; padding: .3rem; border: 1px solid rgba(var(--color-text), .14); border-radius: 999px; }
+  .filters button { padding: .35rem .75rem; border-radius: 999px; cursor: pointer; }
+  .filters button.active { background: rgb(var(--color-text)); color: rgb(var(--color-fill)); }
+  .gallery-grid { columns: 2; column-gap: 1rem; }
+  .work-card { break-inside: avoid; margin-bottom: 1rem; overflow: hidden; border-radius: 1rem; background: rgb(var(--color-card)); }
+  .work-card img { width: 100%; }
+  .work-caption { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem; }
+  .work-caption span, .work-caption p { color: rgb(var(--color-text-dodge)); font-size: .75rem; }
+  .work-caption h2 { margin: .2rem 0 0; }
+  .empty-state { padding: 5rem 1rem; border: 1px dashed rgba(var(--color-text), .24); border-radius: 1.2rem; text-align: center; color: rgb(var(--color-text-dodge)); }
+  .empty-state i { font-size: 2.5rem; color: rgb(var(--color-text-active)); }
+  .empty-state h2 { margin: .75rem 0; color: rgb(var(--color-text)); }
+  @media (max-width: 620px) { .gallery-head { align-items: start; flex-direction: column; } .gallery-grid { columns: 1; } }
+</style>

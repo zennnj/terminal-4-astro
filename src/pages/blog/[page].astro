@@ -1,0 +1,143 @@
+---
+import IndexPage from '@/layouts/IndexPage.astro';
+import { getCollectionByName } from '@/utils/getCollectionByName';
+import { orderBySticky } from '@/utils/orderBySticky';
+import { dealLabel } from '@/utils/dealLabel';
+import getUrl from '@/utils/getUrl';
+
+export async function getStaticPaths() {
+  return [{ params: { page: '1' } }];
+}
+
+const posts = orderBySticky(await getCollectionByName('blog'));
+const tagCounts = new Map<string, number>();
+for (const post of posts) {
+  for (const tag of dealLabel(post.data.tags)) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+}
+const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
+const postsByYear = posts.reduce<Record<string, typeof posts>>((groups, post) => {
+  const year = String(post.data.date.getFullYear());
+  (groups[year] ??= []).push(post);
+  return groups;
+}, {});
+---
+
+<IndexPage title="Article" contentClass="article-hub-shell">
+  <header class="article-toolbar">
+    <nav class="section-tabs" aria-label="Article view">
+      <button class="active" type="button" data-view-button="list">ARTICLE</button>
+      <button type="button" data-view-button="archive">ARCHIVE</button>
+    </nav>
+    <button class="search-toggle" id="search-toggle" type="button" aria-label="Open article search" aria-expanded="false"><i class="ri-search-line"></i></button>
+  </header>
+
+  <div class="search-panel" id="search-panel" hidden>
+    <i class="ri-search-line"></i><input id="article-search" type="search" placeholder="Search title or tag..." autocomplete="off" /><button id="search-close" type="button" aria-label="Close search"><i class="ri-close-line"></i></button>
+  </div>
+
+  <section class="article-layout" data-view-panel="list">
+    <div class="article-list" id="article-list">
+      {posts.map((post, index) => {
+        const postTags = dealLabel(post.data.tags);
+        const searchText = `${post.data.title} ${postTags.join(' ')}`.toLowerCase();
+        return (
+          <article class="article-row" data-filter-item data-tags={postTags.join('|')} data-search={searchText} style={`--row-index:${index}`}>
+            <a href={getUrl(`/blog/${post.id}`)}>
+              <span class="row-index">{String(index + 1).padStart(2, '0')}</span>
+              <div class="row-copy"><h2>{post.data.title}</h2><div class="row-meta"><time>{post.data.date.toLocaleDateString('zh-CN')}</time>{postTags.map((tag) => <span>#{tag}</span>)}</div></div>
+              <span class="row-orb" aria-hidden="true"></span><i class="ri-arrow-right-up-line row-arrow"></i>
+            </a>
+          </article>
+        );
+      })}
+      <p class="no-results" id="no-results" hidden>No matching articles.</p>
+    </div>
+
+    <aside class="article-stats">
+      <div class="stat-total"><span>TOTAL</span><strong>{posts.length}</strong><small>ARTICLES</small></div>
+      <div class="tag-filter"><p>ALL TAGS</p><button class="active" type="button" data-tag="all"># ALL <span>{posts.length}</span></button>{tags.map(([tag, count]) => <button type="button" data-tag={tag}># {tag} <span>{count}</span></button>)}</div>
+    </aside>
+  </section>
+
+  <section class="archive-view" data-view-panel="archive" hidden>
+    <div class="archive-years">
+      {Object.entries(postsByYear).sort(([a], [b]) => Number(b) - Number(a)).map(([year, yearPosts]) => (
+        <section class="year-group">
+          <header><h2>{year}</h2><span>{yearPosts.length} PUBLISHED</span></header>
+          <div>{yearPosts.map((post) => { const postTags = dealLabel(post.data.tags); return <a href={getUrl(`/blog/${post.id}`)} data-filter-item data-tags={postTags.join('|')} data-search={`${post.data.title} ${postTags.join(' ')}`.toLowerCase()}><time>{post.data.date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}</time><span>{post.data.title}</span><i class="ri-arrow-right-line"></i></a>; })}</div>
+        </section>
+      ))}
+    </div>
+    <aside class="article-stats archive-stats"><div class="stat-total"><span>TOTAL</span><strong>{posts.length}</strong><small>ARTICLES</small></div><div class="tag-filter"><p>ALL TAGS</p><button class="active" type="button" data-tag="all"># ALL <span>{posts.length}</span></button>{tags.map(([tag, count]) => <button type="button" data-tag={tag}># {tag} <span>{count}</span></button>)}</div></aside>
+  </section>
+</IndexPage>
+
+<script>
+  function initArticleHub() {
+    const viewButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-view-button]')];
+    const panels = [...document.querySelectorAll<HTMLElement>('[data-view-panel]')];
+    const searchToggle = document.querySelector<HTMLButtonElement>('#search-toggle');
+    const searchPanel = document.querySelector<HTMLElement>('#search-panel');
+    const searchInput = document.querySelector<HTMLInputElement>('#article-search');
+    const searchClose = document.querySelector<HTMLButtonElement>('#search-close');
+    let activeTag = 'all';
+
+    const applyFilters = () => {
+      const term = searchInput?.value.trim().toLowerCase() ?? '';
+      let visible = 0;
+      document.querySelectorAll<HTMLElement>('[data-filter-item]').forEach((item) => {
+        const tags = (item.dataset.tags ?? '').split('|');
+        const match = (activeTag === 'all' || tags.includes(activeTag)) && (item.dataset.search ?? '').includes(term);
+        item.hidden = !match;
+        if (match && item.closest('[data-view-panel="list"]')) visible += 1;
+      });
+      const empty = document.querySelector<HTMLElement>('#no-results');
+      if (empty) empty.hidden = visible !== 0;
+    };
+
+    const setView = (view: string) => {
+      viewButtons.forEach((button) => button.classList.toggle('active', button.dataset.viewButton === view));
+      panels.forEach((panel) => panel.hidden = panel.dataset.viewPanel !== view);
+      const url = new URL(window.location.href);
+      if (view === 'archive') url.searchParams.set('view', 'archive'); else url.searchParams.delete('view');
+      history.replaceState(null, '', url);
+    };
+    viewButtons.forEach((button) => button.addEventListener('click', () => setView(button.dataset.viewButton ?? 'list')));
+    setView(new URLSearchParams(location.search).get('view') === 'archive' ? 'archive' : 'list');
+
+    document.querySelectorAll<HTMLButtonElement>('[data-tag]').forEach((button) => button.addEventListener('click', () => {
+      activeTag = button.dataset.tag ?? 'all';
+      document.querySelectorAll('[data-tag]').forEach((item) => item.classList.toggle('active', (item as HTMLElement).dataset.tag === activeTag));
+      applyFilters();
+    }));
+    searchInput?.addEventListener('input', applyFilters);
+    searchToggle?.addEventListener('click', () => {
+      if (!searchPanel) return;
+      searchPanel.hidden = false; searchToggle.setAttribute('aria-expanded', 'true'); searchInput?.focus();
+    });
+    searchClose?.addEventListener('click', () => {
+      if (!searchPanel) return;
+      searchPanel.hidden = true; searchToggle?.setAttribute('aria-expanded', 'false'); if (searchInput) searchInput.value = ''; applyFilters();
+    });
+  }
+  document.addEventListener('astro:page-load', initArticleHub);
+</script>
+
+<style>
+  :global(.article-hub-shell) { max-width: 1480px; margin: 0 auto 0 var(--rail-width); padding: 1.15rem clamp(1.5rem, 5vw, 5.5rem) clamp(2rem, 4vw, 4rem); }
+  .article-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
+  .search-toggle { display: grid; width: 58px; height: 58px; place-items: center; border: 1px solid var(--purple); border-radius: 50%; cursor: pointer; font-size: 1.6rem; transition: background .2s, color .2s, transform .2s; }.search-toggle:hover { background: var(--purple); color: var(--paper); transform: rotate(-8deg); }
+  .search-panel { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; margin-bottom: 2rem; padding: 1rem 1.2rem; border: 2px solid var(--purple); background: var(--paper); }.search-panel[hidden] { display: none; }.search-panel input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 1.1rem; }.search-panel button { cursor: pointer; font-size: 1.3rem; }
+  .article-layout, .archive-view { display: grid; grid-template-columns: minmax(0, 1fr) minmax(190px, 250px); gap: clamp(2rem, 6vw, 7rem); }.article-layout[hidden], .archive-view[hidden] { display: none; }
+  .article-list { border-top: 1px solid var(--purple); }
+  .article-row { border-bottom: 1px solid rgba(58,13,98,.72); overflow: hidden; }.article-row[hidden] { display: none; }.article-row > a { position: relative; display: grid; min-height: 145px; grid-template-columns: 62px 1fr auto; align-items: center; gap: 1rem; padding: 1.5rem 1rem; isolation: isolate; transition: color .3s ease, padding .3s ease; }.article-row > a::before { content: ''; position: absolute; z-index: -2; inset: 0; background: var(--purple); transform: translateY(101%); transition: transform .38s cubic-bezier(.2,.7,.2,1); }.article-row:hover > a { padding-right: 1.8rem; padding-left: 1.8rem; color: var(--paper); }.article-row:hover > a::before { transform: translateY(0); }
+  .row-index { color: var(--purple-soft); font-size: .88rem; transition: color .25s; }.article-row:hover .row-index { color: var(--pink); }
+  .row-copy h2 { margin: 0 0 .9rem; font: 500 clamp(1.65rem, 2.5vw, 2.55rem)/1.2 Georgia, "Noto Serif SC", serif; transition: transform .3s ease; }.article-row:hover h2 { transform: translateX(10px); }.row-meta { display: flex; flex-wrap: wrap; gap: .85rem; color: var(--purple-soft); font-size: .88rem; transition: color .25s; }.article-row:hover .row-meta { color: #d9c8df; }
+  .row-orb { position: absolute; z-index: -1; right: 8%; width: 110px; height: 110px; border: 2px solid var(--pink); border-radius: 42% 58% 65% 35%; opacity: 0; transform: scale(.2) rotate(0); transition: opacity .3s, transform .45s; }.article-row:hover .row-orb { opacity: 1; transform: scale(1) rotate(45deg); }.row-arrow { font-size: 1.8rem; opacity: 0; transform: translate(-18px, 18px); transition: opacity .3s, transform .3s; }.article-row:hover .row-arrow { opacity: 1; transform: translate(0,0); }
+  .article-stats { position: sticky; top: 2rem; align-self: start; }.stat-total { display: flex; flex-direction: column; margin-bottom: 2.5rem; }.stat-total span, .tag-filter > p { color: var(--pink); font: 700 .9rem/1.2 Georgia, serif; letter-spacing: .12em; }.stat-total strong { font: 500 clamp(3.5rem, 7vw, 6.5rem)/1 Georgia, serif; }.stat-total small { color: var(--purple-soft); font-size: .85rem; letter-spacing: .15em; }
+  .tag-filter { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; }.tag-filter button { display: flex; justify-content: space-between; gap: 1rem; padding: .55rem .7rem; border: 1px solid transparent; border-radius: 999px; cursor: pointer; font-size: .85rem; text-align: left; transition: border-color .2s, background .2s; }.tag-filter button:hover, .tag-filter button.active { border-color: var(--purple); background: var(--paper-deep); }.tag-filter button span { color: var(--purple-soft); }
+  .archive-years { min-width: 0; }.year-group { margin-bottom: 4rem; }.year-group > header { display: flex; align-items: end; gap: 1.5rem; padding-bottom: .7rem; border-bottom: 2px solid var(--purple); }.year-group h2 { margin: 0; font: 500 clamp(3rem, 7vw, 6.5rem)/.8 Georgia, serif; }.year-group header span { padding-bottom: .2rem; color: var(--purple-soft); font-size: .72rem; letter-spacing: .08em; }.year-group > div > a { display: grid; grid-template-columns: 70px 1fr auto; gap: 1rem; padding: 1rem .5rem; border-bottom: 1px solid rgba(58,13,98,.22); transition: padding .2s, color .2s; }.year-group > div > a[hidden] { display: none; }.year-group > div > a:hover { padding-left: 1rem; color: var(--pink); }.year-group time { color: var(--purple-soft); font-size: .72rem; }
+  .no-results { padding: 4rem 1rem; text-align: center; color: var(--purple-soft); }
+  @media (max-width: 900px) { :global(.article-hub-shell) { margin-left: 0; }.article-layout, .archive-view { grid-template-columns: 1fr; }.article-stats { position: static; display: grid; grid-template-columns: 120px 1fr; grid-row: 1; gap: 1.5rem; }.tag-filter { max-height: 170px; overflow: auto; }.article-row > a { grid-template-columns: 35px 1fr auto; }.row-orb { display: none; } }
+  @media (max-width: 560px) { .article-toolbar { align-items: start; }.view-tabs { flex-direction: column; gap: .5rem; }.article-stats { grid-template-columns: 1fr; }.stat-total { flex-direction: row; align-items: baseline; gap: .7rem; margin-bottom: 0; }.stat-total strong { font-size: 3rem; }.article-row > a { min-height: 112px; padding-inline: .25rem; }.row-index { display: none; }.row-copy h2 { font-size: 1.25rem; }.row-meta span:nth-of-type(n+3) { display: none; }.year-group > div > a { grid-template-columns: 55px 1fr auto; } }
+</style>

@@ -1,0 +1,82 @@
+---
+import { getCollection, render } from 'astro:content';
+import IndexPage from '@/layouts/IndexPage.astro';
+import WalineComment from '@/components/WalineComment.astro';
+import { comment } from '@/consts';
+
+const memos = (await getCollection('memos'))
+  .filter((memo) => !memo.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const rendered = await Promise.all(memos.map(async (memo) => ({ memo, ...(await render(memo)) })));
+const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.serverUrl);
+---
+
+<IndexPage title="Memos" contentClass="memos-shell">
+  <header class="memo-toolbar">
+    <nav class="section-tabs" aria-label="Memo view">
+      <button class="active" type="button" data-memo-view="memos">MEMOS</button>
+      <button type="button" data-memo-view="junk">JUNK</button>
+    </nav>
+  </header>
+
+  <section data-memo-panel="memos">
+    <div class="memo-head"><h1>MEMOS</h1><span>Some sentences I like.</span></div>
+    <div class="memo-stream">
+      {rendered.map(({ memo, Content }, index) => (
+        <article class="memo-entry">
+          <div class="memo-avatar" aria-hidden="true">{index === 0 ? '✦' : '○'}</div>
+          <div class="memo-bubble">
+            {memo.data.tags.length > 0 && <div class="memo-tags">{memo.data.tags.map((tag) => <span>#{tag}</span>)}</div>}
+            <div class="markdown-body memo-body"><Content /></div>
+            <footer><time datetime={memo.data.date.toISOString()}>{memo.data.date.toLocaleDateString('en-CA')}</time>{memo.data.mood && <span>{memo.data.mood}</span>}</footer>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section data-memo-panel="junk" hidden>
+    <div class="memo-head"><h1>JUNK</h1><span>Anonymous fragments and passing thoughts.</span></div>
+    {walineReady && <div class="memo-publisher" aria-label="Post to junk"><WalineComment standalone path="/discuss/" /></div>}
+  </section>
+</IndexPage>
+
+<script>
+  function initMemoViews() {
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-memo-view]')];
+    const panels = [...document.querySelectorAll<HTMLElement>('[data-memo-panel]')];
+    const setView = (view: string) => {
+      buttons.forEach((button) => button.classList.toggle('active', button.dataset.memoView === view));
+      panels.forEach((panel) => panel.hidden = panel.dataset.memoPanel !== view);
+      const url = new URL(location.href);
+      if (view === 'junk') url.searchParams.set('view', 'junk'); else url.searchParams.delete('view');
+      history.replaceState(null, '', url);
+    };
+    buttons.forEach((button) => button.addEventListener('click', () => setView(button.dataset.memoView ?? 'memos')));
+    setView(new URLSearchParams(location.search).get('view') === 'junk' ? 'junk' : 'memos');
+  }
+  document.addEventListener('astro:page-load', initMemoViews);
+</script>
+
+<style>
+  :global(.memos-shell) { max-width: 1280px; margin: 0 auto 0 var(--rail-width); padding: 1.15rem clamp(1.5rem, 7vw, 7rem) clamp(2rem, 5vw, 5rem); }
+  .memo-toolbar { margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
+  [data-memo-panel][hidden] { display: none; }
+  .memo-head { margin-bottom: clamp(3rem, 7vw, 6rem); }
+  .memo-head h1 { margin: clamp(2rem, 5vw, 4.5rem) 0 .8rem 7%; font: 500 clamp(4rem, 9vw, 8rem)/.9 Georgia, serif; letter-spacing: -.07em; }
+  .memo-head > span { display: block; margin-left: 10%; font: 400 clamp(1.15rem, 2.3vw, 2rem)/1.4 Georgia, serif; }
+  .memo-publisher { margin: 0 0 4rem 8%; padding: 1.5rem; background: #fff; }
+  .memo-stream { position: relative; display: grid; gap: clamp(2.5rem, 5vw, 4.5rem); margin-left: 8%; }
+  .memo-entry { position: relative; display: grid; grid-template-columns: 72px minmax(0,1fr); gap: 1.8rem; align-items: start; }
+  .memo-avatar { position: relative; z-index: 2; display: grid; width: 72px; height: 72px; place-items: center; border: 1px solid var(--purple); border-radius: 50%; background: var(--paper); font-size: 1.5rem; }
+  .memo-bubble { position: relative; min-height: 150px; padding: 1.25rem 1.5rem 1rem; border: 0; border-radius: 1.5rem; background: #fff; }
+  .memo-bubble::before { content: ''; position: absolute; top: 28px; left: -12px; width: 24px; height: 20px; background: #fff; transform: rotate(28deg) skewX(-24deg); }
+  .memo-tags { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: .65rem; margin-bottom: .75rem; color: var(--purple-soft); font-size: .88rem; }
+  .memo-body { position: relative; z-index: 1; font-size: 1rem; line-height: 1.8; }
+  .memo-body :global(img) { max-width: min(100%, 440px); border-radius: .8rem; }
+  .memo-bubble footer { display: flex; gap: 1.2rem; margin-top: 1.2rem; color: var(--purple-soft); font-size: .82rem; }
+  :global(.memo-publisher .wl-panel), :global(.memo-publisher .wl-card) { border: 0 !important; box-shadow: none !important; background: #fff !important; }
+  :global(.memo-publisher) { --waline-bg-color: #fff; --waline-bg-color-light: #fff; --waline-border-color: transparent; --waline-theme-color: #77479a; --waline-active-color: #3a0d62; }
+  @media (max-width: 900px) { :global(.memos-shell) { margin-left: 0; }.memo-head h1, .memo-head > span { margin-left: 0; }.memo-stream { margin-left: 0; } }
+  @media (max-width: 560px) { .memo-entry { grid-template-columns: 44px minmax(0,1fr); gap: .9rem; }.memo-avatar { width: 44px; height: 44px; font-size: 1rem; }.memo-bubble { padding: 1rem; border-radius: 1rem; }.memo-bubble::before { top: 14px; }.memo-publisher { margin-left: 0; } }
+</style>

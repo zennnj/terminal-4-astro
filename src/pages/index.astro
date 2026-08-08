@@ -1,0 +1,118 @@
+---
+import IndexPage from '@/layouts/IndexPage.astro';
+import { infoLinks, site } from '@/consts';
+import getUrl from '@/utils/getUrl';
+
+const socialLinks = infoLinks.filter((link) => link.outlink);
+const siteLogs = [
+  { date: '2026.08', text: 'Redesigned the site around a new visual system.' },
+  { date: '2026.08', text: 'Migrated the blog from Hexo to Astro.' },
+  { date: '2026.08', text: 'Moved the article archive into the new site.' },
+  { date: '2026.08', text: 'Started rebuilding from the Astro Yi theme.' },
+];
+---
+
+<IndexPage title="Home" contentClass="home-shell">
+  <section class="main-stage" aria-label="Terminal 4">
+    <div class="portrait-wrap" aria-label="Main visual placeholder">
+      <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+      <div class="portrait-placeholder">
+        <span class="face"></span><span class="hair hair-a"></span><span class="hair hair-b"></span>
+        <span class="eye eye-a"></span><span class="eye eye-b"></span><span class="collar"></span>
+      </div>
+      <div class="doodle doodle-a">✦</div><div class="doodle doodle-b">〰</div>
+      <div class="site-wordmark">TERMINAL <strong>4</strong></div>
+    </div>
+
+    <aside class="social-stack" aria-label="Social accounts">
+      {socialLinks.map((link) => (
+        <a href={getUrl(link.outlink)} target={link.outlink.startsWith('http') ? '_blank' : '_self'} title={link.name} aria-label={link.name}>
+          <i class={link.icon}></i><span>{link.name}</span>
+        </a>
+      ))}
+    </aside>
+
+    <a class="scroll-cue" href="#updates" aria-label="Scroll to site log"></a>
+  </section>
+
+  <section class="updates-stage" id="updates">
+    <div class="update-log">
+      <p class="stage-kicker">SITE UPDATE LOG</p>
+      <h2>Site history</h2>
+      <ol>
+        {siteLogs.map((entry) => (
+          <li>
+            <time>{entry.date}</time>
+            <span>{entry.text}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="ask-card">
+      <div class="ask-orbit"></div>
+      <p>ASK ME</p><h2>ANYTHING</h2>
+      <label for="ask-type">TYPE</label>
+      <select id="ask-type" aria-label="Message type"><option>Just saying hi</option><option>About an article</option><option>About an artwork</option></select>
+      <label for="ask-content">MESSAGE</label>
+      <textarea id="ask-content" rows="4" placeholder="The message box will be connected later..." disabled></textarea>
+      <button type="button" disabled>COMING SOON <i class="ri-send-plane-line"></i></button>
+    </div>
+
+    <footer class="home-footer">
+      <span>POWERED BY ASTRO</span><span>© {new Date().getFullYear()} {site.author}</span><a href={getUrl('/site')}>ABOUT THIS SITE</a>
+    </footer>
+  </section>
+</IndexPage>
+
+<script>
+  function initHomeScrollCue() {
+    const cue = document.querySelector<HTMLElement>('.scroll-cue');
+    if (!cue) return;
+    const update = () => cue.classList.toggle('is-hidden', window.scrollY > 24);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+  }
+  document.addEventListener('astro:page-load', initHomeScrollCue);
+</script>
+
+<style>
+  :global(.home-shell) { padding: 0; }
+  .main-stage { position: relative; display: grid; min-height: 100svh; place-items: center; overflow: hidden; padding: 1rem clamp(5rem, 8vw, 8rem) 3.5rem; }
+  .stage-copy { position: relative; z-index: 3; align-self: start; padding-top: 9vh; }
+  .stage-kicker { margin: 0 0 1rem; color: var(--purple-soft); font-size: .72rem; letter-spacing: .18em; }
+  .stage-copy h1 { max-width: 10ch; margin: 0; font: 500 clamp(2.2rem, 4.6vw, 5.1rem)/1.06 Georgia, "Noto Serif SC", serif; letter-spacing: -.06em; }
+  .stage-copy h1 em { color: var(--pink); font-style: normal; }
+  .stage-intro { max-width: 28rem; margin: 1.5rem 0; color: var(--purple-soft); line-height: 1.9; }
+  .stage-cta { display: inline-flex; align-items: center; gap: .5rem; padding-bottom: .3rem; border-bottom: 1px solid var(--purple); font-size: .82rem; letter-spacing: .08em; }
+  .portrait-wrap { position: relative; display: grid; width: min(74vw, 880px); min-height: min(82svh, 820px); place-items: center; }
+  .portrait-placeholder { position: relative; z-index: 2; width: min(58vw, 650px); aspect-ratio: 1; overflow: hidden; border: 2px solid var(--purple); border-radius: 48% 52% 45% 55% / 52% 45% 55% 48%; background: radial-gradient(circle at 55% 36%, #fbfaf7 0 9%, transparent 9.5%), radial-gradient(circle at 40% 37%, #fbfaf7 0 7%, transparent 7.5%), linear-gradient(145deg, #d9c8df, #8c60a8 58%, #3a0d62); box-shadow: 14px 18px 0 rgba(58,13,98,.08); transform: rotate(-2deg); }
+  .face { position: absolute; left: 28%; top: 22%; width: 48%; height: 52%; border: 3px solid var(--purple); border-radius: 50% 45% 48% 52%; background: var(--paper); transform: rotate(6deg); }
+  .hair { position: absolute; z-index: 2; border: 3px solid var(--purple); background: var(--purple); }
+  .hair-a { left: 18%; top: 12%; width: 58%; height: 34%; border-radius: 70% 40% 45% 20%; transform: rotate(-10deg); }
+  .hair-b { right: 10%; top: 29%; width: 28%; height: 45%; border-radius: 20% 70% 50% 60%; transform: rotate(10deg); }
+  .eye { position: absolute; z-index: 4; top: 43%; width: 9%; height: 4%; border-bottom: 3px solid var(--purple); border-radius: 50%; }
+  .eye-a { left: 42%; transform: rotate(5deg); }.eye-b { left: 60%; transform: rotate(-4deg); }
+  .collar { position: absolute; z-index: 4; left: 38%; bottom: 11%; width: 46%; height: 24%; border: 3px solid var(--purple); border-radius: 40% 50% 12% 8%; background: var(--pink); transform: rotate(8deg); }
+  .orbit { position: absolute; z-index: 1; border: 2px solid var(--purple); border-radius: 50%; }
+  .orbit-a { width: 77%; aspect-ratio: 1; transform: rotate(17deg) scaleY(.78); }.orbit-b { width: 90%; aspect-ratio: 1; border-style: dashed; opacity: .38; transform: rotate(-12deg) scaleY(.68); }
+  .doodle { position: absolute; z-index: 4; color: var(--pink); font-size: 3.5rem; }.doodle-a { right: 3%; top: 18%; }.doodle-b { left: 2%; bottom: 19%; transform: rotate(-12deg); }
+  .site-wordmark { position: absolute; z-index: 5; bottom: 9%; left: 5%; color: var(--pink); font: 700 clamp(2.2rem, 5vw, 5.8rem)/1 Georgia, serif; letter-spacing: -.08em; transform: rotate(-7deg); }.site-wordmark strong { font-size: 1.3em; }
+  .social-stack { position: absolute; z-index: 3; top: 50%; right: clamp(1.25rem, 3vw, 3.5rem); display: flex; flex-direction: column; align-items: center; gap: 1rem; transform: translateY(-50%); }
+  .social-stack a, .social-add { position: relative; display: grid; width: 50px; height: 50px; place-items: center; border: 2px solid var(--purple); border-radius: 50%; font-size: 1.35rem; transition: transform .25s ease, background .25s ease, color .25s ease; }
+  .social-stack a:hover { background: var(--purple); color: var(--paper); transform: translateX(-7px) rotate(-7deg); }
+  .social-stack a span { position: absolute; right: calc(100% + 8px); opacity: 0; font-size: .68rem; text-transform: uppercase; transition: opacity .2s ease; }.social-stack a:hover span { opacity: 1; }
+  .social-add { border-style: dashed; opacity: .35; }
+  .scroll-cue { position: fixed; z-index: 6; bottom: 1.25rem; left: calc(var(--rail-width) + (100vw - var(--rail-width)) / 2); width: 0; height: 0; border-right: 9px solid transparent; border-left: 9px solid transparent; border-top: 13px solid var(--purple); transform: translateX(-50%); animation: bob 1.8s ease-in-out infinite; transition: opacity .2s ease; }.scroll-cue.is-hidden { opacity: 0; pointer-events: none; }
+  .updates-stage { position: relative; display: grid; min-height: 100vh; grid-template-columns: minmax(0, 1.35fr) minmax(300px, .75fr); gap: clamp(3rem, 8vw, 8rem); padding: clamp(5rem, 9vw, 9rem) clamp(2rem, 7vw, 8rem) 6rem; }
+  .update-log h2, .ask-card h2 { margin: 0; font: 500 clamp(2.4rem, 5vw, 5rem)/1 Georgia, serif; letter-spacing: -.05em; }
+  .update-log ol { position: relative; margin: 3rem 0; padding-left: 1.8rem; }.update-log ol::before { content: ''; position: absolute; inset: .2rem auto .2rem .35rem; width: 2px; background: var(--purple); }
+  .update-log li { position: relative; display: grid; grid-template-columns: 120px 1fr; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid rgba(58,13,98,.2); }.update-log li::before { content: ''; position: absolute; left: -1.75rem; top: 1.55rem; width: .65rem; height: .65rem; border: 2px solid var(--paper); border-radius: 50%; background: var(--purple); }
+  .update-log time { color: var(--purple-soft); font-size: .9rem; }.update-log li > span { font-size: clamp(1rem, 1.5vw, 1.3rem); line-height: 1.55; }
+  .log-more { display: inline-flex; align-items: center; gap: .5rem; border-bottom: 1px solid; font-size: .8rem; }
+  .ask-card { position: relative; align-self: center; padding: 2rem; border: 2px solid var(--purple); background: var(--paper-deep); box-shadow: 12px 12px 0 var(--purple); transform: rotate(1deg); }.ask-card > * { position: relative; z-index: 2; }.ask-card > p { margin: 0; color: var(--pink); font: 700 1.2rem/1 Georgia, serif; letter-spacing: .12em; }.ask-card label { display: block; margin: 1.3rem 0 .35rem; font-size: .65rem; letter-spacing: .15em; }.ask-card select, .ask-card textarea { width: 100%; border: 1px solid var(--purple); background: var(--paper); padding: .75rem; resize: none; }.ask-card button { width: 100%; margin-top: 1rem; padding: .8rem; background: var(--purple); color: var(--paper); opacity: .65; }.ask-orbit { position: absolute; z-index: 0; right: -35px; top: -50px; width: 110px; height: 110px; border: 2px dashed var(--pink); border-radius: 50%; }
+  .home-footer { position: absolute; inset: auto clamp(2rem, 7vw, 8rem) 1.5rem; display: flex; justify-content: space-between; gap: 1rem; padding-top: 1rem; color: var(--purple-soft); font-size: .75rem; letter-spacing: .1em; }
+  @keyframes bob { 50% { transform: translate(-50%, 7px); } }
+  @media (max-width: 1050px) { .main-stage { grid-template-columns: .8fr 1.4fr 70px; }.portrait-placeholder { width: min(61vw, 540px); }.social-stack a, .social-add { width: 44px; height: 44px; } }
+  @media (max-width: 760px) { .main-stage { padding: 5.5rem 1rem 5rem; }.portrait-wrap { width: 100%; min-height: 100vw; }.portrait-placeholder { width: 82vw; }.social-stack { top: auto; right: auto; bottom: 1.2rem; left: 50%; flex-direction: row; transform: translateX(-50%); }.site-wordmark { bottom: 4%; }.scroll-cue { left: 50%; }.updates-stage { grid-template-columns: 1fr; padding-bottom: 8rem; }.home-footer { flex-wrap: wrap; }.update-log li { grid-template-columns: 1fr; gap: .45rem; } }
+</style>

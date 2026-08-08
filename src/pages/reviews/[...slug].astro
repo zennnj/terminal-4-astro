@@ -1,0 +1,56 @@
+---
+import { getCollection, render } from 'astro:content';
+import IndexPage from '@/layouts/IndexPage.astro';
+import getUrl from '@/utils/getUrl';
+
+export async function getStaticPaths() {
+  const reviews = (await getCollection('reviews')).filter((review) => !review.data.draft);
+  return reviews.map((review) => ({ params: { slug: review.id }, props: { review } }));
+}
+
+const { review } = Astro.props;
+const { Content } = await render(review);
+const typeLabel = ({ '游戏': 'GAME', '动画': 'ANI/COMIC', '影视': 'MOVIE', '视频': 'VIDEO', '书籍': 'BOOK' } as Record<string, string>)[review.data.type] ?? review.data.type.toUpperCase();
+---
+
+<IndexPage title={review.data.title} contentClass="review-detail-shell">
+  <a class="detail-back" href={getUrl('/reviews')}><i class="ri-arrow-left-line"></i> REVIEW</a>
+  <article class="review-detail">
+    <h1>{review.data.title}</h1>
+    <div class="review-overview">
+      <div class="detail-cover">
+        {review.data.cover ? <img src={review.data.cover} alt={review.data.title} /> : <i class="ri-image-line"></i>}
+      </div>
+      <dl>
+        <div><dt>NAME</dt><dd>{review.data.title}</dd></div>
+        <div><dt>TYPE</dt><dd>{typeLabel}</dd></div>
+        <div><dt>AUTHOR / DIRECTOR</dt><dd>{review.data.creator ?? '—'}</dd></div>
+        <div><dt>DESCRIPTION</dt><dd>{review.data.summary ?? 'No description yet.'}</dd></div>
+        <div><dt>DATE</dt><dd>{review.data.date.getFullYear()}.{review.data.date.getMonth() + 1}</dd></div>
+        {review.data.rating !== undefined && <div><dt>RATING</dt><dd>{review.data.rating} / 10</dd></div>}
+      </dl>
+    </div>
+
+    {review.data.notes.length > 0 && <section class="detail-notes"><h2>NOTES</h2>{review.data.notes.map((note) => <blockquote><time>{note.date}</time><p>{note.text}</p></blockquote>)}</section>}
+    <section class="final-review"><h2>REVIEW</h2><div class="markdown-body"><Content /></div></section>
+  </article>
+</IndexPage>
+
+<style>
+  :global(.review-detail-shell) { max-width: 1240px; margin: 0 auto 0 var(--rail-width); padding: clamp(2rem, 5vw, 5rem) clamp(1.5rem, 7vw, 7rem); }
+  .detail-back { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: 2rem; font-size: .85rem; letter-spacing: .12em; }
+  .review-detail > h1 { max-width: 14ch; margin: 0 0 clamp(2.5rem, 5vw, 5rem) 8%; font: 500 clamp(3rem, 7vw, 6rem)/1 Georgia, serif; overflow-wrap: anywhere; }
+  .review-overview { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.25fr); gap: clamp(2rem, 7vw, 7rem); align-items: center; }
+  .detail-cover { display: grid; aspect-ratio: 4 / 5; place-items: center; overflow: hidden; border: 1px solid rgba(58,13,98,.7); background: var(--paper-deep); }
+  .detail-cover img { width: 100%; height: 100%; object-fit: cover; }.detail-cover i { color: var(--purple-soft); font-size: 5rem; }
+  .review-overview dl { display: grid; gap: 1.4rem; margin: 0; }
+  .review-overview dl > div { display: grid; grid-template-columns: 190px 1fr; gap: 1rem; }
+  .review-overview dt { color: var(--purple-soft); font-size: .85rem; letter-spacing: .08em; }.review-overview dd { margin: 0; font: 400 clamp(1rem, 1.6vw, 1.3rem)/1.6 Georgia, serif; }
+  .detail-notes, .final-review { margin: clamp(4rem, 8vw, 7rem) 8% 0; }
+  .detail-notes h2, .final-review h2 { margin: 0 0 2rem; font: 500 clamp(2.5rem, 5vw, 4.5rem)/1 Georgia, serif; }
+  .detail-notes blockquote { margin: 1.2rem 0; padding: 1rem 1.3rem; border-left: 2px solid #c9b4dc; background: rgba(221,209,232,.35); }
+  .detail-notes time { color: var(--purple-soft); font-size: .8rem; }.detail-notes p { margin: .5rem 0 0; }
+  .final-review .markdown-body { font-size: 1.05rem; line-height: 1.9; }
+  @media (max-width: 900px) { :global(.review-detail-shell) { margin-left: 0; }.review-overview { grid-template-columns: 1fr; }.detail-cover { width: min(100%, 430px); }.review-detail > h1, .detail-notes, .final-review { margin-left: 0; margin-right: 0; } }
+  @media (max-width: 560px) { .review-overview dl > div { grid-template-columns: 1fr; gap: .25rem; } }
+</style>

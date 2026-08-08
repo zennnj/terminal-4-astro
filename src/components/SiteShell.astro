@@ -1,0 +1,108 @@
+---
+import BaseHead from '@/components/BaseHead.astro';
+import { config } from '@/consts';
+import getUrl from '@/utils/getUrl';
+
+interface Props {
+  title?: string;
+  description?: string;
+  mathjax?: boolean;
+  mermaid?: boolean;
+  ogImage?: string;
+  contentClass?: string;
+}
+
+const {
+  title,
+  description,
+  mathjax = false,
+  mermaid = false,
+  ogImage,
+  contentClass = '',
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
+const navItems = [
+  { name: 'Home', href: '/', icon: 'ri-home-5-line', match: (path: string) => path === '/' },
+  { name: 'Article', href: '/blog/1', icon: 'ri-article-line', match: (path: string) => path.startsWith('/blog') || path.startsWith('/archive') || path.startsWith('/tags') },
+  { name: 'Memos', href: '/memos', icon: 'ri-message-3-line', match: (path: string) => path.startsWith('/memos') },
+  { name: 'Review', href: '/reviews', icon: 'ri-draft-line', match: (path: string) => path.startsWith('/reviews') },
+  { name: 'Gallery', href: '/gallery', icon: 'ri-image-line', match: (path: string) => path.startsWith('/gallery') },
+  { name: 'About', href: '/about', icon: 'ri-user-smile-line', match: (path: string) => path.startsWith('/about') || path.startsWith('/site') },
+];
+---
+
+<html lang={config.lang}>
+  <BaseHead title={title} description={description} mathjax={mathjax} mermaid={mermaid} ogImage={ogImage} />
+  <body class="site-body">
+    <script is:inline>
+      (() => {
+        try {
+          if (sessionStorage.getItem('terminal4-loaded')) document.documentElement.dataset.loaderSeen = 'true';
+        } catch (_) {}
+      })();
+    </script>
+    <div class="site-loader" id="site-loader" aria-label="Loading page" role="status">
+      <img src={getUrl('/loading.png')} alt="Loading" />
+    </div>
+
+    <aside class="side-rail" id="side-rail" aria-label="Main navigation">
+      <button class="rail-toggle" id="rail-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+        <i class="ri-menu-2-line"></i>
+      </button>
+      <nav class="rail-nav">
+        {navItems.map((item) => (
+          <a class:list={['rail-link', { active: item.match(currentPath) }]} href={getUrl(item.href)} title={item.name}>
+            <i class={item.icon}></i><span>{item.name}</span>
+          </a>
+        ))}
+      </nav>
+      <div class="rail-bottom">
+        <a class="rail-link" href={getUrl('/site')} title="About this site"><i class="ri-information-line"></i><span>Site</span></a>
+        <span class="rail-dots" aria-hidden="true">•••</span>
+      </div>
+    </aside>
+
+    <button class="mobile-rail-toggle" id="mobile-rail-toggle" type="button" aria-label="Open navigation" aria-expanded="false">
+      <i class="ri-menu-2-line"></i>
+    </button>
+    <button class="rail-backdrop" id="rail-backdrop" type="button" aria-label="Close navigation"></button>
+    <main class:list={['site-content', contentClass]} id="app"><slot /></main>
+  </body>
+</html>
+
+<script>
+  function initSiteShell() {
+    const root = document.documentElement;
+    const loader = document.querySelector<HTMLElement>('#site-loader');
+    const toggle = document.querySelector<HTMLButtonElement>('#rail-toggle');
+    const mobileToggle = document.querySelector<HTMLButtonElement>('#mobile-rail-toggle');
+    const backdrop = document.querySelector<HTMLButtonElement>('#rail-backdrop');
+
+    if (loader && root.dataset.loaderSeen !== 'true') {
+      const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 80 : 1050;
+      window.setTimeout(() => {
+        loader.classList.add('is-leaving');
+        root.dataset.loaderSeen = 'true';
+        try { sessionStorage.setItem('terminal4-loaded', 'true'); } catch (_) {}
+        window.setTimeout(() => loader.remove(), 760);
+      }, delay);
+    }
+
+    const closeRail = () => {
+      document.body.classList.remove('rail-open');
+      toggle?.setAttribute('aria-expanded', 'false');
+      mobileToggle?.setAttribute('aria-expanded', 'false');
+    };
+    const toggleRail = () => {
+      const open = document.body.classList.toggle('rail-open');
+      toggle?.setAttribute('aria-expanded', String(open));
+      mobileToggle?.setAttribute('aria-expanded', String(open));
+    };
+    toggle?.addEventListener('click', toggleRail);
+    mobileToggle?.addEventListener('click', toggleRail);
+    backdrop?.addEventListener('click', closeRail);
+    document.querySelectorAll('.rail-nav a').forEach((link) => link.addEventListener('click', closeRail));
+  }
+  document.addEventListener('astro:page-load', initSiteShell);
+</script>
