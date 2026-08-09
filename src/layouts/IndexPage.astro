@@ -8,11 +8,12 @@ interface Props {
   title?: string;
   frontmatter?: { comment?: boolean; donate?: boolean };
   contentClass?: string;
+  bodyClass?: string;
 }
-const { frontmatter = { comment: false, donate: false }, contentClass = '' } = Astro.props;
+const { frontmatter = { comment: false, donate: false }, contentClass = '', bodyClass = '' } = Astro.props;
 ---
 
-<SiteShell title={Astro.props.title} contentClass={contentClass}>
+<SiteShell title={Astro.props.title} contentClass={contentClass} bodyClass={bodyClass}>
   <slot />
   {donate.enable && frontmatter.donate && <Donate />}
   {comment.enable && frontmatter.comment && <Comment />}
