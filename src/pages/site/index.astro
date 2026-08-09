@@ -1,26 +1,17 @@
 ---
 import IndexPage from '@/layouts/IndexPage.astro';
+import { getEntry, render } from 'astro:content';
+
+const page = await getEntry('pages', 'site');
+if (!page) throw new Error('Missing content entry: src/content/pages/site.md');
+const { Content } = await render(page);
 ---
 
-<IndexPage title="About this site">
+<IndexPage title={page.data.title}>
   <article class="site-story markdown-body">
     <p class="kicker">ABOUT THIS SITE</p>
-    <h1>About this site</h1>
-    <p class="lede">Terminal 4 is a personal archive for articles, memos, artwork, and reviews.</p>
-
-    <h2>Why rebuild it</h2>
-    <p>The old site used Hexo. As the archive grew beyond articles, it was migrated to Astro and reorganized from Astro Yi as a starting point.</p>
-
-    <h2>Current structure</h2>
-    <div class="site-map">
-      <div><strong>ARTICLE</strong><span>Long-form writing and technical notes</span></div>
-      <div><strong>MEMOS</strong><span>Short thoughts recorded anytime</span></div>
-      <div><strong>GALLERY</strong><span>Original characters and fan art</span></div>
-      <div><strong>REVIEW</strong><span>Notes and final impressions</span></div>
-    </div>
-
-    <h2>Technology & credits</h2>
-    <p>Built with Astro. The first structure started from the open-source <a href="https://github.com/cirry/astro-yi">Astro Yi</a> theme.</p>
+    <h1>{page.data.title}</h1>
+    <div class="site-copy"><Content /></div>
   </article>
 </IndexPage>
 
@@ -28,10 +19,9 @@ import IndexPage from '@/layouts/IndexPage.astro';
   .site-story { padding: 2rem 0; }
   .site-story .kicker { color: rgb(var(--color-text-active)); font: 600 .72rem/1 jetbrains-mono, monospace; letter-spacing: .16em; }
   .site-story h1 { margin: .6rem 0 1.5rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.04em; }
-  .site-story .lede { max-width: 42rem; font-size: 1.25rem; color: rgb(var(--color-text-dodge)); }
-  .site-map { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8rem; margin: 1.5rem 0 2rem; }
-  .site-map div { display: flex; flex-direction: column; padding: 1rem; border: 1px solid rgba(var(--color-text), .13); border-radius: .8rem; background: rgb(var(--color-card)); }
-  .site-map strong { color: rgb(var(--color-text-active)); font: .75rem/1.4 jetbrains-mono, monospace; }
-  .site-map span { margin-top: .4rem; }
-  @media (max-width: 560px) { .site-map { grid-template-columns: 1fr; } }
+  .site-copy :global(p:first-child) { max-width: 42rem; font-size: 1.25rem; color: rgb(var(--color-text-dodge)); }
+  .site-copy :global(ul) { display: grid; grid-template-columns: repeat(2, 1fr); gap: .8rem; padding: 0; margin: 1.5rem 0 2rem; list-style: none; }
+  .site-copy :global(li) { padding: 1rem; border: 1px solid rgba(var(--color-text), .13); border-radius: .8rem; background: rgb(var(--color-card)); }
+  .site-copy :global(li strong) { display: block; color: rgb(var(--color-text-active)); font: .75rem/1.4 jetbrains-mono, monospace; }
+  @media (max-width: 560px) { .site-copy :global(ul) { grid-template-columns: 1fr; } }
 </style>

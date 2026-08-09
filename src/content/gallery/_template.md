@@ -1,9 +1,9 @@
 ---
 title: 作品标题
 date: 2026-08-08
-kind: OC
+kind: oc
 tags: [示例]
-image: /gallery/example.jpg
+image: ../../image/gallery/sample-terminal.png
 alt: 作品替代文字
 draft: true
 ---

@@ -1,11 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import IndexPage from '@/layouts/IndexPage.astro';
 
 const works = (await getCollection('gallery'))
   .filter((work) => !work.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-const kindLabel = (kind: string) => ({ '同人': 'FAN ART', '原创': 'ORIGINAL', '插画': 'ILLUSTRATION' }[kind] ?? kind.toUpperCase());
+const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpperCase());
 ---
 
 <IndexPage title="Gallery">
@@ -13,8 +14,8 @@ const kindLabel = (kind: string) => ({ '同人': 'FAN ART', '原创': 'ORIGINAL'
     <div><p>GALLERY · VISUAL ARCHIVE</p><h1>Gallery</h1></div>
     <div class="filters" role="group" aria-label="Artwork type">
       <button class="active" data-filter="all">ALL</button>
-      <button data-filter="OC">OC</button>
-      <button data-filter="同人">FAN ART</button>
+      <button data-filter="oc">OC</button>
+      <button data-filter="fanart">FAN ART</button>
     </div>
   </header>
 
@@ -22,7 +23,7 @@ const kindLabel = (kind: string) => ({ '同人': 'FAN ART', '原创': 'ORIGINAL'
     <div class="gallery-grid" id="gallery-grid">
       {works.map((work) => (
         <article class="work-card" data-kind={work.data.kind}>
-          <img src={work.data.image} alt={work.data.alt ?? work.data.title} loading="lazy" />
+          <Image src={work.data.image} alt={work.data.alt ?? work.data.title} loading="lazy" />
           <div class="work-caption">
             <div><span>{kindLabel(work.data.kind)}</span><h2>{work.data.title}</h2></div>
             <p>{work.data.tags.map((tag) => `#${tag}`).join(' ')}</p>

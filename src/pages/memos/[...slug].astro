@@ -1,0 +1,38 @@
+---
+import { getCollection, render } from 'astro:content';
+import IndexPage from '@/layouts/IndexPage.astro';
+import WalineComment from '@/components/WalineComment.astro';
+import getUrl from '@/utils/getUrl';
+
+export async function getStaticPaths() {
+  const memos = (await getCollection('memos')).filter((memo) => !memo.data.draft);
+  return memos.map((memo) => ({ params: { slug: memo.id }, props: { memo } }));
+}
+
+const { memo } = Astro.props;
+const { Content } = await render(memo);
+const commentPath = `/memos/${memo.id}`;
+---
+
+<IndexPage title="Memo" contentClass="memo-detail-shell">
+  <a class="memo-back" href={getUrl('/memos')}><i class="ri-arrow-left-line"></i> MEMOS</a>
+  <article class="memo-detail">
+    {memo.data.tags.length > 0 && <div class="memo-tags">{memo.data.tags.map((tag) => <span>#{tag}</span>)}</div>}
+    <div class="markdown-body"><Content /></div>
+    <footer><time datetime={memo.data.date.toISOString()}>{memo.data.date.toLocaleDateString('en-CA')}</time>{memo.data.mood && <span>{memo.data.mood}</span>}</footer>
+  </article>
+  <section class="memo-comments" aria-labelledby="comments-title">
+    <h1 id="comments-title">COMMENTS</h1>
+    <WalineComment force path={commentPath} />
+  </section>
+</IndexPage>
+
+<style>
+  :global(.memo-detail-shell) { max-width: 980px; margin: 0 auto 0 var(--rail-width); padding: clamp(2rem, 5vw, 5rem) clamp(1.5rem, 7vw, 6rem); }
+  .memo-back { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: 2rem; font-size: .85rem; letter-spacing: .1em; }
+  .memo-detail { padding: clamp(1.5rem, 4vw, 3rem); border-radius: 1.5rem; background: #fff; }
+  .memo-tags { display: flex; flex-wrap: wrap; gap: .7rem; margin-bottom: 1rem; color: var(--purple-soft); font-size: .85rem; }
+  .memo-detail .markdown-body { font-size: 1.05rem; line-height: 1.9; }.memo-detail footer { display: flex; gap: 1rem; margin-top: 2rem; color: var(--purple-soft); font-size: .8rem; }
+  .memo-comments { margin-top: clamp(3rem, 7vw, 6rem); }.memo-comments h1 { margin: 0 0 1.5rem; font: 500 clamp(1.5rem, 3vw, 2.2rem)/1 Georgia, serif; }
+  @media (max-width: 900px) { :global(.memo-detail-shell) { margin-left: 0; } }
+</style>

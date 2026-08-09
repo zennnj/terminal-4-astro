@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import IndexPage from '@/layouts/IndexPage.astro';
 import getUrl from '@/utils/getUrl';
 
@@ -7,21 +7,22 @@ const reviews = (await getCollection('reviews'))
   .filter((review) => !review.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const recent = reviews[0];
+const RecentContent = recent ? (await render(recent)).Content : null;
 const types = [
   { value: 'all', label: 'ALL' },
-  { value: '游戏', label: 'GAME' },
-  { value: '影视', label: 'MOVIE' },
-  { value: '动画', label: 'ANI/COMIC' },
-  { value: '视频', label: 'VIDEO' },
-  { value: '书籍', label: 'BOOK' },
+  { value: 'game', label: 'GAME' },
+  { value: 'movie', label: 'MOVIE' },
+  { value: 'anime', label: 'ANI/COMIC' },
+  { value: 'video', label: 'VIDEO' },
+  { value: 'book', label: 'BOOK' },
 ];
-const typeLabel = (type: string) => ({ '游戏': 'GAME', '动画': 'ANI/COMIC', '影视': 'MOVIE', '视频': 'VIDEO', '书籍': 'BOOK' }[type] ?? type.toUpperCase());
+const typeLabel = (type: string) => ({ anime: 'ANI/COMIC' }[type] ?? type.toUpperCase());
 const accentColor = (type: string) => ({
-  '游戏': '#eba6b4',
-  '动画': '#f4df78',
-  '影视': '#9ed7ac',
-  '视频': '#9dc9e7',
-  '书籍': '#c9b4dc',
+  game: '#eba6b4',
+  anime: '#f4df78',
+  movie: '#9ed7ac',
+  video: '#9dc9e7',
+  book: '#c9b4dc',
 }[type] ?? '#c9b4dc');
 ---
 
@@ -29,11 +30,12 @@ const accentColor = (type: string) => ({
   <section class="recent-review" aria-labelledby="recent-title">
     <span class="decor decor-cross" aria-hidden="true"></span>
     <span class="decor decor-dot" aria-hidden="true"></span>
-    <h1 id="recent-title">RECENTLY</h1>
+    <h1 class="review-title">REVIEW</h1>
+    <h2 id="recent-title">RECENTLY</h2>
     {recent ? (
       <a class="recent-card" href={getUrl(`/reviews/${recent.id}`)}>
         <div class="recent-name"><strong>{recent.data.title}</strong><span>{typeLabel(recent.data.type)}</span></div>
-        <div class="recent-copy"><p>{recent.data.summary ?? 'No short review yet.'}</p><span>READ FOR MORE &gt;</span></div>
+        <div class="recent-copy"><div class="recent-excerpt markdown-body">{RecentContent && <RecentContent />}</div><span>READ FOR MORE &gt;</span></div>
       </a>
     ) : (
       <div class="recent-card is-empty"><div class="recent-name"><strong>NO REVIEW</strong><span>YET</span></div><div class="recent-copy"><p>The first review will be featured here.</p></div></div>
@@ -76,13 +78,16 @@ const accentColor = (type: string) => ({
 <style>
   :global(.reviews-shell) { position: relative; max-width: 1500px; margin: 0 auto 0 var(--rail-width); padding: clamp(2.5rem, 6vw, 6rem) clamp(2rem, 7vw, 8rem); overflow: hidden; }
   .recent-review { position: relative; }
-  .recent-review h1 { margin: 0 0 clamp(1.6rem, 3vw, 2.5rem); font: 700 clamp(2.5rem, 4vw, 3.8rem)/1 Georgia, serif; letter-spacing: -.04em; }
-  .recent-card { display: grid; grid-template-columns: minmax(250px, .6fr) minmax(0, 1.8fr); min-height: 260px; color: var(--purple); }
+  .review-title { margin: 0 0 .8rem; font: 500 clamp(3rem, 6vw, 6rem)/.95 Georgia, serif; letter-spacing: -.06em; }
+  .recent-review h2 { margin: 0 0 clamp(1.2rem, 2vw, 1.8rem); font: 700 clamp(1.4rem, 2.2vw, 2rem)/1 Georgia, serif; letter-spacing: .02em; }
+  .recent-card { display: grid; grid-template-columns: minmax(220px, .55fr) minmax(0, 1.8fr); min-height: 185px; color: var(--purple); }
   .recent-name { display: flex; flex-direction: column; justify-content: start; gap: .5rem; padding: 1.5rem 2.5rem 1.5rem 1.5rem; border-right: 1px solid rgba(58,13,98,.55); }
   .recent-name strong { font: 500 clamp(1.8rem, 3vw, 3.5rem)/1.05 Georgia, serif; overflow-wrap: anywhere; }
   .recent-name span { font: 500 clamp(1rem, 1.6vw, 1.45rem)/1.2 Georgia, serif; }
-  .recent-copy { display: flex; flex-direction: column; padding: 1.4rem 1.5rem 1.5rem 2rem; border-right: 1px solid rgba(58,13,98,.55); }
-  .recent-copy p { max-width: 54rem; margin: 0; font: 400 clamp(1rem, 1.5vw, 1.35rem)/1.7 Georgia, serif; }
+  .recent-copy { display: flex; min-width: 0; flex-direction: column; padding: 1rem 1.5rem 1rem 2rem; border-right: 1px solid rgba(58,13,98,.55); }
+  .recent-excerpt { max-width: 54rem; overflow: hidden; font: 400 clamp(.95rem, 1.3vw, 1.15rem)/1.65 Georgia, serif; }
+  .recent-excerpt :global(p:first-child) { display: -webkit-box; margin: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  .recent-excerpt :global(p:not(:first-child)), .recent-excerpt :global(:not(p)) { display: none; }
   .recent-copy > span { margin-top: auto; align-self: end; font: 500 clamp(.95rem, 1.35vw, 1.2rem)/1 Georgia, serif; }
   .recent-card:not(.is-empty):hover .recent-copy > span { color: var(--pink); transform: translateX(5px); }
   .decor { position: absolute; background: #f6aa67; }
@@ -93,15 +98,15 @@ const accentColor = (type: string) => ({
   .review-filters button { position: relative; z-index: 1; flex: 0 0 auto; padding: .75rem 1.1rem; cursor: pointer; font: 500 clamp(.95rem, 1.4vw, 1.25rem)/1 Georgia, serif; }
   .review-filters button::before { content: ''; position: absolute; z-index: -1; inset: .25rem -.15rem; border-radius: 38% 58% 45% 56%; opacity: 0; background: #ddd1e8; transform: rotate(-3deg) scale(.8); transition: opacity .2s, transform .2s; }
   .review-filters button.active::before { opacity: 1; transform: rotate(-3deg) scale(1); }
-  .review-list { display: grid; gap: 1.6rem; }
-  .review-row, .empty-rows > span { min-height: 88px; border: 1px solid rgba(58,13,98,.65); border-radius: 1.35rem; }
-  .review-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; padding: 1rem 1.8rem; transition: background .22s ease, transform .22s ease; }
+  .review-list { display: grid; gap: .75rem; }
+  .review-row, .empty-rows > span { min-height: 62px; border: 1px solid rgba(58,13,98,.65); border-radius: 999px; }
+  .review-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; padding: .65rem 1.5rem; transition: background .22s ease, transform .22s ease; }
   .review-row[hidden] { display: none; }
   .review-row:hover { background: #ddd1e8; transform: translateX(5px); }
   .review-color { width: 34px; height: 34px; border-radius: .45rem; background: var(--accent); }
   .review-row strong { font: 500 clamp(1.05rem, 1.6vw, 1.4rem)/1.2 Georgia, serif; letter-spacing: .02em; }
   .review-row time { font: 400 clamp(.95rem, 1.35vw, 1.2rem)/1 Georgia, serif; }
-  .empty-rows { display: grid; gap: 1.6rem; }.empty-rows > span { position: relative; display: block; }.empty-rows > span::before { content: ''; position: absolute; top: 50%; left: 2rem; width: 34px; height: 34px; border-radius: .45rem; background: #ddd1e8; transform: translateY(-50%); }
+  .empty-rows { display: grid; gap: .75rem; }.empty-rows > span { position: relative; display: block; }.empty-rows > span::before { content: ''; position: absolute; top: 50%; left: 1.5rem; width: 30px; height: 30px; border-radius: .45rem; background: #ddd1e8; transform: translateY(-50%); }
   @media (max-width: 900px) { :global(.reviews-shell) { margin-left: 0; }.recent-card { grid-template-columns: 1fr; }.recent-name, .recent-copy { border-right: 0; border-bottom: 1px solid rgba(58,13,98,.4); }.recent-copy { min-height: 180px; padding-left: 1.5rem; }.review-filters { justify-content: start; } }
   @media (max-width: 560px) { .review-row { min-height: 72px; padding: .8rem 1rem; }.review-color { width: 26px; height: 26px; }.review-row strong { font-size: 1.05rem; } }
 </style>

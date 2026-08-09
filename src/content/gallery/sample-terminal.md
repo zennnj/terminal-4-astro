@@ -1,9 +1,9 @@
 ---
 title: Terminal Portrait
 date: 2026-08-08
-kind: OC
+kind: oc
 tags: [character, terminal]
-image: /gallery/sample-terminal.png
+image: ../../image/gallery/sample-terminal.png
 alt: Temporary Terminal 4 character artwork
 draft: false
 ---

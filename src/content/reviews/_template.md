@@ -1,8 +1,8 @@
 ---
 title: 作品名称
 date: 2026-08-08
-type: 游戏
-status: 已完成
+type: game
+status: completed
 rating: 8
 cover: /reviews/example.jpg
 creator: Author or director

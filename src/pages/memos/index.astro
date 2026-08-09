@@ -1,13 +1,8 @@
 ---
-import { getCollection, render } from 'astro:content';
 import IndexPage from '@/layouts/IndexPage.astro';
 import WalineComment from '@/components/WalineComment.astro';
 import { comment } from '@/consts';
 
-const memos = (await getCollection('memos'))
-  .filter((memo) => !memo.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-const rendered = await Promise.all(memos.map(async (memo) => ({ memo, ...(await render(memo)) })));
 const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.serverUrl);
 ---
 
@@ -21,23 +16,12 @@ const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.se
 
   <section data-memo-panel="memos">
     <div class="memo-head"><h1>MEMOS</h1><span>Some sentences I like.</span></div>
-    <div class="memo-stream">
-      {rendered.map(({ memo, Content }, index) => (
-        <article class="memo-entry">
-          <div class="memo-avatar" aria-hidden="true">{index === 0 ? '✦' : '○'}</div>
-          <div class="memo-bubble">
-            {memo.data.tags.length > 0 && <div class="memo-tags">{memo.data.tags.map((tag) => <span>#{tag}</span>)}</div>}
-            <div class="markdown-body memo-body"><Content /></div>
-            <footer><time datetime={memo.data.date.toISOString()}>{memo.data.date.toLocaleDateString('en-CA')}</time>{memo.data.mood && <span>{memo.data.mood}</span>}</footer>
-          </div>
-        </article>
-      ))}
-    </div>
+    {walineReady && <div class="memo-feed" aria-label="Post a memo"><WalineComment id="waline-memos" standalone path="/memos-feed/" /></div>}
   </section>
 
   <section data-memo-panel="junk" hidden>
     <div class="memo-head"><h1>JUNK</h1><span>Anonymous fragments and passing thoughts.</span></div>
-    {walineReady && <div class="memo-publisher" aria-label="Post to junk"><WalineComment standalone path="/discuss/" /></div>}
+    {walineReady && <div class="junk-thread" aria-label="Post to junk"><button class="junk-reload" id="junk-reload" type="button">RELOAD THREAD</button><WalineComment id="waline-junk" standalone path="/discuss/" /></div>}
   </section>
 </IndexPage>
 
@@ -45,16 +29,53 @@ const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.se
   function initMemoViews() {
     const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-memo-view]')];
     const panels = [...document.querySelectorAll<HTMLElement>('[data-memo-panel]')];
+    const reload = document.querySelector<HTMLButtonElement>('#junk-reload');
+
+    const decorateJunk = () => {
+      const root = document.querySelector<HTMLElement>('#waline-junk');
+      if (!root) return;
+      const cards = [...root.querySelectorAll<HTMLElement>('.wl-card')];
+      const countText = root.querySelector('.wl-count')?.textContent ?? '';
+      const parsedTotal = Number.parseInt(countText.match(/\d+/)?.[0] ?? '', 10);
+      const total = Number.isFinite(parsedTotal) ? parsedTotal : cards.length;
+
+      cards.forEach((card, index) => {
+        let heading = card.querySelector<HTMLElement>('.junk-post-heading');
+        if (!heading) {
+          heading = document.createElement('div');
+          heading.className = 'junk-post-heading';
+          card.prepend(heading);
+        }
+        const time = card.querySelector<HTMLElement>('.wl-time');
+        const rawDate = time?.getAttribute('title') || time?.getAttribute('datetime') || '';
+        const date = rawDate ? new Date(rawDate.replace(' ', 'T')) : null;
+        const dateLabel = date && !Number.isNaN(date.valueOf())
+          ? `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
+          : (time?.textContent?.trim() ?? '');
+        const number = Math.max(1, total - index);
+        const label = `#${number}（第${number}条）${dateLabel ? `  ${dateLabel}` : ''}`;
+        if (heading.textContent !== label) heading.textContent = label;
+      });
+    };
+
+    const junkRoot = document.querySelector('#waline-junk');
+    if (junkRoot) new MutationObserver(decorateJunk).observe(junkRoot, { childList: true, subtree: true });
+
     const setView = (view: string) => {
       buttons.forEach((button) => button.classList.toggle('active', button.dataset.memoView === view));
       panels.forEach((panel) => panel.hidden = panel.dataset.memoPanel !== view);
+      const id = view === 'junk' ? 'waline-junk' : 'waline-memos';
+      window.dispatchEvent(new CustomEvent('waline:mount', { detail: { id } }));
       const url = new URL(location.href);
       if (view === 'junk') url.searchParams.set('view', 'junk'); else url.searchParams.delete('view');
       history.replaceState(null, '', url);
     };
+
     buttons.forEach((button) => button.addEventListener('click', () => setView(button.dataset.memoView ?? 'memos')));
+    reload?.addEventListener('click', () => window.dispatchEvent(new CustomEvent('waline:mount', { detail: { id: 'waline-junk', force: true } })));
     setView(new URLSearchParams(location.search).get('view') === 'junk' ? 'junk' : 'memos');
   }
+
   document.addEventListener('astro:page-load', initMemoViews);
 </script>
 
@@ -62,21 +83,49 @@ const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.se
   :global(.memos-shell) { max-width: 1280px; margin: 0 auto 0 var(--rail-width); padding: 1.15rem clamp(1.5rem, 7vw, 7rem) clamp(2rem, 5vw, 5rem); }
   .memo-toolbar { margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
   [data-memo-panel][hidden] { display: none; }
-  .memo-head { margin-bottom: clamp(3rem, 7vw, 6rem); }
+  .memo-head { margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
   .memo-head h1 { margin: clamp(2rem, 5vw, 4.5rem) 0 .8rem 7%; font: 500 clamp(4rem, 9vw, 8rem)/.9 Georgia, serif; letter-spacing: -.07em; }
   .memo-head > span { display: block; margin-left: 10%; font: 400 clamp(1.15rem, 2.3vw, 2rem)/1.4 Georgia, serif; }
-  .memo-publisher { margin: 0 0 4rem 8%; padding: 1.5rem; background: #fff; }
-  .memo-stream { position: relative; display: grid; gap: clamp(2.5rem, 5vw, 4.5rem); margin-left: 8%; }
-  .memo-entry { position: relative; display: grid; grid-template-columns: 72px minmax(0,1fr); gap: 1.8rem; align-items: start; }
-  .memo-avatar { position: relative; z-index: 2; display: grid; width: 72px; height: 72px; place-items: center; border: 1px solid var(--purple); border-radius: 50%; background: var(--paper); font-size: 1.5rem; }
-  .memo-bubble { position: relative; min-height: 150px; padding: 1.25rem 1.5rem 1rem; border: 0; border-radius: 1.5rem; background: #fff; }
-  .memo-bubble::before { content: ''; position: absolute; top: 28px; left: -12px; width: 24px; height: 20px; background: #fff; transform: rotate(28deg) skewX(-24deg); }
-  .memo-tags { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: .65rem; margin-bottom: .75rem; color: var(--purple-soft); font-size: .88rem; }
-  .memo-body { position: relative; z-index: 1; font-size: 1rem; line-height: 1.8; }
-  .memo-body :global(img) { max-width: min(100%, 440px); border-radius: .8rem; }
-  .memo-bubble footer { display: flex; gap: 1.2rem; margin-top: 1.2rem; color: var(--purple-soft); font-size: .82rem; }
-  :global(.memo-publisher .wl-panel), :global(.memo-publisher .wl-card) { border: 0 !important; box-shadow: none !important; background: #fff !important; }
-  :global(.memo-publisher) { --waline-bg-color: #fff; --waline-bg-color-light: #fff; --waline-border-color: transparent; --waline-theme-color: #77479a; --waline-active-color: #3a0d62; }
-  @media (max-width: 900px) { :global(.memos-shell) { margin-left: 0; }.memo-head h1, .memo-head > span { margin-left: 0; }.memo-stream { margin-left: 0; } }
-  @media (max-width: 560px) { .memo-entry { grid-template-columns: 44px minmax(0,1fr); gap: .9rem; }.memo-avatar { width: 44px; height: 44px; font-size: 1rem; }.memo-bubble { padding: 1rem; border-radius: 1rem; }.memo-bubble::before { top: 14px; }.memo-publisher { margin-left: 0; } }
+  .memo-feed, .junk-thread { width: 100%; margin: 0 0 4rem; background: transparent; }
+  .memo-feed { margin-left: 7%; width: 93%; }
+  .junk-reload { display: block; margin: 0 0 1rem auto; padding-bottom: .2rem; border-bottom: 1px solid currentColor; color: var(--purple-soft); cursor: pointer; font-size: .72rem; letter-spacing: .1em; }
+
+  :global(.memo-feed), :global(.junk-thread) { --waline-bg-color: transparent; --waline-bg-color-light: rgba(255,255,255,.24); --waline-border-color: rgba(58,13,98,.3); --waline-theme-color: #77479a; --waline-active-color: #3a0d62; --waline-color: #3a0d62; }
+  :global(.memo-feed [data-waline-root]), :global(.junk-thread [data-waline-root]), :global(.memo-feed [data-waline]), :global(.junk-thread [data-waline]) { width: 100%; background: transparent !important; }
+  :global(.memo-feed .wl-reaction), :global(.junk-thread .wl-reaction), :global(.memo-feed .wl-meta-head), :global(.junk-thread .wl-meta-head), :global(.memo-feed .wl-meta-foot), :global(.junk-thread .wl-meta-foot), :global(.memo-feed .wl-power), :global(.junk-thread .wl-power) { display: none !important; }
+  :global(.memo-feed .wl-header), :global(.junk-thread .wl-header), :global(.memo-feed .wl-login-info), :global(.junk-thread .wl-login-info) { display: none !important; }
+  :global(.memo-feed #wl-image-upload), :global(.junk-thread #wl-image-upload) { display: none !important; }
+  :global(.memo-feed .wl-footer), :global(.junk-thread .wl-footer) { display: flex !important; flex-wrap: wrap !important; align-items: center !important; margin: .5em .75em !important; }
+  :global(.memo-feed .wl-actions), :global(.junk-thread .wl-actions) { display: flex !important; flex: 2 !important; align-items: center !important; }
+  :global(.memo-feed .wl-info), :global(.junk-thread .wl-info) { display: flex !important; flex: 3 !important; align-items: center !important; justify-content: flex-end !important; }
+  :global(.memo-feed .wl-action), :global(.junk-thread .wl-action) { display: inline-flex !important; width: 1.5em !important; height: 1.5em !important; align-items: center !important; justify-content: center !important; margin: 2px !important; }
+  :global(.memo-feed .wl-gif-popup:not(.display)), :global(.junk-thread .wl-gif-popup:not(.display)), :global(.memo-feed .wl-emoji-popup:not(.display)), :global(.junk-thread .wl-emoji-popup:not(.display)) { display: none !important; visibility: hidden !important; }
+
+  :global(.memo-feed .wl-comment), :global(.junk-thread .wl-comment) { width: 100%; margin: 0 0 2.5rem; }
+  :global(.memo-feed .wl-panel) { width: 100%; margin: 0; border: 0 !important; border-radius: 1.5rem !important; box-shadow: none !important; background: #fff !important; }
+  :global(.junk-thread .wl-panel) { width: calc(100% - 2px); margin: 0; border: 1px solid rgba(58,13,98,.42) !important; border-radius: 1rem !important; box-shadow: none !important; background: transparent !important; }
+  :global(.memo-feed .wl-editor), :global(.junk-thread .wl-editor) { min-height: 7.5rem !important; background: transparent !important; font-size: 1rem !important; }
+
+  :global(.memo-feed .wl-card-item) { align-items: flex-start; margin-bottom: 1.5rem; padding: 0 !important; }
+  :global(.memo-feed .wl-card-item .wl-card-item) { margin: 1rem 0 0; padding: 0 !important; }
+  :global(.memo-feed .wl-card) { width: auto !important; margin: 0 !important; padding: 1.1rem 1.35rem !important; border: 0 !important; border-radius: 1.5rem !important; background: #fff !important; }
+  :global(.memo-feed .wl-card .wl-nick), :global(.memo-feed .wl-card .wl-badge), :global(.memo-feed .wl-card .wl-meta) { display: none !important; }
+  :global(.memo-feed .wl-card .wl-comment-actions) { display: block !important; }
+  :global(.memo-feed .wl-card .wl-like), :global(.memo-feed .wl-card .wl-rss), :global(.memo-feed .wl-card .wl-delete), :global(.memo-feed .wl-card .wl-edit) { display: none !important; }
+  :global(.memo-feed .wl-card .wl-reply svg) { display: none !important; }
+  :global(.memo-feed .wl-card .wl-reply::after) { content: 'COMMENTS'; border-bottom: 1px solid currentColor; color: var(--purple-soft); font-size: .72rem; letter-spacing: .05em; }
+  :global(.memo-feed .wl-card .wl-head) { min-height: 1rem; }
+  :global(.memo-feed .wl-card .wl-time) { color: var(--purple-soft); font-size: .78rem; }
+  :global(.memo-feed .wl-card .wl-content) { margin: 0 !important; padding-top: .45rem !important; font-size: 1rem !important; line-height: 1.8 !important; }
+
+  :global(.junk-thread .wl-cards) { width: 100%; }
+  :global(.junk-thread .wl-card-item), :global(.junk-thread .wl-card-item .wl-card-item) { display: block !important; width: 100%; padding: 0 !important; }
+  :global(.junk-thread .wl-card-item > .wl-user) { display: none !important; }
+  :global(.junk-thread .wl-card), :global(.junk-thread .wl-card:first-child) { width: 100% !important; margin: 0 !important; padding: 1.25rem .2rem 1.35rem !important; border: 0 !important; border-bottom: 1px solid rgba(58,13,98,.28) !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; }
+  :global(.junk-thread .wl-card .wl-head), :global(.junk-thread .wl-card .wl-comment-actions), :global(.junk-thread .wl-card .wl-meta) { display: none !important; }
+  :global(.junk-thread .junk-post-heading) { margin-bottom: .55rem; color: var(--purple-soft); font: 500 .82rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  :global(.junk-thread .wl-card .wl-content) { margin: 0 !important; padding: 0 !important; color: var(--purple); font-size: 1rem !important; line-height: 1.8 !important; }
+
+  @media (max-width: 900px) { :global(.memos-shell) { margin-left: 0; }.memo-head h1, .memo-head > span { margin-left: 0; }.memo-feed { width: 100%; margin-left: 0; } }
+  @media (max-width: 560px) { :global(.memo-feed .wl-user) { display: none !important; }:global(.memo-feed .wl-card-item) { display: block !important; }:global(.memo-feed .wl-card) { width: 100% !important; } }
 </style>

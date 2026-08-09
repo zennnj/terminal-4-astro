@@ -1,8 +1,8 @@
 ---
 title: Death Stranding
 date: 2026-08-08
-type: 游戏
-status: 已完成
+type: game
+status: completed
 rating: 8.8
 cover: /reviews/sample-game.png
 creator: Hideo Kojima

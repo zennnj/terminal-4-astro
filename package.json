@@ -2,17 +2,20 @@
   "name": "terminal-4-blog",
   "type": "module",
   "version": "0.0.20",
-  "packageManager": "pnpm@11.9.0",
+  "packageManager": "pnpm@10.30.3",
   "engines": {
     "node": ">=22.12.0",
-    "pnpm": ">=11.0.0"
+    "pnpm": ">=10.0.0"
   },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "new:post": "node scripts/new-post.mjs",
+    "new:review": "node scripts/new-review.mjs",
+    "new:gallery": "node scripts/new-gallery.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.2.2",

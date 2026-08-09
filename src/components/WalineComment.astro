@@ -1,44 +1,74 @@
 ---
 interface Props {
+  id?: string;
   standalone?: boolean;
+  force?: boolean;
   path?: string;
 }
 
-const { standalone = false, path = '' } = Astro.props;
+const { id = 'waline', standalone = false, force = false, path = '' } = Astro.props;
 ---
 
-<div id="waline" data-standalone={standalone ? 'true' : 'false'} data-waline-path={path}></div>
+<div id={id} data-waline-root data-standalone={standalone ? 'true' : 'false'} data-force={force ? 'true' : 'false'} data-waline-path={path}></div>
 
 <script>
-  import {init} from "@waline/client";
-  import {comment} from "../consts";
-  import "@waline/client/style";
+  import { init } from '@waline/client';
+  import { comment } from '../consts';
+  import '@waline/client/style';
 
-  let walineInstance;
+  const walineInstances = new Map<string, ReturnType<typeof init>>();
 
-  function initWaline() {
-    const walineDoc = document.getElementById("waline");
-    const standalone = walineDoc?.dataset.standalone === 'true';
-    if ((!comment.enable && !standalone) || comment.type !== "waline" || !comment.walineConfig.serverUrl || !walineDoc) return;
-    // ClientRouter re-renders #waline on each navigation: destroy the previous
-    // instance (its element is gone) before mounting a fresh one.
-    walineInstance?.destroy();
-    walineInstance = init({
-      el: "#waline",
+  function destroyWaline(root: HTMLElement) {
+    walineInstances.get(root.id)?.destroy();
+    walineInstances.delete(root.id);
+    root.replaceChildren();
+    delete root.dataset.mounted;
+  }
+
+  function mountWaline(root: HTMLElement, forceRemount = false) {
+    const standalone = root.dataset.standalone === 'true';
+    const force = root.dataset.force === 'true';
+    if ((!comment.enable && !standalone && !force) || comment.type !== 'waline' || !comment.walineConfig.serverUrl) return;
+    if (root.closest('[hidden]')) return;
+    if (forceRemount) destroyWaline(root);
+    if (root.dataset.mounted === 'true') return;
+
+    // An element with this id may have belonged to the previous Astro page.
+    walineInstances.get(root.id)?.destroy();
+    const instance = init({
+      el: root,
       comment: true,
-      path: walineDoc.dataset.walinePath || window.location.pathname.replace(/\/$/, ""),
+      path: root.dataset.walinePath || window.location.pathname.replace(/\/$/, ''),
       serverURL: comment.walineConfig.serverUrl,
       lang: comment.walineConfig.lang,
       pageSize: comment.walineConfig.pageSize,
-      pageview: comment.walineConfig.pageview, // 浏览量统计
-      reaction: comment.walineConfig.whiteList.includes(location.pathname)
-        ? false
-        : comment.walineConfig.reaction, // 开启反应
-      requiredMeta: comment.walineConfig.requiredMeta,
+      pageview: comment.walineConfig.pageview,
+      reaction: false,
+      meta: standalone ? [] : ['nick', 'mail', 'link'],
+      requiredMeta: standalone ? [] : comment.walineConfig.requiredMeta,
       login: standalone ? 'disable' : 'enable',
+      locale: standalone ? { placeholder: 'Write anonymously...' } : undefined,
       dark: 'html[data-theme="dark"]',
+    });
+    walineInstances.set(root.id, instance);
+    root.dataset.mounted = 'true';
+  }
+
+  function initWaline(event?: Event) {
+    const detail = event instanceof CustomEvent ? event.detail : undefined;
+    const targetId = detail?.id as string | undefined;
+    const forceRemount = detail?.force === true;
+    const roots = [...document.querySelectorAll<HTMLElement>('[data-waline-root]')];
+
+    roots.forEach((root) => {
+      if (targetId && root.id !== targetId) {
+        destroyWaline(root);
+        return;
+      }
+      if (!targetId || root.id === targetId) mountWaline(root, forceRemount);
     });
   }
 
-  document.addEventListener("astro:page-load", initWaline);
+  document.addEventListener('astro:page-load', initWaline);
+  window.addEventListener('waline:mount', initWaline as EventListener);
 </script>

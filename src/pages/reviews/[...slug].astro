@@ -10,7 +10,7 @@ export async function getStaticPaths() {
 
 const { review } = Astro.props;
 const { Content } = await render(review);
-const typeLabel = ({ '游戏': 'GAME', '动画': 'ANI/COMIC', '影视': 'MOVIE', '视频': 'VIDEO', '书籍': 'BOOK' } as Record<string, string>)[review.data.type] ?? review.data.type.toUpperCase();
+const typeLabel = ({ anime: 'ANI/COMIC' } as Record<string, string>)[review.data.type] ?? review.data.type.toUpperCase();
 ---
 
 <IndexPage title={review.data.title} contentClass="review-detail-shell">

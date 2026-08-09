@@ -32,12 +32,12 @@ const memos = defineCollection({
 
 const gallery = defineCollection({
   loader: glob({ base: './src/content/gallery', pattern: '**/*.{md,mdx}' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     date: z.date(),
-    kind: z.enum(['OC', '同人']),
+    kind: z.enum(['oc', 'fanart']),
     tags: z.array(z.string()).default([]),
-    image: z.string(),
+    image: image(),
     alt: z.string().optional(),
     draft: z.boolean().default(false),
   }),
@@ -48,8 +48,8 @@ const reviews = defineCollection({
   schema: z.object({
     title: z.string(),
     date: z.date(),
-    type: z.enum(['游戏', '动画', '影视', '视频', '书籍']),
-    status: z.string().default('已完成'),
+    type: z.enum(['game', 'anime', 'movie', 'video', 'book']),
+    status: z.string().default('completed'),
     rating: z.number().min(0).max(10).optional(),
     cover: z.string().optional(),
     creator: z.string().optional(),
@@ -63,4 +63,12 @@ const reviews = defineCollection({
   }),
 });
 
-export const collections = { blog, memos, gallery, reviews };
+const pages = defineCollection({
+  loader: glob({ base: './src/content/pages', pattern: '**/*.{md,mdx}' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+  }),
+});
+
+export const collections = { blog, memos, gallery, reviews, pages };

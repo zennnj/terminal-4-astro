@@ -1,8 +1,8 @@
 ---
 title: The Quiet Station
 date: 2026-06-12
-type: 影视
-status: 已完成
+type: movie
+status: completed
 rating: 8
 cover: /reviews/sample-film.png
 creator: Sample Director
