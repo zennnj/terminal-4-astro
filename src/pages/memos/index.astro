@@ -4,6 +4,7 @@ import WalineComment from '@/components/WalineComment.astro';
 import { comment } from '@/consts';
 
 const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.serverUrl);
+const memoAvatar = '/assets/about/selfpic.png';
 ---
 
 <IndexPage title="Memos" contentClass="memos-shell">
@@ -16,12 +17,12 @@ const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.se
 
   <section data-memo-panel="memos">
     <div class="memo-head"><h1>MEMOS</h1><span>Some sentences I like.</span></div>
-    {walineReady && <div class="memo-feed" aria-label="Post a memo"><WalineComment id="waline-memos" standalone path="/memos-feed/" /></div>}
+    {walineReady && <div class="memo-feed" aria-label="Post a memo"><WalineComment id="waline-memos" standalone path="/memos-feed/" avatar={memoAvatar} /></div>}
   </section>
 
   <section data-memo-panel="junk" hidden>
     <div class="memo-head"><h1>JUNK</h1><span>Anonymous fragments and passing thoughts.</span></div>
-    {walineReady && <div class="junk-thread" aria-label="Post to junk"><button class="junk-reload" id="junk-reload" type="button">RELOAD THREAD</button><WalineComment id="waline-junk" standalone path="/discuss/" /></div>}
+    {walineReady && <div class="junk-thread" aria-label="Post to junk"><button class="junk-reload" id="junk-reload" type="button">RELOAD THREAD</button><WalineComment id="waline-junk" standalone path="/discuss/" avatar={memoAvatar} /></div>}
   </section>
 </IndexPage>
 
@@ -53,7 +54,7 @@ const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.se
           ? `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
           : (time?.textContent?.trim() ?? '');
         const number = Math.max(1, total - index);
-        const label = `#${number}（第${number}条）${dateLabel ? `  ${dateLabel}` : ''}`;
+        const label = `#${number}${dateLabel ? `  ${dateLabel}` : ''}`;
         if (heading.textContent !== label) heading.textContent = label;
       });
     };
@@ -65,7 +66,7 @@ const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.se
       buttons.forEach((button) => button.classList.toggle('active', button.dataset.memoView === view));
       panels.forEach((panel) => panel.hidden = panel.dataset.memoPanel !== view);
       const id = view === 'junk' ? 'waline-junk' : 'waline-memos';
-      window.dispatchEvent(new CustomEvent('waline:mount', { detail: { id } }));
+      requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('waline:mount', { detail: { id } })));
       const url = new URL(location.href);
       if (view === 'junk') url.searchParams.set('view', 'junk'); else url.searchParams.delete('view');
       history.replaceState(null, '', url);
@@ -80,14 +81,13 @@ const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.se
 </script>
 
 <style>
-  :global(.memos-shell) { width: var(--article-shell-width); margin: 0 auto; padding: 1.15rem var(--article-shell-padding-inline) clamp(2rem, 5vw, 5rem); }
-  .memo-toolbar { margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
+  :global(.memos-shell) { width: var(--article-shell-width); margin: 0 auto; padding: 1rem var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem); }
+  .memo-toolbar { display: flex; align-items: center; gap: clamp(1.5rem, 3vw, 3rem); margin-bottom: clamp(1.6rem, 3vw, 3rem); }
   [data-memo-panel][hidden] { display: none; }
-  .memo-head { margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
-  .memo-head h1 { margin: clamp(2rem, 5vw, 4.5rem) 0 .8rem 7%; font: 700 clamp(4rem, 9vw, 8rem)/.86 var(--font-title); letter-spacing: -.07em; }
-  .memo-head > span { display: block; margin-left: 10%; color: var(--p4-coral); font: 400 clamp(1.15rem, 2.3vw, 2rem)/1.4 var(--font-body); }
+  .memo-head { margin-bottom: .6rem; }
+  .memo-head h1 { margin: 0; font-family: var(--font-title); font-size: var(--article-detail-title-size); font-weight: 700; line-height: .95; letter-spacing: -.035em; }
+  .memo-head > span { display: block; margin: .8rem 0 .55rem; color: var(--purple-soft); font: 400 .88rem/1.4 var(--font-body); }
   .memo-feed, .junk-thread { width: 100%; margin: 0 0 4rem; background: transparent; }
-  .memo-feed { margin-left: 7%; width: 93%; }
   .junk-reload { display: block; margin: 0 0 1rem auto; padding-bottom: .2rem; border-bottom: 1px solid currentColor; color: var(--purple-soft); cursor: pointer; font-size: .72rem; letter-spacing: .1em; }
 
   :global(.memo-feed), :global(.junk-thread) { --waline-bg-color: transparent; --waline-bg-color-light: color-mix(in srgb, var(--p4-yellow) 55%, transparent); --waline-border-color: color-mix(in srgb, var(--p4-purple) 30%, transparent); --waline-theme-color: var(--p4-coral); --waline-active-color: var(--p4-purple); --waline-color: var(--p4-purple); --waline-font-family: var(--font-body); }
@@ -95,10 +95,11 @@ const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.se
   :global(.memo-feed .wl-reaction), :global(.junk-thread .wl-reaction), :global(.memo-feed .wl-meta-head), :global(.junk-thread .wl-meta-head), :global(.memo-feed .wl-meta-foot), :global(.junk-thread .wl-meta-foot), :global(.memo-feed .wl-power), :global(.junk-thread .wl-power) { display: none !important; }
   :global(.memo-feed .wl-header), :global(.junk-thread .wl-header), :global(.memo-feed .wl-login-info), :global(.junk-thread .wl-login-info) { display: none !important; }
   :global(.memo-feed .wl-footer), :global(.junk-thread .wl-footer) { display: flex !important; flex-wrap: wrap !important; align-items: center !important; margin: .5em .75em !important; }
-  :global(.memo-feed .wl-actions), :global(.junk-thread .wl-actions) { display: flex !important; flex: 2 !important; align-items: center !important; }
+  :global(.memo-feed .wl-actions), :global(.junk-thread .wl-actions) { display: flex !important; min-width: 0; flex: 2 !important; align-items: center !important; }
+  :global(.memo-feed .wl-actions .upload), :global(.junk-thread .wl-actions .upload) { display: none !important; }
   :global(.memo-feed .wl-info), :global(.junk-thread .wl-info) { display: flex !important; flex: 3 !important; align-items: center !important; justify-content: flex-end !important; }
   :global(.memo-feed .wl-action), :global(.junk-thread .wl-action) { display: inline-flex !important; width: 1.5em !important; height: 1.5em !important; align-items: center !important; justify-content: center !important; margin: 2px !important; }
-  :global(.memo-feed .wl-gif-popup:not(.display)), :global(.junk-thread .wl-gif-popup:not(.display)), :global(.memo-feed .wl-emoji-popup:not(.display)), :global(.junk-thread .wl-emoji-popup:not(.display)) { display: none !important; visibility: hidden !important; }
+  :global(.memo-feed .wl-gif-popup), :global(.junk-thread .wl-gif-popup) { display: none !important; visibility: hidden !important; }
 
   :global(.memo-feed .wl-comment), :global(.junk-thread .wl-comment) { width: 100%; margin: 0 0 2.5rem; }
   :global(.memo-feed .wl-panel) { width: 100%; margin: 0; border: 0 !important; border-radius: 1.5rem !important; box-shadow: none !important; background: var(--p4-yellow) !important; }
@@ -120,11 +121,12 @@ const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.se
   :global(.junk-thread .wl-cards) { width: 100%; }
   :global(.junk-thread .wl-card-item), :global(.junk-thread .wl-card-item .wl-card-item) { display: block !important; width: 100%; padding: 0 !important; }
   :global(.junk-thread .wl-card-item > .wl-user) { display: none !important; }
-  :global(.junk-thread .wl-card), :global(.junk-thread .wl-card:first-child) { width: 100% !important; margin: 0 !important; padding: 1.25rem .2rem 1.35rem !important; border: 0 !important; border-bottom: 1px solid color-mix(in srgb, var(--p4-purple) 28%, transparent) !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; }
+  :global(.junk-thread .wl-card), :global(.junk-thread .wl-card:first-child) { width: 100% !important; margin: 0 !important; padding: 1.25rem 0 1.35rem !important; border: 0 !important; border-bottom: 1px solid color-mix(in srgb, var(--p4-purple) 28%, transparent) !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; }
   :global(.junk-thread .wl-card .wl-head), :global(.junk-thread .wl-card .wl-comment-actions), :global(.junk-thread .wl-card .wl-meta) { display: none !important; }
   :global(.junk-thread .junk-post-heading) { margin-bottom: .55rem; color: var(--p4-coral); font: 400 .82rem/1.4 var(--font-body); }
   :global(.junk-thread .wl-card .wl-content) { margin: 0 !important; padding: 0 !important; color: var(--purple); font-size: 1rem !important; line-height: 1.8 !important; }
 
-  @media (max-width: 900px) { :global(.memos-shell) { width: 100%; margin-left: 0; padding-inline: 1.1rem; }.memo-head h1, .memo-head > span { margin-left: 0; }.memo-feed { width: 100%; margin-left: 0; } }
+  @media (max-width: 900px) { :global(.memos-shell) { width: 100%; margin-left: 0; } }
+  @media (max-width: 600px) { :global(.memos-shell) { padding-inline: 1.1rem; } }
   @media (max-width: 560px) { :global(.memo-feed .wl-user) { display: none !important; }:global(.memo-feed .wl-card-item) { display: block !important; }:global(.memo-feed .wl-card) { width: 100% !important; } }
 </style>

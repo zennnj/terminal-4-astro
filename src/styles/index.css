@@ -2,6 +2,7 @@
 @import "remixicon/fonts/remixicon.css";
 @import "remark-aside.css";
 @import "tailwindcss";
+@import "@waline/client/style";
 
 /* ── Tailwind v4 configuration (migrated from tailwind.config.js) ── */
 

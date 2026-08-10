@@ -4,19 +4,20 @@ interface Props {
   standalone?: boolean;
   force?: boolean;
   path?: string;
+  avatar?: string;
 }
 
-const { id = 'waline', standalone = false, force = false, path = '' } = Astro.props;
+const { id = 'waline', standalone = false, force = false, path = '', avatar = '' } = Astro.props;
 ---
 
-<div id={id} data-waline-root data-standalone={standalone ? 'true' : 'false'} data-force={force ? 'true' : 'false'} data-waline-path={path}></div>
+<div id={id} data-waline-root data-standalone={standalone ? 'true' : 'false'} data-force={force ? 'true' : 'false'} data-waline-path={path} data-waline-avatar={avatar}></div>
 
 <script>
   import { init } from '@waline/client';
   import { comment } from '../consts';
-  import '@waline/client/style';
 
   const walineInstances = new Map<string, ReturnType<typeof init>>();
+  const walineAvatarObservers = new Map<string, MutationObserver>();
   const ossUploadEnabled = import.meta.env.PUBLIC_OSS_UPLOAD_ENABLED === 'true';
   const configuredMaxFileSize = Number(import.meta.env.PUBLIC_OSS_MAX_FILE_SIZE_MB);
   const maxFileSizeMb = Number.isFinite(configuredMaxFileSize) && configuredMaxFileSize > 0
@@ -59,10 +60,21 @@ const { id = 'waline', standalone = false, force = false, path = '' } = Astro.pr
   }
 
   function destroyWaline(root: HTMLElement) {
+    walineAvatarObservers.get(root.id)?.disconnect();
+    walineAvatarObservers.delete(root.id);
     walineInstances.get(root.id)?.destroy();
     walineInstances.delete(root.id);
     root.replaceChildren();
     delete root.dataset.mounted;
+  }
+
+  function applyAvatar(root: HTMLElement) {
+    const avatar = root.dataset.walineAvatar;
+    if (!avatar) return;
+    root.querySelectorAll<HTMLImageElement>('img.wl-user-avatar, img.wl-avatar').forEach((image) => {
+      if (image.src !== new URL(avatar, window.location.origin).href) image.src = avatar;
+      image.removeAttribute('srcset');
+    });
   }
 
   function mountWaline(root: HTMLElement, forceRemount = false) {
@@ -87,6 +99,7 @@ const { id = 'waline', standalone = false, force = false, path = '' } = Astro.pr
       // AccessKey remains inside the Netlify Function runtime.
       imageUploader: ossUploadEnabled ? uploadToOss : false,
       reaction: false,
+      search: standalone ? false : undefined,
       meta: standalone ? [] : ['nick', 'mail', 'link'],
       requiredMeta: standalone ? [] : comment.walineConfig.requiredMeta,
       login: standalone ? 'disable' : 'enable',
@@ -95,6 +108,12 @@ const { id = 'waline', standalone = false, force = false, path = '' } = Astro.pr
     });
     walineInstances.set(root.id, instance);
     root.dataset.mounted = 'true';
+    if (root.dataset.walineAvatar) {
+      const observer = new MutationObserver(() => applyAvatar(root));
+      observer.observe(root, { childList: true, subtree: true });
+      walineAvatarObservers.set(root.id, observer);
+      applyAvatar(root);
+    }
   }
 
   function initWaline(event?: Event) {
@@ -114,4 +133,7 @@ const { id = 'waline', standalone = false, force = false, path = '' } = Astro.pr
 
   document.addEventListener('astro:page-load', initWaline);
   window.addEventListener('waline:mount', initWaline as EventListener);
+  // ClientRouter can finish loading this component after page-load has fired.
+  // Mount once immediately so first visits never depend on a browser refresh.
+  initWaline();
 </script>

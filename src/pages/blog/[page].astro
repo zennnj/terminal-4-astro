@@ -177,11 +177,11 @@ const yearEntries = Object.entries(postsByYear).sort(([a], [b]) => Number(b) - N
 <style>
   :global(.article-hub-shell) { width: var(--article-shell-width); margin: 0 auto; padding: 1rem var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem); }
   .article-toolbar { display: flex; align-items: center; gap: clamp(1.5rem, 3vw, 3rem); margin-bottom: clamp(1.6rem, 3vw, 3rem); }
-  .search-control { display: flex; min-width: 58px; align-items: center; gap: .8rem; }
-  .search-toggle { display: grid; width: 44px; height: 44px; flex: 0 0 auto; place-items: center; border: 1px solid color-mix(in srgb, var(--purple) 55%, transparent); border-radius: 50%; cursor: pointer; font-size: 1.2rem; transition: background .2s, color .2s; }
+  .search-control { --search-toggle-size: clamp(1rem, 1.4vw, 1.25rem); display: flex; min-width: var(--search-toggle-size); align-items: center; gap: .8rem; }
+  .search-toggle { display: grid; width: var(--search-toggle-size); height: var(--search-toggle-size); flex: 0 0 auto; place-items: center; border: 1px solid color-mix(in srgb, var(--purple) 55%, transparent); border-radius: 50%; cursor: pointer; font-size: calc(var(--search-toggle-size) * .64); transition: background .2s, color .2s; }
   .search-toggle:hover, .search-control.is-open .search-toggle { background: var(--purple); color: var(--p4-yellow); }
-  .search-capsule { display: grid; width: 0; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: .7rem; overflow: hidden; padding: .78rem 0; border: 2px solid transparent; border-radius: 999px; opacity: 0; transition: width .35s ease, padding .35s ease, opacity .2s ease, border-color .35s ease; pointer-events: none; }
-  .search-control.is-open .search-capsule { width: min(36vw, 470px); padding-inline: .85rem 1rem; border-color: color-mix(in srgb, var(--purple) 45%, transparent); opacity: 1; pointer-events: auto; }
+  .search-capsule { display: grid; width: 0; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: .7rem; overflow: hidden; padding: 0; border: 2px solid transparent; border-radius: 999px; opacity: 0; transition: width .35s ease, padding .35s ease, opacity .2s ease, border-color .35s ease; pointer-events: none; }
+  .search-control.is-open .search-capsule { width: min(36vw, 470px); padding: .78rem 1rem .78rem .85rem; border-color: color-mix(in srgb, var(--purple) 45%, transparent); opacity: 1; pointer-events: auto; }
   .search-capsule input { min-width: 0; border: 0 !important; outline: 0; background: transparent !important; font: italic .92rem/1 var(--font-body); }
   .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, 190px); gap: clamp(2.5rem, 4vw, 4rem); }
   .article-layout[hidden], .archive-view[hidden] { display: none; }
