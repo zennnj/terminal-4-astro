@@ -1,35 +1,68 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import IndexPage from '@/layouts/IndexPage.astro';
 
 const works = (await getCollection('gallery'))
   .filter((work) => !work.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const galleryItems = await Promise.all(works.map(async (work) => ({
+  work,
+  Content: (await render(work)).Content,
+})));
 const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpperCase());
 ---
 
 <IndexPage title="Gallery" contentClass="gallery-shell">
   <header class="gallery-head">
-    <div><p>GALLERY · VISUAL ARCHIVE</p><h1>Gallery</h1></div>
+    <div class="gallery-title">
+      <h1>GALLERY</h1>
+      <p>GALLERY · VISUAL ARCHIVE</p>
+    </div>
     <div class="filters" role="group" aria-label="Artwork type">
-      <button class="active" data-filter="all">ALL</button>
-      <button data-filter="oc">OC</button>
-      <button data-filter="fanart">FAN ART</button>
+      <button class="active" type="button" data-filter="all">ALL</button>
+      <button type="button" data-filter="oc">OC</button>
+      <button type="button" data-filter="fanart">FAN ART</button>
     </div>
   </header>
 
-  {works.length > 0 ? (
+  {galleryItems.length > 0 ? (
     <div class="gallery-grid" id="gallery-grid">
-      {works.map((work) => (
-        <article class="work-card" data-kind={work.data.kind}>
-          <Image src={work.data.image} alt={work.data.alt ?? work.data.title} loading="lazy" />
-          <div class="work-caption">
-            <div><span>{kindLabel(work.data.kind)}</span><h2>{work.data.title}</h2></div>
-            <p>{work.data.tags.map((tag) => `#${tag}`).join(' ')}</p>
-          </div>
-        </article>
-      ))}
+      {galleryItems.map(({ work, Content }, index) => {
+        const dialogId = `gallery-dialog-${index}`;
+        const titleId = `gallery-title-${index}`;
+        return (
+          <article class="work-card" data-kind={work.data.kind}>
+            <button class="work-image-button" type="button" data-gallery-open={dialogId} aria-label={`放大查看：${work.data.title}`}>
+              <Image src={work.data.image} alt={work.data.alt ?? work.data.title} loading="lazy" />
+              <span class="view-hint" aria-hidden="true"><i class="ri-fullscreen-line"></i> VIEW</span>
+            </button>
+            <div class="work-caption">
+              <div>
+                <span>{kindLabel(work.data.kind)}</span>
+                <h2>{work.data.title}</h2>
+              </div>
+              <p>{work.data.tags.map((tag) => `#${tag}`).join(' ')}</p>
+            </div>
+
+            <dialog class="gallery-dialog" id={dialogId} aria-labelledby={titleId}>
+              <div class="dialog-layout">
+                <div class="dialog-image">
+                  <Image src={work.data.image} alt={work.data.alt ?? work.data.title} loading="lazy" />
+                </div>
+                <aside class="dialog-description">
+                  <button class="dialog-close" type="button" data-gallery-close aria-label="关闭作品预览"><i class="ri-close-line"></i></button>
+                  <p class="dialog-kind">{kindLabel(work.data.kind)}</p>
+                  <h2 id={titleId}>{work.data.title}</h2>
+                  <time datetime={work.data.date.toISOString()}>{work.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+                  <div class="dialog-copy"><Content /></div>
+                  {work.data.tags.length > 0 && <p class="dialog-tags">{work.data.tags.map((tag) => <span>#{tag}</span>)}</p>}
+                </aside>
+              </div>
+            </dialog>
+          </article>
+        );
+      })}
     </div>
   ) : (
     <div class="empty-state"><i class="ri-image-add-line"></i><h2>The frames are ready</h2><p>New artwork will appear here once it is added to the gallery.</p></div>
@@ -37,38 +70,122 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
 </IndexPage>
 
 <script>
-  function bindGalleryFilters() {
-    document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((button) => {
+  function initGallery() {
+    const gallery = document.querySelector<HTMLElement>('.gallery-shell');
+    if (!gallery || gallery.dataset.ready === 'true') return;
+    gallery.dataset.ready = 'true';
+    const root = document.documentElement;
+    const lockPageScroll = () => {
+      if (root.classList.contains('gallery-modal-open')) return;
+      const scrollY = window.scrollY;
+      root.dataset.galleryScrollY = String(scrollY);
+      root.style.setProperty('--gallery-scroll-y', `${scrollY}px`);
+      root.classList.add('gallery-modal-open');
+    };
+    const unlockPageScroll = () => {
+      const scrollY = Number(root.dataset.galleryScrollY ?? 0);
+      root.classList.remove('gallery-modal-open');
+      root.style.removeProperty('--gallery-scroll-y');
+      delete root.dataset.galleryScrollY;
+      window.scrollTo(0, scrollY);
+    };
+
+    const filterButtons = [...gallery.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    filterButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        document.querySelectorAll('[data-filter]').forEach((item) => item.classList.remove('active'));
-        button.classList.add('active');
+        filterButtons.forEach((item) => item.classList.toggle('active', item === button));
         const filter = button.dataset.filter;
-        document.querySelectorAll<HTMLElement>('[data-kind]').forEach((card) => {
+        gallery.querySelectorAll<HTMLElement>('[data-kind]').forEach((card) => {
           card.hidden = filter !== 'all' && card.dataset.kind !== filter;
         });
       });
     });
+
+    gallery.querySelectorAll<HTMLButtonElement>('[data-gallery-open]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const dialog = document.getElementById(button.dataset.galleryOpen ?? '') as HTMLDialogElement | null;
+        if (!dialog) return;
+        dialog.showModal();
+        lockPageScroll();
+      });
+    });
+
+    gallery.querySelectorAll<HTMLDialogElement>('.gallery-dialog').forEach((dialog) => {
+      dialog.querySelector<HTMLButtonElement>('[data-gallery-close]')?.addEventListener('click', () => dialog.close());
+      dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+      dialog.addEventListener('close', () => {
+        if (!gallery.querySelector('.gallery-dialog[open]')) unlockPageScroll();
+      });
+    });
+
+    document.addEventListener('astro:before-swap', unlockPageScroll, { once: true });
   }
-  document.addEventListener('astro:page-load', bindGalleryFilters);
+
+  document.addEventListener('astro:page-load', initGallery);
 </script>
 
 <style>
-  :global(.gallery-shell) { width: var(--article-shell-width); margin: 0 auto; padding: 1rem var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem); }
-  .gallery-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: 2rem 0; }
-  .gallery-head p { margin: 0; color: var(--p4-coral); font: 400 .72rem/1 var(--font-body); letter-spacing: .16em; }
-  .gallery-head h1 { margin: .55rem 0 0; font: 700 clamp(2.8rem, 7vw, 6rem)/.92 var(--font-title); letter-spacing: -.055em; text-transform: uppercase; }
-  .filters { display: flex; gap: .4rem; padding: .3rem; border: 1px solid rgba(var(--color-text), .14); border-radius: 999px; }
-  .filters button { padding: .35rem .75rem; border-radius: 999px; cursor: pointer; }
-  .filters button.active { background: var(--p4-purple); color: var(--p4-yellow); }
-  .gallery-grid { columns: 2; column-gap: 1rem; }
-  .work-card { break-inside: avoid; margin-bottom: 1rem; overflow: hidden; border-radius: 1rem; background: var(--p4-yellow); }
-  .work-card img { width: 100%; }
-  .work-caption { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem; }
-  .work-caption span, .work-caption p { color: rgb(var(--color-text-dodge)); font-size: .75rem; }
-  .work-caption h2 { margin: .2rem 0 0; font: 700 clamp(1.2rem, 2.2vw, 2rem)/1 var(--font-title); }
-  .empty-state { padding: 5rem 1rem; border: 1px dashed rgba(var(--color-text), .24); border-radius: 1.2rem; text-align: center; color: rgb(var(--color-text-dodge)); }
-  .empty-state i { font-size: 2.5rem; color: rgb(var(--color-text-active)); }
-  .empty-state h2 { margin: .75rem 0; color: rgb(var(--color-text)); }
-  @media (max-width: 900px) { :global(.gallery-shell) { width: 100%; padding-inline: 1.1rem; } }
-  @media (max-width: 620px) { .gallery-head { align-items: start; flex-direction: column; } .gallery-grid { columns: 1; } }
+  :global(.gallery-shell) { width: var(--article-shell-width); margin: 0 auto; padding: clamp(2rem, 4vw, 3.5rem) var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem); }
+  .gallery-head { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem; margin: 0 0 clamp(2rem, 3.5vw, 3rem); }
+  .gallery-title h1 { margin: 0 0 .8rem; color: var(--p4-purple); font-family: var(--font-title); font-size: var(--article-detail-title-size); font-weight: 700; line-height: 1; letter-spacing: -.045em; }
+  .gallery-title > p { margin: 0; color: var(--p4-coral); font: 400 clamp(1.05rem, 1.8vw, 1.45rem)/1.5 var(--font-body); }
+  .filters { display: flex; gap: .35rem; padding: .3rem; border: 1px solid color-mix(in srgb, var(--p4-purple) 28%, transparent); border-radius: 999px; }
+  .filters button { padding: .4rem .78rem; border-radius: 999px; cursor: pointer; font: 400 .76rem/1 var(--font-body); letter-spacing: .06em; transition: color .2s, background .2s; }
+  .filters button:hover, .filters button.active { background: var(--p4-purple); color: var(--p4-yellow); }
+  .gallery-grid { columns: 2; column-gap: clamp(1rem, 2vw, 1.5rem); }
+  .work-card { break-inside: avoid; margin-bottom: clamp(1rem, 2vw, 1.5rem); overflow: hidden; border-radius: 1rem; background: var(--p4-yellow); }
+  .work-card[hidden] { display: none; }
+  .work-image-button { position: relative; display: block; width: 100%; overflow: hidden; cursor: zoom-in; }
+  .work-image-button img { display: block; width: 100%; height: auto; transition: transform .35s ease; }
+  .work-image-button:hover img, .work-image-button:focus-visible img { transform: scale(1.015); }
+  .view-hint { position: absolute; right: .75rem; bottom: .75rem; display: inline-flex; align-items: center; gap: .35rem; padding: .42rem .62rem; border-radius: 999px; background: color-mix(in srgb, var(--p4-purple) 88%, transparent); color: var(--p4-yellow); font: 400 .68rem/1 var(--font-body); letter-spacing: .08em; opacity: 0; transform: translateY(.3rem); transition: opacity .2s, transform .2s; }
+  .work-image-button:hover .view-hint, .work-image-button:focus-visible .view-hint { opacity: 1; transform: none; }
+  .work-caption { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: 1rem 1.1rem 1.1rem; }
+  .work-caption span, .work-caption p { color: var(--purple-soft); font: 400 .72rem/1.35 var(--font-body); }
+  .work-caption h2 { margin: .25rem 0 0; font: 700 clamp(1.2rem, 2vw, 1.7rem)/1.05 var(--font-title); }
+  .work-caption p { max-width: 45%; margin: 0; text-align: right; }
+
+  :global(html.gallery-modal-open) { overflow: hidden; overscroll-behavior: none; }
+  :global(html.gallery-modal-open body) { position: fixed; top: calc(var(--gallery-scroll-y) * -1); right: 0; left: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; }
+  .gallery-dialog { position: fixed; inset: 50% auto auto 50%; width: min(1180px, calc(100vw - 3rem)); max-width: none; height: min(780px, calc(100svh - 3rem)); max-height: none; margin: 0; padding: 0; overflow: hidden; border: 0; border-radius: 1.25rem; background: var(--p4-gray); color: var(--p4-purple); box-shadow: 0 1.5rem 5rem color-mix(in srgb, var(--p4-purple) 35%, transparent); transform: translate(-50%, -50%); overscroll-behavior: contain; }
+  .gallery-dialog::backdrop { background: color-mix(in srgb, var(--p4-purple) 72%, transparent); backdrop-filter: blur(5px); }
+  .dialog-layout { display: grid; height: 100%; grid-template-columns: minmax(0, 1.65fr) minmax(280px, .75fr); }
+  .dialog-image { display: grid; min-width: 0; min-height: 0; place-items: center; padding: clamp(1rem, 2vw, 1.5rem); background: color-mix(in srgb, var(--p4-purple) 94%, black 6%); }
+  .dialog-image img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .dialog-description { position: relative; overflow-y: auto; padding: clamp(2rem, 4vw, 3.5rem) clamp(1.5rem, 3vw, 2.5rem); }
+  .dialog-close { position: absolute; top: 1rem; right: 1rem; display: grid; width: 2.25rem; height: 2.25rem; place-items: center; border: 1px solid color-mix(in srgb, var(--p4-purple) 32%, transparent); border-radius: 50%; cursor: pointer; font-size: 1.25rem; transition: color .2s, background .2s; }
+  .dialog-close:hover, .dialog-close:focus-visible { background: var(--p4-purple); color: var(--p4-yellow); }
+  .dialog-kind { margin: 0 3rem .55rem 0; color: var(--p4-coral); font: 400 .72rem/1 var(--font-body); letter-spacing: .14em; }
+  .dialog-description h2 { margin: 0 0 .65rem; font: 700 clamp(2rem, 3.5vw, 3rem)/.95 var(--font-title); letter-spacing: -.035em; }
+  .dialog-description time { color: var(--purple-soft); font: 400 .76rem/1.4 var(--font-body); }
+  .dialog-copy { margin-top: clamp(1.5rem, 3vw, 2.5rem); font: 400 .94rem/1.72 var(--font-body); }
+  .dialog-copy :global(> :first-child) { margin-top: 0; }
+  .dialog-copy :global(> :last-child) { margin-bottom: 0; }
+  .dialog-copy :global(a) { color: var(--p4-coral); text-decoration: underline; text-underline-offset: .18em; }
+  .dialog-tags { display: flex; flex-wrap: wrap; gap: .45rem; margin: 2rem 0 0; }
+  .dialog-tags span { padding: .36rem .62rem; border-radius: 999px; background: color-mix(in srgb, var(--p4-purple) 12%, transparent); font-size: .75rem; line-height: 1; }
+  .empty-state { padding: 5rem 1rem; border: 1px dashed color-mix(in srgb, var(--p4-purple) 24%, transparent); border-radius: 1.2rem; text-align: center; color: var(--purple-soft); }
+  .empty-state i { font-size: 2.5rem; color: var(--p4-coral); }
+  .empty-state h2 { margin: .75rem 0; }
+
+  @media (max-width: 900px) {
+    :global(.gallery-shell) { width: 100%; }
+    .gallery-dialog { width: calc(100vw - 2rem); height: calc(100svh - 2rem); }
+    .dialog-layout { grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); }
+  }
+  @media (max-width: 620px) {
+    :global(.gallery-shell) { padding-inline: 1.1rem; }
+    .gallery-head { align-items: start; flex-direction: column; }
+    .gallery-grid { columns: 1; }
+    .view-hint { opacity: 1; transform: none; }
+    .gallery-dialog { width: calc(100vw - 1rem); height: calc(100svh - 1rem); border-radius: 1rem; }
+    .dialog-layout { display: grid; grid-template-rows: minmax(45svh, 58svh) auto; grid-template-columns: 1fr; overflow-y: auto; }
+    .dialog-image { min-height: 45svh; }
+    .dialog-description { overflow: visible; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .work-image-button img, .view-hint { transition: none; }
+  }
 </style>
