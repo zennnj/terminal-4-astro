@@ -17,6 +17,46 @@ const { id = 'waline', standalone = false, force = false, path = '' } = Astro.pr
   import '@waline/client/style';
 
   const walineInstances = new Map<string, ReturnType<typeof init>>();
+  const ossUploadEnabled = import.meta.env.PUBLIC_OSS_UPLOAD_ENABLED === 'true';
+  const configuredMaxFileSize = Number(import.meta.env.PUBLIC_OSS_MAX_FILE_SIZE_MB);
+  const maxFileSizeMb = Number.isFinite(configuredMaxFileSize) && configuredMaxFileSize > 0
+    ? configuredMaxFileSize
+    : 5;
+
+  interface OssUploadPolicy {
+    host: string;
+    publicUrl: string;
+    fields: Record<string, string>;
+  }
+
+  async function uploadToOss(file: File): Promise<string> {
+    if (!file.type.startsWith('image/')) throw new Error('Only image files can be uploaded.');
+    if (file.size > maxFileSizeMb * 1024 * 1024) {
+      throw new Error(`Images must be smaller than ${maxFileSizeMb} MB.`);
+    }
+
+    const policyResponse = await fetch('/.netlify/functions/oss-upload-policy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contentType: file.type, size: file.size }),
+    });
+    const policy = await policyResponse.json().catch(() => null) as (OssUploadPolicy & { message?: string }) | null;
+    if (!policyResponse.ok || !policy?.host || !policy.publicUrl || !policy.fields) {
+      throw new Error(policy?.message || `Unable to authorize image upload (${policyResponse.status}).`);
+    }
+
+    const formData = new FormData();
+    Object.entries(policy.fields).forEach(([name, value]) => formData.append(name, value));
+    // OSS requires the file field to be the final multipart form field.
+    formData.append('file', file);
+
+    const response = await fetch(policy.host, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) throw new Error(`Image upload failed (${response.status}).`);
+    return policy.publicUrl;
+  }
 
   function destroyWaline(root: HTMLElement) {
     walineInstances.get(root.id)?.destroy();
@@ -43,6 +83,9 @@ const { id = 'waline', standalone = false, force = false, path = '' } = Astro.pr
       lang: comment.walineConfig.lang,
       pageSize: comment.walineConfig.pageSize,
       pageview: comment.walineConfig.pageview,
+      // The browser receives a short-lived, single-object policy. The OSS
+      // AccessKey remains inside the Netlify Function runtime.
+      imageUploader: ossUploadEnabled ? uploadToOss : false,
       reaction: false,
       meta: standalone ? [] : ['nick', 'mail', 'link'],
       requiredMeta: standalone ? [] : comment.walineConfig.requiredMeta,

@@ -8,16 +8,26 @@ const blogs = await getCollectionByName('blog')
 let tagArr = getUniqueTags(blogs);
 ---
 
-<IndexPage title="Tags">
-  <div class="flex flex-wrap">
+<IndexPage title="Tags" contentClass="tags-shell">
+  <header class="tags-head"><p>ARTICLE INDEX</p><h1>TAGS</h1></header>
+  <div class="tag-cloud flex flex-wrap">
     {
       (
         tagArr
         &&
           tagArr.map((tag) =>
-            <a class="inline-block truncate m-1 border p-1 text-sm rounded hover:text-skin-active" title={tag} href={getUrl("/tags/") + tag}>{tag}</a>
+            <a class="inline-block truncate" title={tag} href={getUrl("/tags/") + tag}>#{tag}</a>
           )
       )
     }
   </div>
 </IndexPage>
+
+<style>
+  :global(.tags-shell) { max-width: 1100px; margin: 0 auto; padding-top: clamp(4rem, 9vw, 8rem); }
+  .tags-head p { margin: 0 0 .55rem; color: var(--p4-coral); font-size: .72rem; letter-spacing: .16em; }
+  .tags-head h1 { margin: 0 0 2rem; font: 700 clamp(3rem, 8vw, 7rem)/.9 var(--font-title); letter-spacing: -.055em; }
+  .tag-cloud { gap: .65rem; }
+  .tag-cloud a { padding: .6rem .9rem; border: 1px solid var(--p4-purple); border-radius: 999px; background: transparent; color: var(--p4-purple); transition: color .2s, background-color .2s; }
+  .tag-cloud a:hover { background: var(--p4-purple); color: var(--p4-yellow); }
+</style>

@@ -37,20 +37,20 @@ const typeLabel = ({ anime: 'ANI/COMIC' } as Record<string, string>)[review.data
 </IndexPage>
 
 <style>
-  :global(.review-detail-shell) { max-width: 1240px; margin: 0 auto 0 var(--rail-width); padding: clamp(2rem, 5vw, 5rem) clamp(1.5rem, 7vw, 7rem); }
+  :global(.review-detail-shell) { width: var(--article-shell-width); margin: 0 auto; padding: clamp(2rem, 5vw, 4rem) var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem); }
   .detail-back { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: 2rem; font-size: .85rem; letter-spacing: .12em; }
-  .review-detail > h1 { max-width: 14ch; margin: 0 0 clamp(2.5rem, 5vw, 5rem) 8%; font: 500 clamp(3rem, 7vw, 6rem)/1 Georgia, serif; overflow-wrap: anywhere; }
-  .review-overview { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.25fr); gap: clamp(2rem, 7vw, 7rem); align-items: center; }
-  .detail-cover { display: grid; aspect-ratio: 4 / 5; place-items: center; overflow: hidden; border: 1px solid rgba(58,13,98,.7); background: var(--paper-deep); }
+  .review-detail > h1 { margin: 0 8% clamp(2.5rem, 5vw, 4rem); color: var(--p4-purple); font-family: var(--font-title); font-size: var(--article-detail-title-size); font-weight: 700; line-height: 1; letter-spacing: -.045em; overflow-wrap: anywhere; }
+  .review-overview { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.25fr); gap: clamp(2rem, 7vw, 7rem); align-items: center; margin-inline: 8%; }
+  .detail-cover { display: grid; aspect-ratio: 4 / 5; place-items: center; overflow: hidden; border: 1px solid color-mix(in srgb, var(--p4-purple) 70%, transparent); background: var(--paper-deep); }
   .detail-cover img { width: 100%; height: 100%; object-fit: cover; }.detail-cover i { color: var(--purple-soft); font-size: 5rem; }
   .review-overview dl { display: grid; gap: 1.4rem; margin: 0; }
   .review-overview dl > div { display: grid; grid-template-columns: 190px 1fr; gap: 1rem; }
-  .review-overview dt { color: var(--purple-soft); font-size: .85rem; letter-spacing: .08em; }.review-overview dd { margin: 0; font: 400 clamp(1rem, 1.6vw, 1.3rem)/1.6 Georgia, serif; }
+  .review-overview dt { color: var(--p4-coral); font-size: .85rem; letter-spacing: .08em; }.review-overview dd { margin: 0; font: 400 clamp(1rem, 1.6vw, 1.3rem)/1.6 var(--font-body); }
   .detail-notes, .final-review { margin: clamp(4rem, 8vw, 7rem) 8% 0; }
-  .detail-notes h2, .final-review h2 { margin: 0 0 2rem; font: 500 clamp(2.5rem, 5vw, 4.5rem)/1 Georgia, serif; }
-  .detail-notes blockquote { margin: 1.2rem 0; padding: 1rem 1.3rem; border-left: 2px solid #c9b4dc; background: rgba(221,209,232,.35); }
+  .detail-notes h2, .final-review h2 { margin: 0 0 2rem; font-family: var(--font-title); font-size: var(--article-detail-title-size); font-weight: 700; line-height: 1; letter-spacing: -.045em; }
+  .detail-notes blockquote { margin: 1.2rem 0; padding: 1rem 1.3rem; border-left: 2px solid var(--p4-coral); background: color-mix(in srgb, var(--p4-yellow) 72%, transparent); }
   .detail-notes time { color: var(--purple-soft); font-size: .8rem; }.detail-notes p { margin: .5rem 0 0; }
   .final-review .markdown-body { font-size: 1.05rem; line-height: 1.9; }
-  @media (max-width: 900px) { :global(.review-detail-shell) { margin-left: 0; }.review-overview { grid-template-columns: 1fr; }.detail-cover { width: min(100%, 430px); }.review-detail > h1, .detail-notes, .final-review { margin-left: 0; margin-right: 0; } }
+  @media (max-width: 900px) { :global(.review-detail-shell) { width: 100%; margin-left: 0; padding-inline: 1.1rem; }.review-overview { grid-template-columns: 1fr; margin-inline: 0; }.detail-cover { width: min(100%, 430px); }.review-detail > h1, .detail-notes, .final-review { margin-left: 0; margin-right: 0; } }
   @media (max-width: 560px) { .review-overview dl > div { grid-template-columns: 1fr; gap: .25rem; } }
 </style>

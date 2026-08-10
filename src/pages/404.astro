@@ -2,7 +2,21 @@
 import IndexPage from "@/layouts/IndexPage.astro";
 ---
 
-<IndexPage>
-  <div>404</div>
-  <div>Oops,This Page Could Not Be Found!</div>
+<IndexPage title="404" contentClass="not-found-shell">
+  <section class="not-found" aria-labelledby="not-found-title">
+    <p>LOST IN TERMINAL4</p>
+    <h1 id="not-found-title">404</h1>
+    <div>Oops, this page could not be found.</div>
+    <a href="/">BACK HOME <i class="ri-arrow-right-line"></i></a>
+  </section>
 </IndexPage>
+
+<style>
+  :global(.not-found-shell) { display: grid; min-height: 100svh; place-items: center; }
+  .not-found { text-align: center; }
+  .not-found p { margin: 0; color: var(--p4-coral); font-size: .78rem; letter-spacing: .18em; }
+  .not-found h1 { margin: .25rem 0; color: var(--p4-purple); font: 700 clamp(7rem, 24vw, 18rem)/.8 var(--font-title); letter-spacing: -.08em; }
+  .not-found div { margin-bottom: 2rem; font-size: clamp(1rem, 2vw, 1.35rem); }
+  .not-found a { display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 1rem; border-radius: 999px; background: var(--p4-purple); color: var(--p4-yellow); transition: background-color .2s, color .2s; }
+  .not-found a:hover { background: var(--p4-coral); }
+</style>

@@ -1,3 +1,7 @@
+## Required UI reference
+
+Before changing layout, colors, typography, homepage assets, the sidebar, or interactive UI, read [UI_STYLE_GUIDE.md](./UI_STYLE_GUIDE.md). Treat it as the current design contract unless the user explicitly requests a change to that contract.
+
 ## Development
 
 When starting the dev server, use background mode:

@@ -2,6 +2,7 @@
 import BaseHead from '@/components/BaseHead.astro';
 import { config } from '@/consts';
 import getUrl from '@/utils/getUrl';
+import GlobalFooter from '@/components/GlobalFooter.astro';
 
 interface Props {
   title?: string;
@@ -37,7 +38,7 @@ const navItems = [
 
 <html lang={config.lang}>
   <BaseHead title={title} description={description} mathjax={mathjax} mermaid={mermaid} ogImage={ogImage} />
-  <body class:list={['site-body', bodyClass]}>
+  <body class:list={['site-body', 'rail-open', bodyClass]}>
     <script is:inline>
       (() => {
         try {
@@ -73,15 +74,16 @@ const navItems = [
       class="rail-toggle"
       id="rail-toggle"
       type="button"
-      aria-label="Open navigation"
+      aria-label="Close navigation"
       aria-controls="side-rail"
-      aria-expanded="false"
+      aria-expanded="true"
     >
       <span></span><span></span><span></span>
     </button>
     <button class="rail-backdrop" id="rail-backdrop" type="button" aria-label="Close navigation"></button>
 
     <main class:list={['site-content', contentClass]} id="app"><slot /></main>
+    <GlobalFooter />
   </body>
 </html>
 
@@ -95,7 +97,10 @@ const navItems = [
     if (loader && root.dataset.loaderSeen !== 'true') {
       const shownAt = performance.now();
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let loadingFinished = false;
       const finishLoading = () => {
+        if (loadingFinished) return;
+        loadingFinished = true;
         const minimumVisible = reducedMotion ? 0 : 250;
         const remaining = Math.max(0, minimumVisible - (performance.now() - shownAt));
         window.setTimeout(() => {
@@ -106,7 +111,10 @@ const navItems = [
         }, remaining);
       };
       if (document.readyState === 'complete') finishLoading();
-      else window.addEventListener('load', finishLoading, { once: true });
+      else {
+        window.addEventListener('load', finishLoading, { once: true });
+        window.setTimeout(finishLoading, 1600);
+      }
     }
 
     if (!toggle || toggle.dataset.ready === 'true') return;
@@ -123,7 +131,6 @@ const navItems = [
     document.body.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && document.body.classList.contains('rail-open')) setRail(false);
     });
-    document.querySelectorAll('.rail-nav a').forEach((link) => link.addEventListener('click', () => setRail(false)));
   }
 
   document.addEventListener('astro:page-load', initSiteShell);

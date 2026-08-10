@@ -1,7 +1,6 @@
 ---
 import BlogPost from '@/layouts/BlogPost.astro'
 import PostTitle from "@/components/PostTitle.astro";
-import BlogFooter from '@/components/BlogFooter.astro'
 import {getCollectionByName} from "@/utils/getCollectionByName";
 import {render} from "astro:content";
 import {sortPostsByDate} from "@/utils/sortPostsByDate";
@@ -73,7 +72,6 @@ if (sortPosts[currentPostIndex + 1]) {
         )
       }
     </div>
-    <BlogFooter title={entry.data.title} url={getUrl('/') + entry.collection + '/' + entry.id} date={entry.data.date}></BlogFooter>
     {
       donate.enable && entry.data.donate &&
       <Donate></Donate>

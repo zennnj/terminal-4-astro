@@ -21,9 +21,10 @@ const tagPosts = getPostsByTag(posts, tag);
 const resultPosts = sortPostsByDate(tagPosts);
 ---
 
-<IndexPage title={tag}>
+<IndexPage title={tag} contentClass="tag-results-shell">
+  <header class="tag-results-head"><p>TAGGED ARTICLES</p><h1>#{tag}</h1></header>
   <SearchTitle label={tag}/>
-  <ul class="text-skin-base">
+  <ul class="tag-results text-skin-base">
     {
       resultPosts.map((post) => (
         <li style="list-style-type: disc;" class="ml-4 my-2">
@@ -36,3 +37,14 @@ const resultPosts = sortPostsByDate(tagPosts);
     }
   </ul>
 </IndexPage>
+
+<style>
+  :global(.tag-results-shell) { max-width: 1100px; margin: 0 auto; padding-top: clamp(4rem, 9vw, 8rem); }
+  .tag-results-head p { margin: 0 0 .55rem; color: var(--p4-coral); font-size: .72rem; letter-spacing: .16em; }
+  .tag-results-head h1 { margin: 0 0 2rem; font: 700 clamp(3rem, 8vw, 7rem)/.9 var(--font-title); letter-spacing: -.055em; }
+  .tag-results { margin-top: 1.5rem; border-top: 1px solid var(--p4-purple); }
+  .tag-results li { margin: 0 !important; padding: 1rem .25rem; border-bottom: 1px solid color-mix(in srgb, var(--p4-purple) 24%, transparent); list-style: none !important; }
+  .tag-results a { display: grid; grid-template-columns: 120px 1fr; gap: 1rem; }
+  .tag-results a:hover { color: var(--p4-coral); }
+  @media (max-width: 560px) { .tag-results a { grid-template-columns: 1fr; gap: .15rem; } }
+</style>

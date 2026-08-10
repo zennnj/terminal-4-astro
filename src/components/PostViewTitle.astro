@@ -11,7 +11,7 @@ const {title, date, slug, tags, sticky = false, draft = false} = Astro.props
   <div class="flex items-center">
     {sticky > 0 &&
       <div class="post-sticky select-none">{t('home.sticky')}</div>}
-    <a class="flex text-xl underline-offset-4 cursor-pointer decoration-skin-base decoration-wavy hover:underline hover:decoration-sky-500 font-bold" href={slug}>
+    <a class="post-view-heading flex text-xl underline-offset-4 cursor-pointer decoration-skin-base decoration-wavy hover:underline font-bold" href={slug}>
       {title}
     </a>
   </div>
@@ -38,3 +38,7 @@ const {title, date, slug, tags, sticky = false, draft = false} = Astro.props
     }
   </div>
 </div>
+
+<style>
+  .post-view-heading { font-family: var(--font-title); }
+</style>

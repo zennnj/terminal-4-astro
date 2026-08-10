@@ -55,3 +55,5 @@ https://freshtake.online/showcase
 
 标题字体
 F:\Downloads\PPNeueMontreal-Bold
+
+感觉还是普通中文字Noto Sans SC比较好。。。

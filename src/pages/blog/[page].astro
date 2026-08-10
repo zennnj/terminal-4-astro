@@ -4,22 +4,31 @@ import { getCollectionByName } from '@/utils/getCollectionByName';
 import { orderBySticky } from '@/utils/orderBySticky';
 import { dealLabel } from '@/utils/dealLabel';
 import getUrl from '@/utils/getUrl';
+import readingTime from 'reading-time';
 
 export async function getStaticPaths() {
-  return [{ params: { page: '1' } }];
+  const entries = orderBySticky(await getCollectionByName('blog'));
+  return Array.from({ length: Math.ceil(entries.length / 10) }, (_, index) => ({
+    params: { page: String(index + 1) },
+  }));
 }
 
-const posts = orderBySticky(await getCollectionByName('blog'));
+const allPosts = orderBySticky(await getCollectionByName('blog'));
+const postsPerPage = 10;
+const totalPages = Math.ceil(allPosts.length / postsPerPage);
+const currentPage = Math.min(Math.max(Number(Astro.params.page) || 1, 1), totalPages);
+const posts = allPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
 const tagCounts = new Map<string, number>();
-for (const post of posts) {
+for (const post of allPosts) {
   for (const tag of dealLabel(post.data.tags)) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
 }
 const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
-const postsByYear = posts.reduce<Record<string, typeof posts>>((groups, post) => {
+const postsByYear = allPosts.reduce<Record<string, typeof allPosts>>((groups, post) => {
   const year = String(post.data.date.getFullYear());
   (groups[year] ??= []).push(post);
   return groups;
 }, {});
+const yearEntries = Object.entries(postsByYear).sort(([a], [b]) => Number(b) - Number(a));
 ---
 
 <IndexPage title="Article" contentClass="article-hub-shell">
@@ -28,70 +37,113 @@ const postsByYear = posts.reduce<Record<string, typeof posts>>((groups, post) =>
       <button class="active" type="button" data-view-button="list">ARTICLE</button>
       <button type="button" data-view-button="archive">ARCHIVE</button>
     </nav>
-    <button class="search-toggle" id="search-toggle" type="button" aria-label="Open article search" aria-expanded="false"><i class="ri-search-line"></i></button>
+    <div class="search-control" id="search-control">
+      <button class="search-toggle" id="search-toggle" type="button" aria-label="Open article search" aria-expanded="false"><i class="ri-search-line"></i></button>
+      <label class="search-capsule" for="article-search">
+        <i class="ri-search-line" aria-hidden="true"></i>
+        <input id="article-search" type="search" placeholder="type" autocomplete="off" />
+      </label>
+    </div>
   </header>
 
-  <div class="search-panel" id="search-panel" hidden>
-    <i class="ri-search-line"></i><input id="article-search" type="search" placeholder="Search title or tag..." autocomplete="off" /><button id="search-close" type="button" aria-label="Close search"><i class="ri-close-line"></i></button>
-  </div>
-
   <section class="article-layout" data-view-panel="list">
-    <div class="article-list" id="article-list">
-      {posts.map((post, index) => {
-        const postTags = dealLabel(post.data.tags);
-        const searchText = `${post.data.title} ${postTags.join(' ')}`.toLowerCase();
-        return (
-          <article class="article-row" data-filter-item data-tags={postTags.join('|')} data-search={searchText} style={`--row-index:${index}`}>
-            <a href={getUrl(`/blog/${post.id}`)}>
-              <span class="row-index">{String(index + 1).padStart(2, '0')}</span>
-              <div class="row-copy"><h2>{post.data.title}</h2><div class="row-meta"><time>{post.data.date.toLocaleDateString('zh-CN')}</time>{postTags.map((tag) => <span>#{tag}</span>)}</div></div>
-              <span class="row-orb" aria-hidden="true"></span><i class="ri-arrow-right-up-line row-arrow"></i>
-            </a>
-          </article>
-        );
-      })}
-      <p class="no-results" id="no-results" hidden>No matching articles.</p>
+    <div class="article-primary">
+      <header class="view-heading">
+        <h1>ARTICLE</h1>
+        <p class="page-summary">Page {currentPage} · Showing <span id="visible-count">{posts.length}</span> of {allPosts.length} posts</p>
+        <p>Page 1 · Showing <span id="visible-count">{posts.length}</span> of {posts.length} posts</p>
+      </header>
+      <div class="article-list" id="article-list">
+        {posts.map((post) => {
+          const postTags = dealLabel(post.data.tags);
+          const excerpt = post.data.description?.trim() || (post.body ?? '')
+            .replace(/```[\s\S]*?```/g, ' ')
+            .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+            .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+            .replace(/[#>*_`~|\-]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 120);
+          const searchText = `${post.data.title} ${excerpt} ${postTags.join(' ')}`.toLowerCase();
+          const words = readingTime(post.body ?? '').words;
+          return (
+            <article class="article-card" data-filter-item data-tags={postTags.join('|')} data-search={searchText}>
+              <a href={getUrl(`/blog/${post.id}`)}>
+                <time>{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+                <h2>{post.data.title}</h2>
+                {excerpt && <p class="card-description">{excerpt}{!post.data.description && excerpt.length === 120 ? '…' : ''}</p>}
+                <div class="card-footer">
+                  <span class="word-count"><i class="ri-quill-pen-line"></i>{words} words</span>
+                  <span class="card-tags">{postTags.map((tag) => <span>#{tag}</span>)}</span>
+                </div>
+              </a>
+            </article>
+          );
+        })}
+        <p class="no-results" id="no-results" hidden>No matching articles.</p>
+      </div>
+      {totalPages > 1 && (
+        <nav class="article-pagination" aria-label="Article pagination">
+          {currentPage > 1 ? <a class="previous-posts" href={getUrl(`/blog/${currentPage - 1}`)}><i class="ri-arrow-left-line"></i> Previous Posts</a> : <span></span>}
+          {currentPage < totalPages && <a class="next-posts" href={getUrl(`/blog/${currentPage + 1}`)}>Next Posts <i class="ri-arrow-right-line"></i></a>}
+        </nav>
+      )}
     </div>
 
     <aside class="article-stats">
-      <div class="stat-total"><span>TOTAL</span><strong>{posts.length}</strong><small>ARTICLES</small></div>
-      <div class="tag-filter"><p>ALL TAGS</p><button class="active" type="button" data-tag="all"># ALL <span>{posts.length}</span></button>{tags.map(([tag, count]) => <button type="button" data-tag={tag}># {tag} <span>{count}</span></button>)}</div>
+      <div class="stat-total"><span>TOTAL</span><strong>{allPosts.length}</strong></div>
+      <div class="tag-filter"><p>TAGS</p>{tags.map(([tag, count]) => <button type="button" data-tag={tag}># {tag}<span>{count}</span></button>)}</div>
+      <p class="filter-help">No selected tag means all articles.</p>
     </aside>
   </section>
 
   <section class="archive-view" data-view-panel="archive" hidden>
+    <header class="view-heading"><h1>ARCHIVES</h1></header>
     <div class="archive-years">
-      {Object.entries(postsByYear).sort(([a], [b]) => Number(b) - Number(a)).map(([year, yearPosts]) => (
-        <section class="year-group">
-          <header><h2>{year}</h2><span>{yearPosts.length} PUBLISHED</span></header>
-          <div>{yearPosts.map((post) => { const postTags = dealLabel(post.data.tags); return <a href={getUrl(`/blog/${post.id}`)} data-filter-item data-tags={postTags.join('|')} data-search={`${post.data.title} ${postTags.join(' ')}`.toLowerCase()}><time>{post.data.date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })}</time><span>{post.data.title}</span><i class="ri-arrow-right-line"></i></a>; })}</div>
+      {yearEntries.map(([year, yearPosts], yearIndex) => (
+        <section class:list={['year-group', { 'is-lower-year': yearIndex > 0 }]}>
+          <header><h2>{year}</h2><span>{yearPosts.length} posts</span></header>
+          <div class="year-posts">
+            {yearPosts.map((post) => {
+              const postTags = dealLabel(post.data.tags);
+              return (
+                <a href={getUrl(`/blog/${post.id}`)} data-filter-item data-tags={postTags.join('|')} data-search={`${post.data.title} ${postTags.join(' ')}`.toLowerCase()}>
+                  <time>{post.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+                  <span>{post.data.title}</span><i class="ri-arrow-right-s-line"></i>
+                </a>
+              );
+            })}
+          </div>
         </section>
       ))}
     </div>
-    <aside class="article-stats archive-stats"><div class="stat-total"><span>TOTAL</span><strong>{posts.length}</strong><small>ARTICLES</small></div><div class="tag-filter"><p>ALL TAGS</p><button class="active" type="button" data-tag="all"># ALL <span>{posts.length}</span></button>{tags.map(([tag, count]) => <button type="button" data-tag={tag}># {tag} <span>{count}</span></button>)}</div></aside>
   </section>
 </IndexPage>
 
 <script>
   function initArticleHub() {
-    const viewButtons = [...document.querySelectorAll<HTMLButtonElement>('[data-view-button]')];
-    const panels = [...document.querySelectorAll<HTMLElement>('[data-view-panel]')];
-    const searchToggle = document.querySelector<HTMLButtonElement>('#search-toggle');
-    const searchPanel = document.querySelector<HTMLElement>('#search-panel');
-    const searchInput = document.querySelector<HTMLInputElement>('#article-search');
-    const searchClose = document.querySelector<HTMLButtonElement>('#search-close');
-    let activeTag = 'all';
+    const hub = document.querySelector<HTMLElement>('.article-hub-shell');
+    if (!hub || hub.dataset.ready === 'true') return;
+    hub.dataset.ready = 'true';
+    const viewButtons = [...hub.querySelectorAll<HTMLButtonElement>('[data-view-button]')];
+    const panels = [...hub.querySelectorAll<HTMLElement>('[data-view-panel]')];
+    const searchControl = hub.querySelector<HTMLElement>('#search-control');
+    const searchToggle = hub.querySelector<HTMLButtonElement>('#search-toggle');
+    const searchInput = hub.querySelector<HTMLInputElement>('#article-search');
+    let activeTag = '';
 
     const applyFilters = () => {
       const term = searchInput?.value.trim().toLowerCase() ?? '';
       let visible = 0;
-      document.querySelectorAll<HTMLElement>('[data-filter-item]').forEach((item) => {
+      hub.querySelectorAll<HTMLElement>('[data-filter-item]').forEach((item) => {
         const tags = (item.dataset.tags ?? '').split('|');
-        const match = (activeTag === 'all' || tags.includes(activeTag)) && (item.dataset.search ?? '').includes(term);
+        const match = (!activeTag || tags.includes(activeTag)) && (item.dataset.search ?? '').includes(term);
         item.hidden = !match;
         if (match && item.closest('[data-view-panel="list"]')) visible += 1;
       });
-      const empty = document.querySelector<HTMLElement>('#no-results');
+      const count = hub.querySelector<HTMLElement>('#visible-count');
+      const empty = hub.querySelector<HTMLElement>('#no-results');
+      if (count) count.textContent = String(visible);
       if (empty) empty.hidden = visible !== 0;
     };
 
@@ -105,39 +157,79 @@ const postsByYear = posts.reduce<Record<string, typeof posts>>((groups, post) =>
     viewButtons.forEach((button) => button.addEventListener('click', () => setView(button.dataset.viewButton ?? 'list')));
     setView(new URLSearchParams(location.search).get('view') === 'archive' ? 'archive' : 'list');
 
-    document.querySelectorAll<HTMLButtonElement>('[data-tag]').forEach((button) => button.addEventListener('click', () => {
-      activeTag = button.dataset.tag ?? 'all';
-      document.querySelectorAll('[data-tag]').forEach((item) => item.classList.toggle('active', (item as HTMLElement).dataset.tag === activeTag));
+    hub.querySelectorAll<HTMLButtonElement>('[data-tag]').forEach((button) => button.addEventListener('click', () => {
+      activeTag = activeTag === button.dataset.tag ? '' : (button.dataset.tag ?? '');
+      hub.querySelectorAll<HTMLButtonElement>('[data-tag]').forEach((item) => item.classList.toggle('active', item.dataset.tag === activeTag));
       applyFilters();
     }));
     searchInput?.addEventListener('input', applyFilters);
     searchToggle?.addEventListener('click', () => {
-      if (!searchPanel) return;
-      searchPanel.hidden = false; searchToggle.setAttribute('aria-expanded', 'true'); searchInput?.focus();
-    });
-    searchClose?.addEventListener('click', () => {
-      if (!searchPanel) return;
-      searchPanel.hidden = true; searchToggle?.setAttribute('aria-expanded', 'false'); if (searchInput) searchInput.value = ''; applyFilters();
+      const expanded = searchControl?.classList.toggle('is-open') ?? false;
+      searchToggle.setAttribute('aria-expanded', String(expanded));
+      searchToggle.setAttribute('aria-label', expanded ? 'Close article search' : 'Open article search');
+      if (expanded) searchInput?.focus();
+      else if (searchInput) { searchInput.value = ''; applyFilters(); }
     });
   }
   document.addEventListener('astro:page-load', initArticleHub);
 </script>
 
 <style>
-  :global(.article-hub-shell) { max-width: 1480px; margin: 0 auto 0 var(--rail-width); padding: 1.15rem clamp(1.5rem, 5vw, 5.5rem) clamp(2rem, 4vw, 4rem); }
-  .article-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin-bottom: clamp(1.5rem, 3vw, 2.5rem); }
-  .search-toggle { display: grid; width: 58px; height: 58px; place-items: center; border: 1px solid var(--purple); border-radius: 50%; cursor: pointer; font-size: 1.6rem; transition: background .2s, color .2s, transform .2s; }.search-toggle:hover { background: var(--purple); color: var(--paper); transform: rotate(-8deg); }
-  .search-panel { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; margin-bottom: 2rem; padding: 1rem 1.2rem; border: 2px solid var(--purple); background: var(--paper); }.search-panel[hidden] { display: none; }.search-panel input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 1.1rem; }.search-panel button { cursor: pointer; font-size: 1.3rem; }
-  .article-layout, .archive-view { display: grid; grid-template-columns: minmax(0, 1fr) minmax(190px, 250px); gap: clamp(2rem, 6vw, 7rem); }.article-layout[hidden], .archive-view[hidden] { display: none; }
-  .article-list { border-top: 1px solid var(--purple); }
-  .article-row { border-bottom: 1px solid rgba(58,13,98,.72); overflow: hidden; }.article-row[hidden] { display: none; }.article-row > a { position: relative; display: grid; min-height: 145px; grid-template-columns: 62px 1fr auto; align-items: center; gap: 1rem; padding: 1.5rem 1rem; isolation: isolate; transition: color .3s ease, padding .3s ease; }.article-row > a::before { content: ''; position: absolute; z-index: -2; inset: 0; background: var(--purple); transform: translateY(101%); transition: transform .38s cubic-bezier(.2,.7,.2,1); }.article-row:hover > a { padding-right: 1.8rem; padding-left: 1.8rem; color: var(--paper); }.article-row:hover > a::before { transform: translateY(0); }
-  .row-index { color: var(--purple-soft); font-size: .88rem; transition: color .25s; }.article-row:hover .row-index { color: var(--pink); }
-  .row-copy h2 { margin: 0 0 .9rem; font: 500 clamp(1.65rem, 2.5vw, 2.55rem)/1.2 Georgia, "Noto Serif SC", serif; transition: transform .3s ease; }.article-row:hover h2 { transform: translateX(10px); }.row-meta { display: flex; flex-wrap: wrap; gap: .85rem; color: var(--purple-soft); font-size: .88rem; transition: color .25s; }.article-row:hover .row-meta { color: #d9c8df; }
-  .row-orb { position: absolute; z-index: -1; right: 8%; width: 110px; height: 110px; border: 2px solid var(--pink); border-radius: 42% 58% 65% 35%; opacity: 0; transform: scale(.2) rotate(0); transition: opacity .3s, transform .45s; }.article-row:hover .row-orb { opacity: 1; transform: scale(1) rotate(45deg); }.row-arrow { font-size: 1.8rem; opacity: 0; transform: translate(-18px, 18px); transition: opacity .3s, transform .3s; }.article-row:hover .row-arrow { opacity: 1; transform: translate(0,0); }
-  .article-stats { position: sticky; top: 2rem; align-self: start; }.stat-total { display: flex; flex-direction: column; margin-bottom: 2.5rem; }.stat-total span, .tag-filter > p { color: var(--pink); font: 700 .9rem/1.2 Georgia, serif; letter-spacing: .12em; }.stat-total strong { font: 500 clamp(3.5rem, 7vw, 6.5rem)/1 Georgia, serif; }.stat-total small { color: var(--purple-soft); font-size: .85rem; letter-spacing: .15em; }
-  .tag-filter { display: flex; flex-direction: column; align-items: stretch; gap: .35rem; }.tag-filter button { display: flex; justify-content: space-between; gap: 1rem; padding: .55rem .7rem; border: 1px solid transparent; border-radius: 999px; cursor: pointer; font-size: .85rem; text-align: left; transition: border-color .2s, background .2s; }.tag-filter button:hover, .tag-filter button.active { border-color: var(--purple); background: var(--paper-deep); }.tag-filter button span { color: var(--purple-soft); }
-  .archive-years { min-width: 0; }.year-group { margin-bottom: 4rem; }.year-group > header { display: flex; align-items: end; gap: 1.5rem; padding-bottom: .7rem; border-bottom: 2px solid var(--purple); }.year-group h2 { margin: 0; font: 500 clamp(3rem, 7vw, 6.5rem)/.8 Georgia, serif; }.year-group header span { padding-bottom: .2rem; color: var(--purple-soft); font-size: .72rem; letter-spacing: .08em; }.year-group > div > a { display: grid; grid-template-columns: 70px 1fr auto; gap: 1rem; padding: 1rem .5rem; border-bottom: 1px solid rgba(58,13,98,.22); transition: padding .2s, color .2s; }.year-group > div > a[hidden] { display: none; }.year-group > div > a:hover { padding-left: 1rem; color: var(--pink); }.year-group time { color: var(--purple-soft); font-size: .72rem; }
+  :global(.article-hub-shell) { width: var(--article-shell-width); margin: 0 auto; padding: 1rem var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem); }
+  .article-toolbar { display: flex; align-items: center; gap: clamp(1.5rem, 3vw, 3rem); margin-bottom: clamp(1.6rem, 3vw, 3rem); }
+  .search-control { display: flex; min-width: 58px; align-items: center; gap: .8rem; }
+  .search-toggle { display: grid; width: 44px; height: 44px; flex: 0 0 auto; place-items: center; border: 1px solid color-mix(in srgb, var(--purple) 55%, transparent); border-radius: 50%; cursor: pointer; font-size: 1.2rem; transition: background .2s, color .2s; }
+  .search-toggle:hover, .search-control.is-open .search-toggle { background: var(--purple); color: var(--p4-yellow); }
+  .search-capsule { display: grid; width: 0; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: .7rem; overflow: hidden; padding: .78rem 0; border: 2px solid transparent; border-radius: 999px; opacity: 0; transition: width .35s ease, padding .35s ease, opacity .2s ease, border-color .35s ease; pointer-events: none; }
+  .search-control.is-open .search-capsule { width: min(36vw, 470px); padding-inline: .85rem 1rem; border-color: color-mix(in srgb, var(--purple) 45%, transparent); opacity: 1; pointer-events: auto; }
+  .search-capsule input { min-width: 0; border: 0 !important; outline: 0; background: transparent !important; font: italic .92rem/1 var(--font-body); }
+  .article-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, 190px); gap: clamp(2.5rem, 4vw, 4rem); }
+  .article-layout[hidden], .archive-view[hidden] { display: none; }
+  .view-heading { margin-bottom: .6rem; }
+  .view-heading h1 { margin: 0; font-family: var(--font-title); font-size: var(--article-detail-title-size); font-weight: 700; line-height: .95; letter-spacing: -.035em; }
+  .view-heading p { margin: .8rem 0 .55rem; color: var(--purple-soft); font-size: .88rem; }
+  .view-heading p:not(.page-summary) { display: none; }
+  .article-list { border-top: 1px solid color-mix(in srgb, var(--p4-purple) 68%, transparent); }
+  .article-card { border-bottom: 1px solid color-mix(in srgb, var(--p4-purple) 58%, transparent); }
+  .article-card[hidden] { display: none; }
+  .article-card > a { display: block; min-height: 145px; padding: .85rem 1.15rem .8rem; border-radius: 12px; transition: background-color .25s ease, transform .25s ease; }
+  .article-card > a:hover, .article-card > a:focus-visible { background: color-mix(in srgb, var(--p4-yellow) 88%, transparent); transform: translateX(.35rem); }
+  .article-card time { color: var(--purple-soft); font-size: .74rem; }
+  .article-card h2 { margin: .25rem 0 .25rem; font: 700 clamp(1.15rem, 1.65vw, 1.55rem)/1.15 var(--font-article-title); }
+  .card-description { margin: 0; color: var(--purple-soft); font-size: .88rem; line-height: 1.4; }
+  .card-footer { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-top: 1.05rem; }
+  .word-count { display: flex; align-items: center; gap: .3rem; color: var(--purple-soft); font-size: .74rem; font-style: italic; }
+  .card-tags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .45rem; }
+  .card-tags > span { padding: .34rem .62rem; border-radius: 999px; background: color-mix(in srgb, var(--p4-purple) 12%, transparent); font-size: .78rem; line-height: 1; }
+  .article-stats { position: sticky; top: 2rem; align-self: start; padding-top: 5.25rem; }
+  .stat-total { display: flex; flex-direction: column; margin-bottom: 2.2rem; }
+  .stat-total > span, .tag-filter > p { margin: 0 0 .45rem; color: var(--p4-purple); font-size: .9rem; letter-spacing: .08em; }
+  .stat-total strong { color: var(--p4-coral); font: 700 clamp(2.8rem, 5vw, 4rem)/.9 var(--font-title); }
+  .tag-filter { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .tag-filter > p { flex-basis: 100%; }
+  .tag-filter button { display: flex; gap: .4rem; padding: .34rem .62rem; border-radius: 999px; background: color-mix(in srgb, var(--p4-purple) 12%, transparent); cursor: pointer; font-size: .78rem; line-height: 1; transition: color .2s, background .2s; }
+  .tag-filter button:hover, .tag-filter button.active { background: var(--p4-purple); color: var(--p4-yellow); }
+  .tag-filter button span { opacity: .65; font-size: .75em; }
+  .filter-help { margin-top: .8rem; color: var(--purple-soft); font-size: .72rem; line-height: 1.4; }
+  .article-pagination { display: grid; grid-template-columns: 1fr 1fr; align-items: center; margin-top: 1.35rem; font-size: .86rem; }
+  .article-pagination a { display: inline-flex; align-items: center; gap: .4rem; padding: .45rem 0; }
+  .next-posts { justify-self: end; }
+  .previous-posts { justify-self: start; }
+  .archive-view { max-width: 1280px; }
+  .archive-years { margin-top: 1.5rem; }
+  .year-group { position: relative; isolation: isolate; margin-bottom: clamp(3.5rem, 6vw, 6rem); }
+  .year-group > header { position: relative; z-index: 0; min-height: 120px; pointer-events: none; }
+  .year-group h2 { position: absolute; z-index: -1; top: 0; left: -.03em; margin: 0; color: transparent; font: 700 clamp(5.5rem, 10vw, 9.5rem)/.76 var(--font-title); letter-spacing: -.06em; -webkit-text-stroke: 2px color-mix(in srgb, var(--p4-purple) 28%, transparent); }
+  .year-group.is-lower-year h2 { color: transparent; -webkit-text-stroke: 2px var(--p4-orange); }
+  .year-group header span { position: absolute; z-index: 2; bottom: 1.2rem; left: 1.4rem; color: var(--p4-purple); font-size: .82rem; }
+  .year-posts { position: relative; z-index: 2; display: grid; gap: .55rem; margin-top: -2.5rem; }
+  .year-posts a { display: grid; min-height: 54px; grid-template-columns: minmax(120px, auto) 1fr auto; align-items: center; gap: 1.15rem; padding: .72rem 1.2rem; border: 1px solid color-mix(in srgb, var(--p4-purple) 22%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--p4-gray) 78%, white 22%); font-size: .9rem; transition: background .2s, transform .2s; }
+  .year-posts a[hidden] { display: none; }
+  .year-posts a:hover, .year-posts a:focus-visible { background: var(--p4-yellow); transform: translateX(.35rem); }
+  .year-posts time { color: var(--purple-soft); font-size: .78rem; }
+  .year-posts i { font-size: 1.4rem; }
   .no-results { padding: 4rem 1rem; text-align: center; color: var(--purple-soft); }
-  @media (max-width: 900px) { :global(.article-hub-shell) { margin-left: 0; }.article-layout, .archive-view { grid-template-columns: 1fr; }.article-stats { position: static; display: grid; grid-template-columns: 120px 1fr; grid-row: 1; gap: 1.5rem; }.tag-filter { max-height: 170px; overflow: auto; }.article-row > a { grid-template-columns: 35px 1fr auto; }.row-orb { display: none; } }
-  @media (max-width: 560px) { .article-toolbar { align-items: start; }.view-tabs { flex-direction: column; gap: .5rem; }.article-stats { grid-template-columns: 1fr; }.stat-total { flex-direction: row; align-items: baseline; gap: .7rem; margin-bottom: 0; }.stat-total strong { font-size: 3rem; }.article-row > a { min-height: 112px; padding-inline: .25rem; }.row-index { display: none; }.row-copy h2 { font-size: 1.25rem; }.row-meta span:nth-of-type(n+3) { display: none; }.year-group > div > a { grid-template-columns: 55px 1fr auto; } }
+  @media (max-width: 900px) { .article-layout { grid-template-columns: 1fr; } .article-stats { position: static; display: grid; grid-template-columns: auto 1fr; grid-row: 1; gap: 1.5rem; padding-top: 0; } .stat-total { margin: 0; } .filter-help { display: none; } }
+  @media (max-width: 900px) { :global(.article-hub-shell) { width: 100%; } }
+  @media (max-width: 600px) { :global(.article-hub-shell) { padding-inline: 1.1rem; } .article-toolbar { align-items: flex-start; justify-content: space-between; gap: 1rem; } .search-control { justify-content: flex-end; } .search-control.is-open { position: absolute; z-index: 5; right: 1.1rem; left: 1.1rem; background: var(--paper); } .search-control.is-open .search-capsule { width: 100%; } .article-stats { grid-template-columns: 1fr; } .article-card > a { padding-inline: .8rem; } .card-footer { align-items: flex-start; flex-direction: column; } .card-tags { justify-content: flex-start; } .year-group > header { min-height: 90px; } .year-posts { margin-top: -1.75rem; } .year-posts a { grid-template-columns: 1fr auto; border-radius: 18px; } .year-posts time { grid-column: 1 / -1; } }
 </style>

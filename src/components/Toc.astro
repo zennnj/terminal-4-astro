@@ -1,125 +1,68 @@
 ---
 import type { MarkdownHeading } from 'astro';
 
-interface Props {
-  headings: MarkdownHeading[];
-}
+interface Props { headings: MarkdownHeading[]; }
 
 const { headings = [] } = Astro.props;
-
-const filtersHeadings = headings
-  ? headings.filter((item) => item.depth === 2 || item.depth === 3)
-  : [];
-
-const filtersHeadingsLength = filtersHeadings.length;
+const visibleHeadings = headings
+  .filter((item) => item.depth >= 1 && item.depth <= 4)
+  .map((item, index) => ({ ...item, resolvedSlug: item.slug || `section-${index + 1}` }));
 ---
 
-<div
-  id="toc"
-  class="sticky px-2 py-2 my-4 rounded-lg shadow-lg bg-skin-card top-4"
->
-  <div class="aside-widget">
-    <i class="ri-list-check menu-icon"></i>
-    TABLE OF CONTENTS
-  </div>
-  <ul class="flex flex-col max-w-full mt-4">
-    {
-      filtersHeadings.map((item, index) => (
-        <li class="flex items-stretch">
-          {Array.from({ length: item.depth - 1 }).map((_v, _i) => (
-            <div class="flex flex-col">
-              <div
-                class:list={[
-                  _i === 0 ? 'border-left' : '',
-                  'border-skin-dodge',
-                  'border-box',
-                  'border-bottom',
-                ]}
-              />
-              {index === filtersHeadingsLength - 1 ? (
-                ''
-              ) : (
-                <div
-                  class:list={[
-                    _i === 0 ? 'border-left' : '',
-                    'border-skin-dodge',
-                    'border-box',
-                  ]}
-                />
-              )}
-            </div>
-          ))}
-
-          <a
-            title={item.slug}
-            href={`#${item.slug}`}
-            class="inline-block pl-2 truncate border-s-purple-500"
-          >
-            {item.text}
-          </a>
-        </li>
-      ))
-    }
+<nav id="toc" class="toc-container" aria-label="Table of contents">
+  <div class="toc-heading"><i class="ri-list-check"></i>TABLE OF CONTENTS</div>
+  <ul>
+    {visibleHeadings.map((item) => (
+      <li style={`--toc-depth:${item.depth}`}>
+        <a title={item.text} href={`#${item.resolvedSlug}`} data-heading-id={item.resolvedSlug}>{item.text}</a>
+      </li>
+    ))}
   </ul>
+</nav>
 
-  <style>
-    .toc_container {
-      overflow-y: scroll;
-      /* webkit */
-      /* firefox */
-      scrollbar-width: none;
-      /* ie */
-      -ms-overflow-style: none;
-    }
+<style>
+  .toc-container { position: sticky; top: 1.5rem; max-height: calc(100svh - 3rem); overflow-y: auto; padding: .85rem .7rem 1rem; border-radius: 10px; background: var(--p4-yellow); box-shadow: 0 6px 18px rgba(74, 47, 79, .08); scrollbar-color: color-mix(in srgb, var(--p4-purple) 45%, transparent) transparent; scrollbar-width: thin; }
+  .toc-heading { position: sticky; z-index: 2; top: -.85rem; display: flex; align-items: center; gap: .45rem; padding: .25rem 0 .6rem; border-bottom: 1px solid color-mix(in srgb, var(--p4-purple) 30%, transparent); background: var(--p4-yellow); font-size: .8rem; }
+  ul { display: flex; max-width: 100%; flex-direction: column; gap: .2rem; margin-top: .65rem; }
+  li { min-width: 0; }
+  a { display: block; overflow: hidden; padding: .25rem .2rem .25rem calc((var(--toc-depth) - 1) * .85rem); color: var(--p4-purple); font-size: .8rem; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+  a:hover, a:focus-visible, a.active-heading { color: var(--p4-coral); font-weight: 600; }
+</style>
 
-    .toc_container::-webkit-scrollbar {
-      width: 0;
-      height: 0;
-    }
+<script>
+  function initToc() {
+    const toc = document.querySelector<HTMLElement>('#toc');
+    if (!toc || toc.dataset.ready === 'true') return;
+    toc.dataset.ready = 'true';
 
-    .active-heading {
-      color: #cc7a00;
-      font-weight: 600;
-    }
-    .border-left {
-      border-left: 1px solid;
-    }
-    .border-bottom {
-      border-bottom: 1px solid;
-    }
-    .border-box {
-      height: 13px;
-      width: 12px;
-    }
-  </style>
-
-  <script>
-    const anchors = document.querySelectorAll('h2, h3');
-    const links = document.querySelectorAll('#toc> ul > li > a');
-
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px  0px -75% 0px',
-      threshold: 0,
-    };
-
-    const callback = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          let index = Array.from(anchors).indexOf(entry.target);
-          console.log('🚀 ~ callback ~ index:', index);
-
-          links.forEach((link) => {
-            link.classList.remove('active-heading');
-          });
-          links[index].classList.add('active-heading');
-        }
-      });
-    };
-
-    const observer = new IntersectionObserver(callback, observerOptions);
-    anchors.forEach((link) => {
-      observer.observe(link);
+    const anchors = [...document.querySelectorAll<HTMLElement>('.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4')];
+    const links = [...toc.querySelectorAll<HTMLAnchorElement>('a')];
+    anchors.forEach((anchor, index) => {
+      const expectedId = links[index]?.dataset.headingId;
+      if (!anchor.id && expectedId) anchor.id = expectedId;
     });
-  </script>
-</div>
+    links.forEach((link) => link.addEventListener('click', (event) => {
+      const targetId = link.dataset.headingId;
+      const target = targetId ? document.getElementById(targetId) : null;
+      if (!target) return;
+      event.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.replaceState(null, '', `#${encodeURIComponent(targetId)}`);
+    }));
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const index = anchors.indexOf(entry.target as HTMLElement);
+        links.forEach((link) => link.classList.remove('active-heading'));
+        const active = links[index];
+        active?.classList.add('active-heading');
+        active?.scrollIntoView({ block: 'nearest' });
+      });
+    }, { rootMargin: '0px 0px -75% 0px', threshold: 0 });
+    anchors.forEach((anchor) => observer.observe(anchor));
+  }
+
+  initToc();
+  document.addEventListener('astro:page-load', initToc);
+</script>

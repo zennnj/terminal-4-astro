@@ -1,0 +1,40 @@
+---
+import { homeConfig } from '@/config/home';
+import { site } from '@/consts';
+import getUrl from '@/utils/getUrl';
+
+const footerColumns = [
+  homeConfig.footer.navigation.slice(0, 4),
+  homeConfig.footer.navigation.slice(4),
+];
+---
+
+<footer class="global-footer">
+  <div class="global-footer-inner">
+    <div class="footer-nav" aria-label="Footer navigation">
+      {footerColumns.map((column) => (
+        <nav>{column.map((item) => <a href={getUrl(item.href)}>{item.label}</a>)}</nav>
+      ))}
+    </div>
+    <div class="footer-contact">
+      <span>CONTACT ME</span>
+      <a href={`mailto:${homeConfig.footer.email}`}>{homeConfig.footer.email}</a>
+    </div>
+    <div class="footer-powered">
+      <span>POWERED BY ASTRO</span>
+      <span>© {new Date().getFullYear()} {site.author}</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .global-footer { background: var(--p4-purple); color: var(--p4-gray); }
+  .global-footer-inner { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(260px, .75fr) auto; gap: clamp(2rem, 6vw, 7rem); min-height: 146px; max-width: 1600px; align-items: center; margin: 0 auto; padding: 1.25rem var(--page-gutter); font: 400 clamp(.9rem, 1.15vw, 1.3rem)/1.25 var(--font-body); }
+  .footer-nav { display: flex; gap: clamp(3rem, 8vw, 8rem); }
+  .footer-nav nav, .footer-contact, .footer-powered { display: flex; flex-direction: column; }
+  a { color: inherit; }
+  a:hover, a:focus-visible { color: var(--p4-yellow); }
+  .footer-powered { align-items: flex-end; color: color-mix(in srgb, var(--p4-gray) 72%, transparent); font-size: .78em; letter-spacing: .06em; }
+  @media (max-width: 1050px) { .global-footer-inner { grid-template-columns: 1fr 1fr; } .footer-powered { display: none; } }
+  @media (max-width: 720px) { .global-footer-inner { grid-template-columns: 1fr; gap: 1.5rem; padding-block: 2.5rem 5.5rem; } .footer-nav { justify-content: space-between; gap: 2rem; } }
+</style>

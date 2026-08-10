@@ -25,7 +25,7 @@ const currentDate = dayjs();
 
 <div>
   <!-- title -->
-  <h1 class="break-all text-2xl font-bold">{title}</h1>
+  <h1 class="post-page-title break-all">{title}</h1>
 
   <div class="flex flex-wrap items-center my-2 text-skin-dodge">
     <!-- date -->
@@ -67,3 +67,15 @@ const currentDate = dayjs();
     <div class="shadow w-auto flex bg-skin-card p-2 rounded text-sm"><i class="ri-error-warning-line mr-1"/>This article was last updated on {formatDate(mostRecent)} and may be outdated.</div>
   }
 </div>
+
+<style>
+  .post-page-title {
+    margin: 0;
+    color: var(--p4-purple);
+    font-family: var(--font-article-title);
+    font-size: var(--article-detail-title-size);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -.045em;
+  }
+</style>

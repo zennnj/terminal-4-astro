@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import IndexPage from '@/layouts/IndexPage.astro';
 import getUrl from '@/utils/getUrl';
+import { getReviewAccentColor, getReviewTypeLabel } from '@/config/reviews';
 
 const reviews = (await getCollection('reviews'))
   .filter((review) => !review.data.draft)
@@ -16,29 +17,27 @@ const types = [
   { value: 'video', label: 'VIDEO' },
   { value: 'book', label: 'BOOK' },
 ];
-const typeLabel = (type: string) => ({ anime: 'ANI/COMIC' }[type] ?? type.toUpperCase());
-const accentColor = (type: string) => ({
-  game: '#eba6b4',
-  anime: '#f4df78',
-  movie: '#9ed7ac',
-  video: '#9dc9e7',
-  book: '#c9b4dc',
-}[type] ?? '#c9b4dc');
 ---
 
 <IndexPage title="Review" contentClass="reviews-shell">
-  <section class="recent-review" aria-labelledby="recent-title">
-    <span class="decor decor-cross" aria-hidden="true"></span>
-    <span class="decor decor-dot" aria-hidden="true"></span>
+  <header class="review-header">
     <h1 class="review-title">REVIEW</h1>
-    <h2 id="recent-title">RECENTLY</h2>
+    <p>Here I put some of my reviews of titles. They may not be written seriously XD.</p>
+  </header>
+
+  <section class="recent-review" aria-label="Latest review">
     {recent ? (
       <a class="recent-card" href={getUrl(`/reviews/${recent.id}`)}>
-        <div class="recent-name"><strong>{recent.data.title}</strong><span>{typeLabel(recent.data.type)}</span></div>
-        <div class="recent-copy"><div class="recent-excerpt markdown-body">{RecentContent && <RecentContent />}</div><span>READ FOR MORE &gt;</span></div>
+        <span class="latest-badge">Latest</span>
+        <div class="recent-heading">
+          <strong>{recent.data.title}{recent.data.creator && <span> ({recent.data.creator})</span>}</strong>
+          <span class="recent-type"><i style={`--accent:${getReviewAccentColor(recent.data.type)}`}></i>{getReviewTypeLabel(recent.data.type)}</span>
+        </div>
+        <div class="recent-excerpt markdown-body">{RecentContent && <RecentContent />}</div>
+        <span class="recent-more">READ MORE &gt;&gt;&gt;</span>
       </a>
     ) : (
-      <div class="recent-card is-empty"><div class="recent-name"><strong>NO REVIEW</strong><span>YET</span></div><div class="recent-copy"><p>The first review will be featured here.</p></div></div>
+      <div class="recent-card is-empty"><span class="latest-badge">Latest</span><div class="recent-heading"><strong>NO REVIEW YET</strong></div></div>
     )}
   </section>
 
@@ -49,64 +48,102 @@ const accentColor = (type: string) => ({
   <section class="review-list" aria-label="Reviews">
     {reviews.length > 0 ? reviews.map((review) => (
       <a class="review-row" data-review-type={review.data.type} href={getUrl(`/reviews/${review.id}`)}>
-        <span class="review-color" style={`--accent:${accentColor(review.data.type)}`}></span>
+        <span class="review-color" style={`--accent:${getReviewAccentColor(review.data.type)}`}></span>
         <strong>{review.data.title}</strong>
-        <time>{review.data.date.getFullYear()}.{review.data.date.getMonth() + 1}</time>
+        <time datetime={review.data.date.toISOString()}>{review.data.date.getFullYear()}.{String(review.data.date.getMonth() + 1).padStart(2, '0')}</time>
       </a>
     )) : (
       <div class="empty-rows" aria-label="No reviews yet"><span></span><span></span><span></span></div>
     )}
   </section>
+
+  <nav class="review-pagination" aria-label="Review pages">
+    <span class="page-count" aria-live="polite">PAGE 1/1</span>
+    <span class="page-actions">
+      <button class="page-prev" type="button" hidden>&lt;&lt; PREV PAGE</button>
+      <button class="page-next" type="button" hidden>NEXT PAGE &gt;&gt;</button>
+    </span>
+  </nav>
 </IndexPage>
 
 <script>
-  function bindReviewFilters() {
-    document.querySelectorAll<HTMLButtonElement>('[data-type]').forEach((button) => {
-      button.addEventListener('click', () => {
-        document.querySelectorAll('[data-type]').forEach((item) => item.classList.remove('active'));
-        button.classList.add('active');
-        const type = button.dataset.type;
-        document.querySelectorAll<HTMLElement>('[data-review-type]').forEach((card) => {
-          card.hidden = type !== 'all' && card.dataset.reviewType !== type;
-        });
-      });
-    });
+  const PAGE_SIZE = 20;
+
+  function bindReviewDirectory() {
+    const shell = document.querySelector<HTMLElement>('.reviews-shell');
+    if (!shell || shell.dataset.directoryBound === 'true') return;
+    shell.dataset.directoryBound = 'true';
+
+    const rows = [...shell.querySelectorAll<HTMLElement>('[data-review-type]')];
+    const filters = [...shell.querySelectorAll<HTMLButtonElement>('[data-type]')];
+    const count = shell.querySelector<HTMLElement>('.page-count');
+    const previous = shell.querySelector<HTMLButtonElement>('.page-prev');
+    const next = shell.querySelector<HTMLButtonElement>('.page-next');
+    let activeType = 'all';
+    let page = 1;
+
+    const renderPage = () => {
+      const matches = rows.filter((row) => activeType === 'all' || row.dataset.reviewType === activeType);
+      const pageTotal = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
+      page = Math.min(Math.max(1, page), pageTotal);
+      const start = (page - 1) * PAGE_SIZE;
+      const visible = new Set(matches.slice(start, start + PAGE_SIZE));
+      rows.forEach((row) => { row.hidden = !visible.has(row); });
+      if (count) count.textContent = `PAGE ${page}/${pageTotal}`;
+      if (previous) previous.hidden = page === 1;
+      if (next) next.hidden = page === pageTotal;
+    };
+
+    filters.forEach((button) => button.addEventListener('click', () => {
+      filters.forEach((item) => item.classList.remove('active'));
+      button.classList.add('active');
+      activeType = button.dataset.type ?? 'all';
+      page = 1;
+      renderPage();
+    }));
+    previous?.addEventListener('click', () => { page -= 1; renderPage(); });
+    next?.addEventListener('click', () => { page += 1; renderPage(); });
+    renderPage();
   }
-  document.addEventListener('astro:page-load', bindReviewFilters);
+  document.addEventListener('astro:page-load', bindReviewDirectory);
 </script>
 
 <style>
-  :global(.reviews-shell) { position: relative; max-width: 1500px; margin: 0 auto 0 var(--rail-width); padding: clamp(2.5rem, 6vw, 6rem) clamp(2rem, 7vw, 8rem); overflow: hidden; }
-  .recent-review { position: relative; }
-  .review-title { margin: 0 0 .8rem; font: 500 clamp(3rem, 6vw, 6rem)/.95 Georgia, serif; letter-spacing: -.06em; }
-  .recent-review h2 { margin: 0 0 clamp(1.2rem, 2vw, 1.8rem); font: 700 clamp(1.4rem, 2.2vw, 2rem)/1 Georgia, serif; letter-spacing: .02em; }
-  .recent-card { display: grid; grid-template-columns: minmax(220px, .55fr) minmax(0, 1.8fr); min-height: 185px; color: var(--purple); }
-  .recent-name { display: flex; flex-direction: column; justify-content: start; gap: .5rem; padding: 1.5rem 2.5rem 1.5rem 1.5rem; border-right: 1px solid rgba(58,13,98,.55); }
-  .recent-name strong { font: 500 clamp(1.8rem, 3vw, 3.5rem)/1.05 Georgia, serif; overflow-wrap: anywhere; }
-  .recent-name span { font: 500 clamp(1rem, 1.6vw, 1.45rem)/1.2 Georgia, serif; }
-  .recent-copy { display: flex; min-width: 0; flex-direction: column; padding: 1rem 1.5rem 1rem 2rem; border-right: 1px solid rgba(58,13,98,.55); }
-  .recent-excerpt { max-width: 54rem; overflow: hidden; font: 400 clamp(.95rem, 1.3vw, 1.15rem)/1.65 Georgia, serif; }
-  .recent-excerpt :global(p:first-child) { display: -webkit-box; margin: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+  :global(.reviews-shell) { position: relative; width: var(--article-shell-width); margin: 0 auto; padding: clamp(2rem, 4vw, 3.5rem) var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem); overflow: hidden; }
+  .review-header { margin: 0 0 clamp(2rem, 3.5vw, 3rem); }
+  .review-title { margin: 0 0 .8rem; color: var(--p4-purple); font-family: var(--font-title); font-size: var(--article-detail-title-size); font-weight: 700; line-height: 1; letter-spacing: -.045em; }
+  .review-header p { margin: 0; color: var(--p4-coral); font: 400 clamp(1.05rem, 1.8vw, 1.45rem)/1.5 var(--font-body); }
+  .recent-review { position: relative; margin-left: clamp(1.5rem, 3vw, 3rem); }
+  .recent-card { position: relative; display: block; min-height: 152px; padding: 1rem 1.75rem 2rem clamp(7.5rem, 12vw, 10rem); border-radius: 7px 4px 8px 5px; background: var(--p4-yellow); color: var(--p4-purple); transform: rotate(-.15deg); }
+  .latest-badge { position: absolute; top: 34%; left: clamp(-3.6rem, -4vw, -2.5rem); display: grid; width: clamp(8rem, 13vw, 10.5rem); aspect-ratio: 1.3; place-items: center; color: white; font: 700 clamp(1.4rem, 2.3vw, 2.15rem)/1 var(--font-display); letter-spacing: .02em; background: var(--p4-orange); clip-path: polygon(50% 0,60% 17%,76% 5%,78% 25%,100% 24%,84% 43%,98% 56%,78% 62%,83% 84%,62% 76%,50% 100%,40% 79%,20% 94%,23% 69%,0 65%,18% 49%,3% 34%,25% 31%,20% 8%,42% 20%); transform: translateY(-50%) rotate(-7deg); filter: drop-shadow(3px 0 white) drop-shadow(-3px 0 white) drop-shadow(0 3px white) drop-shadow(0 -3px white); }
+  .recent-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: .65rem 1.25rem; }
+  .recent-heading strong { font: 700 clamp(1.65rem, 3vw, 2.8rem)/1.15 var(--font-article-title); letter-spacing: -.035em; overflow-wrap: anywhere; }
+  .recent-heading strong span { color: color-mix(in srgb, var(--p4-purple) 65%, white); }
+  .recent-type { display: inline-flex; align-items: center; gap: .55rem; font: 400 clamp(1rem, 1.5vw, 1.25rem)/1 var(--font-body); letter-spacing: .05em; }
+  .recent-type i { width: 1.3rem; height: 1.3rem; border-radius: 50%; background: var(--accent); }
+  .recent-excerpt { margin-top: .4rem; overflow: hidden; font: 400 clamp(.95rem, 1.25vw, 1.08rem)/1.45 var(--font-body); }
+  .recent-excerpt :global(p:first-child) { display: -webkit-box; margin: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
   .recent-excerpt :global(p:not(:first-child)), .recent-excerpt :global(:not(p)) { display: none; }
-  .recent-copy > span { margin-top: auto; align-self: end; font: 500 clamp(.95rem, 1.35vw, 1.2rem)/1 Georgia, serif; }
-  .recent-card:not(.is-empty):hover .recent-copy > span { color: var(--pink); transform: translateX(5px); }
-  .decor { position: absolute; background: #f6aa67; }
-  .decor-cross { top: -2rem; left: -4rem; width: 78px; height: 18px; border-radius: 5px; transform: rotate(-18deg); }.decor-cross::after { content: ''; position: absolute; top: -28px; left: 30px; width: 18px; height: 78px; border-radius: 5px; background: inherit; }
-  .decor-dot { top: -2rem; right: 14%; width: 24px; height: 24px; border-radius: 5px; }
-  .review-filters { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: clamp(2.5rem, 5vw, 4.5rem) 0 2.5rem; overflow-x: auto; scrollbar-width: none; }
+  .recent-more { position: absolute; right: 1.5rem; bottom: .75rem; font: 400 .95rem/1 var(--font-body); transition: color .2s, transform .2s; }
+  .recent-card:not(.is-empty):hover .recent-more { color: var(--p4-coral); transform: translateX(.3rem); }
+  .review-filters { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: clamp(1.5rem, 2.5vw, 2.25rem) 0 1.25rem; overflow-x: auto; scrollbar-width: none; }
   .review-filters::-webkit-scrollbar { display: none; }
-  .review-filters button { position: relative; z-index: 1; flex: 0 0 auto; padding: .75rem 1.1rem; cursor: pointer; font: 500 clamp(.95rem, 1.4vw, 1.25rem)/1 Georgia, serif; }
-  .review-filters button::before { content: ''; position: absolute; z-index: -1; inset: .25rem -.15rem; border-radius: 38% 58% 45% 56%; opacity: 0; background: #ddd1e8; transform: rotate(-3deg) scale(.8); transition: opacity .2s, transform .2s; }
-  .review-filters button.active::before { opacity: 1; transform: rotate(-3deg) scale(1); }
-  .review-list { display: grid; gap: .75rem; }
-  .review-row, .empty-rows > span { min-height: 62px; border: 1px solid rgba(58,13,98,.65); border-radius: 999px; }
-  .review-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; padding: .65rem 1.5rem; transition: background .22s ease, transform .22s ease; }
+  .review-filters button { position: relative; z-index: 1; flex: 0 0 auto; padding: .75rem 1.1rem; cursor: pointer; font: 400 clamp(.95rem, 1.4vw, 1.25rem)/1 var(--font-body); }
+  .review-filters button::before { content: ''; position: absolute; z-index: -1; inset: .2rem 0; border-radius: 999px; opacity: 0; background: var(--p4-yellow); transform: scale(.82); transition: opacity .2s, transform .2s; }
+  .review-filters button.active::before { opacity: 1; transform: scale(1); }
+  .review-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem 1.25rem; }
+  .review-row, .empty-rows > span { min-height: 56px; border: 1px solid color-mix(in srgb, var(--p4-purple) 65%, transparent); border-radius: 999px; }
+  .review-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .85rem; padding: .65rem 1.25rem; transition: background .22s ease, transform .22s ease; }
   .review-row[hidden] { display: none; }
-  .review-row:hover { background: #ddd1e8; transform: translateX(5px); }
-  .review-color { width: 34px; height: 34px; border-radius: .45rem; background: var(--accent); }
-  .review-row strong { font: 500 clamp(1.05rem, 1.6vw, 1.4rem)/1.2 Georgia, serif; letter-spacing: .02em; }
-  .review-row time { font: 400 clamp(.95rem, 1.35vw, 1.2rem)/1 Georgia, serif; }
-  .empty-rows { display: grid; gap: .75rem; }.empty-rows > span { position: relative; display: block; }.empty-rows > span::before { content: ''; position: absolute; top: 50%; left: 1.5rem; width: 30px; height: 30px; border-radius: .45rem; background: #ddd1e8; transform: translateY(-50%); }
-  @media (max-width: 900px) { :global(.reviews-shell) { margin-left: 0; }.recent-card { grid-template-columns: 1fr; }.recent-name, .recent-copy { border-right: 0; border-bottom: 1px solid rgba(58,13,98,.4); }.recent-copy { min-height: 180px; padding-left: 1.5rem; }.review-filters { justify-content: start; } }
-  @media (max-width: 560px) { .review-row { min-height: 72px; padding: .8rem 1rem; }.review-color { width: 26px; height: 26px; }.review-row strong { font-size: 1.05rem; } }
+  .review-row:hover { background: var(--p4-yellow); transform: translateX(.2rem); }
+  .review-color { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); }
+  .review-row strong { min-width: 0; overflow: hidden; font: 700 clamp(1rem, 1.35vw, 1.22rem)/1.1 var(--font-article-title); text-overflow: ellipsis; white-space: nowrap; }
+  .review-row time { color: var(--purple-soft); font: 400 clamp(.78rem, 1vw, .92rem)/1 var(--font-body); }
+  .empty-rows { display: grid; grid-column: 1 / -1; gap: .75rem; }
+  .review-pagination { display: flex; align-items: center; justify-content: space-between; min-height: 2rem; margin-top: 1.5rem; color: var(--p4-purple); font: 400 .86rem/1 var(--font-body); letter-spacing: .05em; }
+  .page-actions { display: flex; gap: 1.25rem; margin-left: auto; }
+  .review-pagination button { cursor: pointer; }
+  .review-pagination button:hover { color: var(--p4-coral); }
+  @media (max-width: 900px) { :global(.reviews-shell) { width: 100%; margin-left: 0; padding-inline: 1.1rem; }.review-filters { justify-content: start; }.review-list { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .review-header { margin-bottom: 3.25rem; }.recent-review { margin-left: 0; }.recent-card { min-height: 188px; padding: 3.75rem 1.15rem 2.25rem; }.latest-badge { top: 0; left: .5rem; width: 7rem; transform: translateY(-45%) rotate(-7deg); }.recent-heading strong { font-size: 1.45rem; }.review-row { min-height: 62px; padding-inline: 1rem; }.review-color { width: 15px; height: 15px; }.review-row strong { font-size: 1rem; } }
 </style>

@@ -1,10 +1,16 @@
 ---
 import IndexPage from '@/layouts/IndexPage.astro';
 import { homeConfig } from '@/config/home';
+import { siteConfig } from '@/config/site';
+import AskBox from '@/components/AskBox.astro';
+import { getEntry } from 'astro:content';
 import { site } from '@/consts';
 import getUrl from '@/utils/getUrl';
 
 const localUrl = (href: string) => href.startsWith('/') ? getUrl(href) : href;
+const sitePage = await getEntry('pages', 'site');
+if (!sitePage) throw new Error('Missing content entry: src/content/pages/site.md');
+const siteUpdates = sitePage.data.updates;
 const footerColumns = [
   homeConfig.footer.navigation.slice(0, 4),
   homeConfig.footer.navigation.slice(4),
@@ -101,23 +107,23 @@ const footerColumns = [
 
       <section class="home-log" aria-labelledby="site-log-heading">
         <h2 id="site-log-heading">
-          {homeConfig.siteLog.title.map((line) => <span>{line}</span>)}
+          {siteConfig.updateLogTitle.map((line) => <span>{line}</span>)}
         </h2>
         <div class="log-copy">
           <ol>
-            {homeConfig.siteLog.entries.map((entry) => (
+            {siteUpdates.map((entry) => (
               <li>
                 <time datetime={entry.date}>{entry.date}</time>
                 <span>{entry.text}</span>
               </li>
             ))}
           </ol>
-          <a class="info-more" href={getUrl(homeConfig.siteLog.href)}>more <span aria-hidden="true">&gt;</span></a>
+          <a class="info-more" href={getUrl('/site')}>more <span aria-hidden="true">&gt;</span></a>
         </div>
       </section>
     </div>
 
-    <footer class="home-footer">
+    {false && (<footer class="home-footer">
       <div class="footer-nav" aria-label="Footer navigation">
         {footerColumns.map((column) => (
           <nav>
@@ -133,37 +139,14 @@ const footerColumns = [
         <span>POWERED BY ASTRO</span>
         <span>© {new Date().getFullYear()} {site.author}</span>
       </div>
-    </footer>
+    </footer>)}
   </section>
 
-  <button class="ask-launcher" id="ask-launcher" type="button" aria-label="Open question box" aria-haspopup="dialog">
-    <img src={getUrl('/assets/ui/corner-icon.png')} width="103" height="98" alt="ASK" />
-  </button>
-
-  <dialog class="ask-dialog" id="ask-dialog" aria-labelledby="ask-title">
-    <div class="ask-dialog-inner">
-      <form method="dialog" class="ask-close-form">
-        <button class="ask-close" type="submit" aria-label="Close question box">
-          <i class="ri-close-line"></i>
-        </button>
-      </form>
-      <p class="ask-kicker">ASK ME</p>
-      <h2 id="ask-title">ANYTHING</h2>
-      <form class="ask-form" id="ask-form">
-        <label for="ask-name">YOUR NAME</label>
-        <input id="ask-name" name="name" type="text" autocomplete="name" placeholder="Anonymous is okay" />
-
-        <label for="ask-message">QUESTION</label>
-        <textarea id="ask-message" name="message" rows="5" required placeholder="Type your question here..."></textarea>
-
-        <button class="ask-submit" type="submit">SEND BY EMAIL <i class="ri-arrow-right-up-line"></i></button>
-      </form>
-    </div>
-  </dialog>
+  <AskBox variant="corner" email={homeConfig.footer.email} />
 </IndexPage>
 
-<script define:vars={{ askEmail: homeConfig.footer.email }}>
-  function initQuestionBox() {
+<script>
+  function initHomeScroll() {
     const heroLink = document.querySelector('#hero-scroll-cue');
     const portalPanel = document.querySelector('#explore');
     if (heroLink instanceof HTMLButtonElement && portalPanel instanceof HTMLElement && heroLink.dataset.ready !== 'true') {
@@ -173,31 +156,9 @@ const footerColumns = [
       });
     }
 
-    const dialog = document.querySelector('#ask-dialog');
-    const launcher = document.querySelector('#ask-launcher');
-    const form = document.querySelector('#ask-form');
-    if (!(dialog instanceof HTMLDialogElement) || !(launcher instanceof HTMLButtonElement) || !(form instanceof HTMLFormElement)) return;
-    if (dialog.dataset.ready === 'true') return;
-    dialog.dataset.ready = 'true';
-
-    launcher.addEventListener('click', () => dialog.showModal());
-    dialog.addEventListener('click', (event) => {
-      if (event.target === dialog) dialog.close();
-    });
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const data = new FormData(form);
-      const name = String(data.get('name') || 'Anonymous').trim() || 'Anonymous';
-      const message = String(data.get('message') || '').trim();
-      if (!message) return;
-      const subject = encodeURIComponent(`Terminal 4 question from ${name}`);
-      const body = encodeURIComponent(message);
-      window.location.href = `mailto:${askEmail}?subject=${subject}&body=${body}`;
-      dialog.close();
-    });
   }
 
-  document.addEventListener('astro:page-load', initQuestionBox);
+  document.addEventListener('astro:page-load', initHomeScroll);
 </script>
 
 <style>

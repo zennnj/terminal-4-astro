@@ -9,7 +9,7 @@ const works = (await getCollection('gallery'))
 const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpperCase());
 ---
 
-<IndexPage title="Gallery">
+<IndexPage title="Gallery" contentClass="gallery-shell">
   <header class="gallery-head">
     <div><p>GALLERY · VISUAL ARCHIVE</p><h1>Gallery</h1></div>
     <div class="filters" role="group" aria-label="Artwork type">
@@ -53,20 +53,22 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
 </script>
 
 <style>
+  :global(.gallery-shell) { width: var(--article-shell-width); margin: 0 auto; padding: 1rem var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem); }
   .gallery-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; padding: 2rem 0; }
-  .gallery-head p { margin: 0; font: 600 .72rem/1 jetbrains-mono, monospace; letter-spacing: .16em; color: rgb(var(--color-text-active)); }
-  .gallery-head h1 { margin: .55rem 0 0; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.04em; }
+  .gallery-head p { margin: 0; color: var(--p4-coral); font: 400 .72rem/1 var(--font-body); letter-spacing: .16em; }
+  .gallery-head h1 { margin: .55rem 0 0; font: 700 clamp(2.8rem, 7vw, 6rem)/.92 var(--font-title); letter-spacing: -.055em; text-transform: uppercase; }
   .filters { display: flex; gap: .4rem; padding: .3rem; border: 1px solid rgba(var(--color-text), .14); border-radius: 999px; }
   .filters button { padding: .35rem .75rem; border-radius: 999px; cursor: pointer; }
-  .filters button.active { background: rgb(var(--color-text)); color: rgb(var(--color-fill)); }
+  .filters button.active { background: var(--p4-purple); color: var(--p4-yellow); }
   .gallery-grid { columns: 2; column-gap: 1rem; }
-  .work-card { break-inside: avoid; margin-bottom: 1rem; overflow: hidden; border-radius: 1rem; background: rgb(var(--color-card)); }
+  .work-card { break-inside: avoid; margin-bottom: 1rem; overflow: hidden; border-radius: 1rem; background: var(--p4-yellow); }
   .work-card img { width: 100%; }
   .work-caption { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem; }
   .work-caption span, .work-caption p { color: rgb(var(--color-text-dodge)); font-size: .75rem; }
-  .work-caption h2 { margin: .2rem 0 0; }
+  .work-caption h2 { margin: .2rem 0 0; font: 700 clamp(1.2rem, 2.2vw, 2rem)/1 var(--font-title); }
   .empty-state { padding: 5rem 1rem; border: 1px dashed rgba(var(--color-text), .24); border-radius: 1.2rem; text-align: center; color: rgb(var(--color-text-dodge)); }
   .empty-state i { font-size: 2.5rem; color: rgb(var(--color-text-active)); }
   .empty-state h2 { margin: .75rem 0; color: rgb(var(--color-text)); }
+  @media (max-width: 900px) { :global(.gallery-shell) { width: 100%; padding-inline: 1.1rem; } }
   @media (max-width: 620px) { .gallery-head { align-items: start; flex-direction: column; } .gallery-grid { columns: 1; } }
 </style>

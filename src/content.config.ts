@@ -68,6 +68,36 @@ const pages = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
+    about: z.object({
+      portrait: z.string(),
+      playlist: z.object({
+        neteasePlaylistId: z.string(),
+        autoplay: z.boolean().default(false),
+      }),
+      contacts: z.array(z.object({
+        name: z.string(),
+        href: z.string(),
+      })).default([]),
+      favorites: z.array(z.object({
+        name: z.string(),
+        author: z.string().optional(),
+        category: z.enum(['game', 'anime', 'movie', 'video', 'book']),
+      })).default([]),
+      other: z.array(z.object({
+        label: z.string(),
+        value: z.string(),
+        href: z.string().optional(),
+      })).default([]),
+      fun: z.array(z.object({
+        title: z.string(),
+        description: z.string().default(''),
+        images: z.array(z.string()).default([]),
+      })).default([]),
+    }).optional(),
+    updates: z.array(z.object({
+      date: z.string(),
+      text: z.string(),
+    })).default([]),
   }),
 });
 
