@@ -187,27 +187,27 @@ const yearEntries = Object.entries(postsByYear).sort(([a], [b]) => Number(b) - N
   .article-layout[hidden], .archive-view[hidden] { display: none; }
   .view-heading { margin-bottom: .6rem; }
   .view-heading h1 { margin: 0; font-family: var(--font-title); font-size: var(--article-detail-title-size); font-weight: 700; line-height: .95; letter-spacing: -.035em; }
-  .view-heading p { margin: .8rem 0 .55rem; color: var(--purple-soft); font-size: .88rem; }
+  .view-heading p { margin: .8rem 0 .55rem; color: var(--purple-soft); font-size: 14.5px; }
   .view-heading p:not(.page-summary) { display: none; }
   .article-list { border-top: 1px solid color-mix(in srgb, var(--p4-purple) 68%, transparent); }
   .article-card { border-bottom: 1px solid color-mix(in srgb, var(--p4-purple) 58%, transparent); }
   .article-card[hidden] { display: none; }
   .article-card > a { display: block; min-height: 145px; padding: .85rem 1.15rem .8rem; border-radius: 12px; transition: background-color .25s ease, transform .25s ease; }
   .article-card > a:hover, .article-card > a:focus-visible { background: color-mix(in srgb, var(--p4-yellow) 88%, transparent); transform: translateX(.35rem); }
-  .article-card time { color: var(--purple-soft); font-size: .74rem; }
+  .article-card time { color: var(--purple-soft); font-size: 12px; }
   .article-card h2 { margin: .25rem 0 .25rem; font: 700 clamp(1.15rem, 1.65vw, 1.55rem)/1.15 var(--font-article-title); }
-  .card-description { margin: 0; color: var(--purple-soft); font-size: .88rem; line-height: 1.4; }
+  .card-description { margin: 0; color: var(--purple-soft); font-size: 15px; line-height: 1.4; }
   .card-footer { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-top: 1.05rem; }
-  .word-count { display: flex; align-items: center; gap: .3rem; color: var(--purple-soft); font-size: .74rem; font-style: italic; }
+  .word-count { display: flex; align-items: center; gap: .3rem; color: var(--purple-soft); font-size: 12px; font-style: italic; }
   .card-tags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .45rem; }
-  .card-tags > span { padding: .34rem .62rem; border-radius: 999px; background: color-mix(in srgb, var(--p4-purple) 12%, transparent); font-size: .78rem; line-height: 1; }
+  .card-tags > span { padding: .34rem .62rem; border-radius: 999px; background: color-mix(in srgb, var(--p4-purple) 12%, transparent); font-size: 12.5px; line-height: 1; }
   .article-stats { position: sticky; top: 2rem; align-self: start; padding-top: 5.25rem; }
   .stat-total { display: flex; flex-direction: column; margin-bottom: 2.2rem; }
-  .stat-total > span, .tag-filter > p { margin: 0 0 .45rem; color: var(--p4-purple); font-size: .9rem; letter-spacing: .08em; }
+  .stat-total > span, .tag-filter > p { margin: 0 0 .45rem; color: var(--p4-purple); font-size: 14.5px; letter-spacing: .08em; }
   .stat-total strong { color: var(--p4-coral); font: 700 clamp(2.8rem, 5vw, 4rem)/.9 var(--font-title); }
   .tag-filter { display: flex; flex-wrap: wrap; gap: .5rem; }
   .tag-filter > p { flex-basis: 100%; }
-  .tag-filter button { display: flex; gap: .4rem; padding: .34rem .62rem; border-radius: 999px; background: color-mix(in srgb, var(--p4-purple) 12%, transparent); cursor: pointer; font-size: .78rem; line-height: 1; transition: color .2s, background .2s; }
+  .tag-filter button { display: flex; gap: .4rem; padding: .34rem .62rem; border-radius: 999px; background: color-mix(in srgb, var(--p4-purple) 12%, transparent); cursor: pointer; font-size: 12.5px; line-height: 1; transition: color .2s, background .2s; }
   .tag-filter button:hover, .tag-filter button.active { background: var(--p4-purple); color: var(--p4-yellow); }
   .tag-filter button span { opacity: .65; font-size: .75em; }
   .filter-help { margin-top: .8rem; color: var(--purple-soft); font-size: .72rem; line-height: 1.4; }
@@ -230,6 +230,6 @@ const yearEntries = Object.entries(postsByYear).sort(([a], [b]) => Number(b) - N
   .year-posts i { font-size: 1.4rem; }
   .no-results { padding: 4rem 1rem; text-align: center; color: var(--purple-soft); }
   @media (max-width: 900px) { .article-layout { grid-template-columns: 1fr; } .article-stats { position: static; display: grid; grid-template-columns: auto 1fr; grid-row: 1; gap: 1.5rem; padding-top: 0; } .stat-total { margin: 0; } .filter-help { display: none; } }
-  @media (max-width: 900px) { :global(.article-hub-shell) { width: 100%; } }
-  @media (max-width: 600px) { :global(.article-hub-shell) { padding-inline: 1.1rem; } .article-toolbar { align-items: flex-start; justify-content: space-between; gap: 1rem; } .search-control { justify-content: flex-end; } .search-control.is-open { position: absolute; z-index: 5; right: 1.1rem; left: 1.1rem; background: var(--paper); } .search-control.is-open .search-capsule { width: 100%; } .article-stats { grid-template-columns: 1fr; } .article-card > a { padding-inline: .8rem; } .card-footer { align-items: flex-start; flex-direction: column; } .card-tags { justify-content: flex-start; } .year-group > header { min-height: 90px; } .year-posts { margin-top: -1.75rem; } .year-posts a { grid-template-columns: 1fr auto; border-radius: 18px; } .year-posts time { grid-column: 1 / -1; } }
+  @media (max-width: 900px) { :global(.article-hub-shell) { width: 100%; padding-inline: 1.1rem; } }
+  @media (max-width: 600px) { .article-toolbar { align-items: flex-start; justify-content: space-between; gap: 1rem; } .search-control { justify-content: flex-end; } .search-control.is-open { position: absolute; z-index: 5; right: 1.1rem; left: 1.1rem; background: var(--paper); } .search-control.is-open .search-capsule { width: 100%; } .article-stats { grid-template-columns: 1fr; } .article-card > a { padding-inline: .8rem; } .card-footer { align-items: flex-start; flex-direction: column; } .card-tags { justify-content: flex-start; } .year-group > header { min-height: 90px; } .year-posts { margin-top: -1.75rem; } .year-posts a { grid-template-columns: 1fr auto; border-radius: 18px; } .year-posts time { grid-column: 1 / -1; } }
 </style>

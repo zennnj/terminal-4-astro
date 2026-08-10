@@ -126,6 +126,7 @@ The shared sidebar is implemented in `src/components/SiteShell.astro` and styled
 - The toggle, X, navigation icons, and bottom side icon are centered on the same horizontal axis.
 - Opening/closing must not add page margin, change content width, or shift the hero. Expected layout shift is `0px`.
 - The bottom item uses `public/assets/ui/side-icon.png`.
+- ABOUT SITE has no separate information (`i`) navigation icon; the bottom `side-icon.png` remains its sidebar entry.
 - Leave modest symmetrical page padding so the overlay does not obscure critical content.
 
 Never implement `.rail-open` by changing `.site-content` width, margin, padding, grid columns, or transform.
@@ -133,19 +134,25 @@ Never implement `.rail-open` by changing `.site-content` width, margin, padding,
 ## 8. Shared page footer and article surfaces
 
 - The purple homepage footer is a global site footer rendered by `src/components/GlobalFooter.astro` on every route.
-- Article index, archive, and article-detail pages use a compact centered content column (roughly 1200–1280px of usable desktop content) with generous symmetrical outer whitespace.
+- The global footer reuses the Article shell width and inline padding so its HOME column aligns with the shared Article/Memo/Review/Gallery content line. Do not change the existing gap between its two navigation columns when adjusting this alignment.
+- Article, Memo, Review, and Gallery index/detail pages share `--article-shell-width: min(1240px, calc(100% - 27rem))` and `--article-shell-padding-inline: 2.5rem`, producing one enlarged desktop left-content line. At `900px` and below, their shell width becomes `100%` with `1.1rem` inline padding.
 - Unless a page has an explicit exception, Memos, Reviews, Gallery, their detail views, and article detail reuse the Article hub's `--article-shell-width` and `--article-shell-padding-inline` values. Homepage and About are explicit exceptions.
 - Article lists paginate at 10 posts per page and keep navigation aligned at the lower right.
+- Article-detail BACK is a real link to `/blog/1`, not a `history.back()` control, so ClientRouter navigation cannot leave the URL and rendered page out of sync.
 - Archive year numerals are background layers: the first post card overlaps the lower portion of each outlined year.
 - Archive post cards use a solid surface slightly lighter than the page gray so the outlined year stays visibly behind the cards.
 - Article/Archive tabs use `--p4-coral` in both active and inactive states.
 - Sidebar navigation must not close the rail before route navigation; its open state remains visually stable across page transitions.
 - Article titles use the `Noto Sans SC` stack through `--font-article-title`; other display headings continue to use `--font-title`.
-- ARTICLE and REVIEW page/detail headings share the canonical responsive size `--article-detail-title-size: clamp(2.4rem, 4vw, 3.8rem)`. ARTICLE and REVIEW index headings keep `--font-title`; article-detail titles and latest-review titles use `Noto Sans SC` through `--font-article-title`. REVIEW-detail title, NOTES, and REVIEW headings all use `--font-title` and the canonical shared size.
-- REVIEW pages reuse the Article shell padding. On REVIEW detail pages, the title, cover, NOTES, and REVIEW share the same 8% inset alignment line on desktop; mobile removes this inset.
+- ARTICLE and REVIEW page/detail titles share the canonical responsive size `--article-detail-title-size: clamp(2.4rem, 4vw, 3.8rem)`. ARTICLE and REVIEW index headings keep `--font-title`; article-detail titles and latest-review titles use `Noto Sans SC` through `--font-article-title`. REVIEW-detail NOTES and REVIEW headings use `--font-title` and share `--markdown-h2-size: 1.55rem` with Markdown `h2` headings.
+- REVIEW-detail metadata labels and values are both fixed at `15px`; compact desktop metadata rows use a `140px` label column and `.85rem` column gap so DESCRIPTION retains a wide reading column.
+- REVIEW pages reuse the Article shell padding. On REVIEW detail pages, the back link, title, cover, NOTES, and REVIEW have no extra desktop inset: their left edge must exactly align with the REVIEW directory's large `REVIEW` heading. The back link is a separate row and must not consume a column in the cover/metadata grid.
+- REVIEW detail uses a dense overview: the cover column is much narrower than the metadata column, the inter-column gap stays at or below `2.5rem`, metadata rows use a `.6rem` gap, and the title/NOTES/REVIEW vertical spacing must remain compact.
 - The REVIEW directory uses a compact yellow latest-review feature card. Its orange `Latest` burst intentionally overlaps outside the card's upper-left edge, while the Noto Sans SC `Latest` text must remain fully contained inside the orange burst. The card is followed by a two-column desktop list. Filter selection is a contained capsule. Category markers are circles, dates remain visible, and filtered results paginate at 20 entries per page with a bottom page count and navigation.
 - REVIEW category accents are a dedicated five-color palette configured in `src/config/reviews.ts`: GAME `#e36397`, MOVIE `#f6e27f`, ANI/COMIC `#44ccff`, VIDEO `#6e2594`, and BOOK `#169873`.
 - Markdown tables of contents include heading levels 1 through 4 and remain vertically scrollable within the viewport.
+- Article Markdown body copy is `16px`; TOC headings and entries are `15px`. Article detail keeps the original body left edge, the original `clamp(2rem, 3.5vw, 3.5rem)` body-to-TOC gap, and the original `210px–240px` TOC column. Its grid alone grows 5rem to the right (`min(1320px, calc(100% - 22rem))`), so all added width belongs to the body column and the right outer margin becomes smaller. Do not center, translate, or resize either panel to achieve this.
+- ARTICLE index descriptions are `15px`; dates and word counts are `12px`; page summaries plus TOTAL/TAGS labels are `14.5px`; article and filter tags are `12.5px`.
 - Markdown soft line endings, including consecutive blockquote lines, render as visible single line breaks on CRLF, LF, and CR-authored files.
 
 ## 10. Responsive validation

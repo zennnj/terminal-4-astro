@@ -171,12 +171,11 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
   .empty-state h2 { margin: .75rem 0; }
 
   @media (max-width: 900px) {
-    :global(.gallery-shell) { width: 100%; }
+    :global(.gallery-shell) { width: 100%; padding-inline: 1.1rem; }
     .gallery-dialog { width: calc(100vw - 2rem); height: calc(100svh - 2rem); }
     .dialog-layout { grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr); }
   }
   @media (max-width: 620px) {
-    :global(.gallery-shell) { padding-inline: 1.1rem; }
     .gallery-head { align-items: start; flex-direction: column; }
     .gallery-grid { columns: 1; }
     .view-hint { opacity: 1; transform: none; }

@@ -5,6 +5,7 @@ import Comment from '@/components/Comment.astro';
 import Toc from '@/components/Toc.astro';
 import { comment } from '@/consts';
 import ScrollToTop from '@/components/ScrollToTop.astro';
+import getUrl from '@/utils/getUrl';
 
 interface Props {
   frontmatter: {
@@ -43,14 +44,13 @@ const {
 >
       <div class="article-detail-grid">
         <div class="article-detail-main">
-          <button
-            class="flex items-center outline-hidden cursor-pointer text-md hover:text-skin-active"
-            style="background-color: inherit;"
-            onclick="history.back()"
+          <a
+            class="article-back flex items-center outline-hidden cursor-pointer text-md hover:text-skin-active"
+            href={getUrl('/blog/1')}
           >
             <i class="mr-2 ri-arrow-left-line"></i>
             <span>BACK</span>
-          </button>
+          </a>
           <slot />
           {frontmatter.comment && comment.enable && <Comment />}
         </div>
