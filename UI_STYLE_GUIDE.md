@@ -118,16 +118,18 @@ Do not replace this with a width-only size. Browser zoom at 100% does not guaran
 
 The shared sidebar is implemented in `src/components/SiteShell.astro` and styled in `src/styles/index.css`.
 
-- Width: `--rail-width: 88px`.
-- The sidebar is open by default on every route; visitors can still close it with the shared toggle.
+- Width: `--rail-width: 72px`.
+- On desktop, the homepage sidebar remains toggleable. Every other route keeps the sidebar open and replaces the close X with a static white three-bar menu mark without a circular background.
+- At `900px` and below, the sidebar starts closed on every route and can be opened or closed with the shared toggle.
 - Background: solid `--p4-purple`; no divider line.
 - Closed state: the rail is translated off canvas and the purple circular menu button remains visible.
-- Open state: the rail overlays the page. The button becomes white with a purple X.
+- On the homepage and on narrow screens, the open-state button becomes white with a purple X.
 - The toggle, X, navigation icons, and bottom side icon are centered on the same horizontal axis.
 - Opening/closing must not add page margin, change content width, or shift the hero. Expected layout shift is `0px`.
 - The bottom item uses `public/assets/ui/side-icon.png`.
 - ABOUT SITE has no separate information (`i`) navigation icon; the bottom `side-icon.png` remains its sidebar entry.
 - Leave modest symmetrical page padding so the overlay does not obscure critical content.
+- Article, Memo, Review, Gallery, archive, tag, search, and utility-page layouts center inside the desktop space to the right of the fixed rail. Homepage, ABOUT ME, and ABOUT SITE preserve their full-viewport composition.
 
 Never implement `.rail-open` by changing `.site-content` width, margin, padding, grid columns, or transform.
 
@@ -135,6 +137,7 @@ Never implement `.rail-open` by changing `.site-content` width, margin, padding,
 
 - The purple homepage footer is a global site footer rendered by `src/components/GlobalFooter.astro` on every route.
 - The global footer reuses the Article shell width and inline padding so its HOME column aligns with the shared Article/Memo/Review/Gallery content line. Do not change the existing gap between its two navigation columns when adjusting this alignment.
+- The global footer uses a fixed `14.4px` font size and a compact `126px` desktop minimum height.
 - Article, Memo, Review, and Gallery index/detail pages share `--article-shell-width: min(1240px, calc(100% - 27rem))` and `--article-shell-padding-inline: 2.5rem`, producing one enlarged desktop left-content line. At `900px` and below, their shell width becomes `100%` with `1.1rem` inline padding.
 - Unless a page has an explicit exception, Memos, Reviews, Gallery, their detail views, and article detail reuse the Article hub's `--article-shell-width` and `--article-shell-padding-inline` values. Homepage and About are explicit exceptions.
 - Article lists paginate at 10 posts per page and keep navigation aligned at the lower right.

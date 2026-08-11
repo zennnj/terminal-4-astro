@@ -25,6 +25,8 @@ const {
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
+const isHomepage = currentPath === '/';
+const usesRailCenteredLayout = !isHomepage && currentPath !== '/about' && currentPath !== '/site';
 const navItems = [
   { name: 'Home', href: '/', icon: 'ri-home-5-line', match: (path: string) => path === '/' },
   { name: 'Articles', href: '/blog/1', icon: 'ri-article-line', match: (path: string) => path.startsWith('/blog') || path.startsWith('/archive') || path.startsWith('/tags') },
@@ -37,12 +39,18 @@ const navItems = [
 
 <html lang={config.lang}>
   <BaseHead title={title} description={description} mathjax={mathjax} mermaid={mermaid} ogImage={ogImage} />
-  <body class:list={['site-body', 'rail-open', bodyClass]}>
+  <body class:list={[
+    'site-body',
+    'rail-open',
+    { 'rail-fixed-route': !isHomepage, 'rail-centered-layout': usesRailCenteredLayout },
+    bodyClass,
+  ]}>
     <script is:inline>
       (() => {
         try {
           if (sessionStorage.getItem('terminal4-loaded')) document.documentElement.dataset.loaderSeen = 'true';
         } catch (_) {}
+        if (window.matchMedia('(max-width: 900px)').matches) document.body.classList.remove('rail-open');
       })();
     </script>
 
@@ -71,18 +79,21 @@ const navItems = [
 
     <button
       class="rail-toggle"
-      id="rail-toggle"
+      id="rail-menu-toggle"
       type="button"
       aria-label="Close navigation"
       aria-controls="side-rail"
       aria-expanded="true"
+      data-homepage={isHomepage ? 'true' : 'false'}
     >
       <span></span><span></span><span></span>
     </button>
     <button class="rail-backdrop" id="rail-backdrop" type="button" aria-label="Close navigation"></button>
 
-    <main class:list={['site-content', contentClass]} id="app"><slot /></main>
-    <GlobalFooter />
+    <div class="site-stage">
+      <main class:list={['site-content', contentClass]} id="app"><slot /></main>
+      <GlobalFooter />
+    </div>
   </body>
 </html>
 
@@ -90,8 +101,9 @@ const navItems = [
   function initSiteShell() {
     const root = document.documentElement;
     const loader = document.querySelector<HTMLElement>('#site-loader');
-    const toggle = document.querySelector<HTMLButtonElement>('#rail-toggle');
+    const toggle = document.querySelector<HTMLButtonElement>('#rail-menu-toggle');
     const backdrop = document.querySelector<HTMLButtonElement>('#rail-backdrop');
+    const mobileRail = window.matchMedia('(max-width: 900px)');
 
     if (loader && root.dataset.loaderSeen !== 'true') {
       const shownAt = performance.now();
@@ -116,20 +128,41 @@ const navItems = [
       }
     }
 
-    if (!toggle || toggle.dataset.ready === 'true') return;
-    toggle.dataset.ready = 'true';
+    if (!toggle) return;
 
     const setRail = (open: boolean) => {
+      const currentToggle = document.querySelector<HTMLButtonElement>('#rail-menu-toggle');
       document.body.classList.toggle('rail-open', open);
-      toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+      currentToggle?.setAttribute('aria-expanded', String(open));
+      currentToggle?.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
     };
 
-    toggle.addEventListener('click', () => setRail(!document.body.classList.contains('rail-open')));
-    backdrop?.addEventListener('click', () => setRail(false));
-    document.body.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && document.body.classList.contains('rail-open')) setRail(false);
-    });
+    const syncRailMode = () => {
+      const currentToggle = document.querySelector<HTMLButtonElement>('#rail-menu-toggle');
+      if (!currentToggle) return;
+      const fixedOnDesktop = currentToggle.dataset.homepage !== 'true' && !mobileRail.matches;
+      currentToggle.disabled = fixedOnDesktop;
+      currentToggle.tabIndex = fixedOnDesktop ? -1 : 0;
+      currentToggle.setAttribute('aria-hidden', String(fixedOnDesktop));
+      setRail(!mobileRail.matches);
+    };
+
+    syncRailMode();
+
+    if (toggle.dataset.ready !== 'true') {
+      toggle.dataset.ready = 'true';
+      toggle.addEventListener('click', () => setRail(!document.body.classList.contains('rail-open')));
+      backdrop?.addEventListener('click', () => setRail(false));
+      document.body.addEventListener('keydown', (event) => {
+        const currentToggle = document.querySelector<HTMLButtonElement>('#rail-menu-toggle');
+        if (event.key === 'Escape' && !currentToggle?.disabled && document.body.classList.contains('rail-open')) setRail(false);
+      });
+    }
+
+    if (root.dataset.railMediaBound !== 'true') {
+      root.dataset.railMediaBound = 'true';
+      mobileRail.addEventListener('change', syncRailMode);
+    }
   }
 
   document.addEventListener('astro:page-load', initSiteShell);

@@ -410,7 +410,7 @@ menu {
   --purple: var(--p4-purple);
   --purple-soft: #98789d;
   --pink: var(--p4-coral);
-  --rail-width: 88px;
+  --rail-width: 72px;
   --font-title: "PP Neue Montreal", Arial, sans-serif;
   --font-display: "Boba Mono", "Courier New", monospace;
   --font-body: "Wix Madefor Display", "Noto Sans SC", system-ui, sans-serif;
@@ -456,6 +456,17 @@ button {
   padding: var(--content-gutter) clamp(6.5rem, 8vw, 9rem);
 }
 
+@media (min-width: 901px) {
+  body.rail-centered-layout > .site-stage {
+    width: calc(100% - var(--rail-width));
+    margin-left: var(--rail-width);
+  }
+
+  body.rail-centered-layout .article-detail-grid {
+    margin-inline: auto;
+  }
+}
+
 .side-rail {
   position: fixed;
   z-index: 90;
@@ -476,11 +487,11 @@ button {
 .rail-toggle {
   position: fixed;
   z-index: 95;
-  top: 18px;
-  left: calc((var(--rail-width) - 52px) / 2);
+  top: 14px;
+  left: calc((var(--rail-width) - 44px) / 2);
   display: flex;
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   cursor: pointer;
   flex-direction: column;
   align-items: center;
@@ -494,7 +505,7 @@ button {
 
 .rail-toggle span {
   display: block;
-  width: 25px;
+  width: 22px;
   height: 3px;
   border-radius: 999px;
   background: #fff;
@@ -525,6 +536,34 @@ button {
   transform: rotate(-4deg) scale(1.05);
 }
 
+@media (min-width: 901px) {
+  .rail-fixed-route .rail-toggle {
+    cursor: default;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    pointer-events: none;
+  }
+
+  .rail-fixed-route .rail-toggle span {
+    width: 22px;
+    background: #fff;
+    transition: none;
+  }
+
+  .rail-fixed-route .rail-toggle span:nth-child(1),
+  .rail-fixed-route .rail-toggle span:nth-child(2),
+  .rail-fixed-route .rail-toggle span:nth-child(3) {
+    display: block;
+    opacity: 1;
+    transform: none;
+  }
+
+  .rail-fixed-route .rail-toggle:hover {
+    transform: none;
+  }
+}
+
 .rail-nav {
   display: flex;
   width: 100%;
@@ -532,14 +571,14 @@ button {
   flex-direction: column;
   align-items: center;
   gap: .28rem;
-  padding-top: 82px;
+  padding-top: 70px;
 }
 
 .rail-link {
   position: relative;
   display: flex;
-  width: 56px;
-  min-height: 54px;
+  width: 48px;
+  min-height: 48px;
   align-items: center;
   justify-content: center;
   border-radius: 48% 52% 45% 55% / 55% 46% 54% 45%;
@@ -548,7 +587,7 @@ button {
 }
 
 .rail-link i {
-  font-size: 1.65rem;
+  font-size: 1.45rem;
   transition: transform .25s ease;
 }
 
@@ -589,7 +628,7 @@ button {
 
 .rail-side-icon {
   display: block;
-  width: 66px;
+  width: 54px;
   margin-bottom: 1rem;
   transition: transform .25s ease;
 }
