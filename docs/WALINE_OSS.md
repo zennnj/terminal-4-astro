@@ -2,6 +2,8 @@
 
 评论图片由浏览器直传 OSS。Netlify Function 只生成 60 秒有效、绑定单个随机对象名的 V4 表单签名，AccessKey 不会进入浏览器资源。
 
+线上签名接口按来源 IP 限制为每分钟 10 次请求，以降低匿名上传被批量滥用的风险。
+
 ## OSS
 
 - Bucket：`terminal-astro`

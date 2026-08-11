@@ -117,4 +117,10 @@ export default async function handler(request) {
 
 export const config = {
   path: '/.netlify/functions/oss-upload-policy',
+  rateLimit: {
+    action: 'rate_limit',
+    aggregateBy: ['ip'],
+    windowLimit: 10,
+    windowSize: 60,
+  },
 };

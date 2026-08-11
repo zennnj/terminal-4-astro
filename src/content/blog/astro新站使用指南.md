@@ -1,7 +1,7 @@
 ---
 title: Astro 新站使用指南
-description: Terminal 4 新站的内容创建、图片管理、Markdown、主题配置与发布指南。
-date: 2026-08-08
+description: Terminal 4 的内容创建、页面配置、图片管理、Markdown、评论上传与发布指南。
+date: 2026-08-10
 tags: [Astro, 指南]
 sticky: 0
 draft: false
@@ -14,7 +14,7 @@ comment: false
 
 # Astro 新站使用指南
 
-本文档适用于当前 `Terminal 4` 项目，说明如何创建和维护 Blog、Review、Gallery、About 页面，以及如何配置图片、Markdown、主题和网站信息。
+本文档适用于当前的 `Terminal 4` 项目，记录日常维护时最常用的内容入口。页面结构或配置发生变化后，应同步更新本文档与根目录的 `UI_STYLE_GUIDE.md`。
 
 ## 1. 环境与常用命令
 
@@ -49,32 +49,41 @@ pnpm astro dev stop
 pnpm build
 ```
 
-构建结果位于 `dist/`。
+构建结果位于 `dist/`。路由配置为 `trailingSlash: "never"`，本地访问 ABOUT 页面时应使用 `/about`，而不是 `/about/`。
 
-## 2. 主要目录
+## 2. 项目中的主要维护入口
 
 ```text
 src/
+├─ config/
+│  ├─ home.ts             首页文字、链接和图片
+│  ├─ reviews.ts          Review 类型名称与分类色
+│  └─ site.ts             ABOUT SITE 右侧结构卡片
 ├─ content/
-│  ├─ blog/       博客文章
-│  ├─ reviews/    Review 内容
-│  ├─ gallery/    Gallery 元数据
-│  ├─ memos/      短动态
-│  └─ pages/      About 页面 Markdown 正文
+│  ├─ blog/               Blog 文章
+│  ├─ memos/              短动态
+│  ├─ reviews/            Review
+│  ├─ gallery/            Gallery 元数据
+│  └─ pages/
+│     ├─ about.md          ABOUT ME 正文与全部可配置内容
+│     └─ site.md           ABOUT SITE 正文与全站更新日志
 ├─ image/
-│  ├─ blog/       新博客文章图片，由 Typora 管理
-│  └─ gallery/    Gallery 图片，由创建命令导入
-├─ pages/          Astro 页面与路由
-├─ styles/         全局与 Markdown 样式
-└─ consts.ts       网站主要配置
+│  ├─ blog/               新 Blog 图片
+│  └─ gallery/            Gallery 原图
+├─ pages/                 Astro 页面、路由与页面局部样式
+├─ styles/                全局主题与 Markdown 样式
+├─ content.config.ts      内容集合字段校验
+└─ consts.ts              站点信息、旧导航、评论和统计开关
 
-public/
-├─ images/         旧博客文章图片
-├─ reviews/        Review 封面图片
-└─ gallery/        旧 Gallery 图片，保留用于兼容
+public/assets/
+├─ about/                 ABOUT ME 头像等资源
+├─ fonts/                 本地字体
+├─ home/hero/             首页首屏分层图片
+├─ home/navigation/       首页导航图片、遮罩与描边
+└─ ui/                    侧栏与 ASK 图标
 ```
 
-内容字段由 `src/content.config.ts` 统一校验。字段拼错、类型不正确或缺少必填字段时，构建会报错。
+`src/content.config.ts` 会校验所有内容字段。字段拼错、类型不正确或缺少必填字段时，`pnpm build` 会报错。
 
 ## 3. 创建 Blog 文章
 
@@ -84,25 +93,25 @@ public/
 pnpm new:post "文章名称"
 ```
 
-将生成：
+生成位置：
 
 ```text
 src/content/blog/文章名称.md
 ```
 
-脚本不会覆盖同名文件。只检查目标而不创建文件：
+只检查、不创建文件：
 
 ```bash
 pnpm new:post "文章名称" --dry-run
 ```
 
-默认模板：
+基本格式：
 
 ```md
 ---
 title: "文章名称"
 description: ""
-date: 2026-08-08
+date: 2026-08-10
 tags: []
 sticky: 0
 draft: true
@@ -113,7 +122,7 @@ donate: true
 comment: true
 ---
 
-Write the article here.
+在这里写正文。
 ```
 
 ### Blog 字段
@@ -133,19 +142,16 @@ Write the article here.
 | `comment` | 否 | 是否允许显示评论区域 |
 | `ogImage` | 否 | 社交分享图片 |
 
-当前 Blog 没有 `category`、`categories` 或 `abbrlink` 功能。旧文章中这些字段不会参与页面分类，新内容应使用 `tags`。
+当前 Blog 没有 `category`、`categories` 或 `abbrlink` 功能，新文章分类使用 `tags`。
 
-文章文件名会成为 URL，例如：
+文件名会成为 URL。例如：
 
 ```text
 src/content/blog/Astro指南.md
 → /blog/astro指南
 ```
 
-### Blog 草稿行为
-
-- 本地开发时，Blog 的 `draft: true` 文章仍然显示，方便预览。
-- 执行生产构建时，Blog 草稿会被排除。
+本地开发时 Blog 草稿仍会显示，生产构建时会排除 `draft: true` 的 Blog。
 
 ## 4. Typora 与 Blog 图片
 
@@ -155,40 +161,42 @@ src/content/blog/Astro指南.md
 src/image/blog/文章名称/
 ```
 
-例如：
-
-```text
-src/content/blog/Astro指南.md
-src/image/blog/Astro指南/首页.png
-```
-
-在 Markdown 中引用：
+Markdown 中使用相对路径：
 
 ```md
 ![首页](../../image/blog/Astro指南/首页.png)
 ```
 
-Typora 可以将当前文章的图片复制目标配置为：
+Typora 的图片复制目标可配置为：
 
 ```text
 ../../image/blog/${filename}/
 ```
 
-实际变量写法以当前 Typora 版本支持的规则为准。创建 Blog 的命令只创建 `.md` 文件，图片目录由 Typora 在插图时管理。
-
-旧文章仍可以继续使用：
-
-```text
-public/images/JVM/1.png
-```
-
-对应 Markdown：
+旧文章仍可使用 `public/images/`：
 
 ```md
 ![说明](/images/JVM/1.png)
 ```
 
-## 5. 创建 Review
+## 5. 创建 Memos
+
+Memos 暂无创建脚本，在 `src/content/memos/` 中新建 Markdown：
+
+```md
+---
+date: 2026-08-10
+mood: 随手记
+tags: [生活]
+draft: false
+---
+
+这里写短动态正文。
+```
+
+可用字段为 `date`、`mood`、`tags` 和 `draft`。Memos 页面会渲染 Markdown 正文。
+
+## 6. 创建 Review
 
 默认创建游戏 Review：
 
@@ -202,7 +210,7 @@ pnpm new:review "作品名称"
 pnpm new:review "作品名称" --type anime
 ```
 
-可用类型全部使用英文内部标识：
+可用类型：
 
 ```text
 game
@@ -212,34 +220,10 @@ video
 book
 ```
 
-安全预演：
+预演：
 
 ```bash
 pnpm new:review "作品名称" --type movie --dry-run
-```
-
-生成位置：
-
-```text
-src/content/reviews/作品名称.md
-```
-
-默认格式：
-
-```md
----
-title: "作品名称"
-date: 2026-08-08
-type: game
-status: completed
-creator: ""
-summary: ""
-notes: []
-tags: []
-draft: true
----
-
-Write the final review here.
 ```
 
 完整示例：
@@ -247,7 +231,7 @@ Write the final review here.
 ```md
 ---
 title: "Death Stranding"
-date: 2026-08-08
+date: 2026-08-10
 type: game
 status: completed
 rating: 8.8
@@ -266,23 +250,17 @@ draft: false
 这里写完整的最终 Review。
 ```
 
-Review 封面可放在：
+封面可以放在 `public/reviews/`。`rating` 可以省略；填写时必须在 0～10 之间。Review 的 `draft: true` 在开发和生产页面中都会被过滤。
+
+Review 类型的显示名称与颜色统一配置在：
 
 ```text
-public/reviews/death-stranding.png
+src/config/reviews.ts
 ```
 
-然后填写：
+修改 `reviewTypeLabels` 会改变类型文字，修改 `reviewAccentColors` 会同时影响 Review 页面和 ABOUT ME 的 MY FAVORITE 彩色圆点。
 
-```yaml
-cover: /reviews/death-stranding.png
-```
-
-`rating` 可省略；填写时必须在 `0` 到 `10` 之间。Review 的 `draft: true` 在开发和生产环境都会被页面过滤。
-
-## 6. 创建 Gallery
-
-Gallery 使用“导入图片并同时生成内容”的方式。
+## 7. 创建 Gallery
 
 原创作品：
 
@@ -296,125 +274,192 @@ pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind oc
 pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind fanart
 ```
 
-添加替代文字：
+增加替代文字：
 
 ```bash
-pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind fanart --alt "作品画面说明"
+pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind fanart --alt "画面说明"
 ```
 
-安全预演：
+预演：
 
 ```bash
 pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind oc --dry-run
 ```
 
-命令会自动：
+命令会复制图片到 `src/image/gallery/`，并在 `src/content/gallery/` 创建对应 Markdown。允许的图片格式为 AVIF、GIF、JPEG、JPG、PNG、SVG 和 WebP。
 
-1. 检查源图片是否存在。
-2. 将图片复制到 `src/image/gallery/作品名称.扩展名`。
-3. 创建 `src/content/gallery/作品名称.md`。
-4. 自动填写标题、日期、类型、图片路径和 alt。
-5. 设置 `draft: true`。
-6. 在构建时交给 Astro 优化图片。
-
-允许的图片格式：
-
-```text
-avif gif jpeg jpg png svg webp
-```
-
-Gallery 内部类型只使用：
+Gallery 的 `kind` 只能填写：
 
 ```text
 oc
 fanart
 ```
 
-页面显示为 `OC` 和 `FAN ART`。请不要在 frontmatter 中写 `OC`、`同人` 或其他值。
+发布前把 `draft: true` 改为 `draft: false`。创建脚本不会覆盖已存在的 Markdown 或目标图片。
 
-生成格式：
+## 8. 配置首页
 
-```md
----
-title: "作品名称"
-date: 2026-08-08
-kind: oc
-tags: []
-image: ../../image/gallery/作品名称.png
-alt: "作品名称"
-draft: true
----
+首页常改内容集中在：
 
-Write the artwork description here.
+```text
+src/config/home.ts
 ```
 
-发布前将：
+主要字段：
 
-```yaml
-draft: true
+- `brand`：站点品牌文字。
+- `hero`：首屏人物、贴纸、OMO 和标题图片。
+- `contacts`：首屏联系方式。
+- `navigation.heading`：首页导航区引语。
+- `navigation.items`：ARTICLE、MEMOS、REVIEWS、GALLERY 的链接、图片、遮罩和描边。
+- `about`：首页底部的独立 ABOUT 简介，不与 ABOUT ME 正文同步。
+- `footer.navigation`：页脚导航。
+- `footer.email`：ASK BOX 使用的收件邮箱。
+
+首页资源路径约定：
+
+```text
+public/assets/home/hero/
+public/assets/home/navigation/
 ```
 
-改为：
+每个导航卡片的 `image` 是可替换图片，`mask` 是裁切轮廓，`outline` 是手绘描边。只替换图片时优先修改配置，不要直接复制页面结构。
 
-```yaml
-draft: false
-```
+## 9. 配置 ABOUT ME
 
-Gallery 命令不会覆盖已经存在的 Markdown 或目标图片。当前 Gallery 页面只显示图片、标题、类型和标签，Markdown 正文暂未显示在页面上。
-
-## 7. 编辑 About 页面
-
-页面布局仍由 Astro 管理，经常修改的正文已经迁移到 Markdown。
-
-“关于我”正文：
+ABOUT ME 的内容统一放在：
 
 ```text
 src/content/pages/about.md
 ```
 
-“关于本站”正文：
+文件分为两部分：
+
+1. frontmatter：头像、播放器、联系方式、MY FAVORITE、OTHER 和折叠图片。
+2. Markdown 正文：头像右侧的个人介绍。
+
+完整结构示例：
+
+```md
+---
+title: About me
+description: 关于页面摘要
+about:
+  portrait: /assets/about/selfpic.png
+  playlist:
+    neteasePlaylistId: '17606083772'
+    autoplay: false
+  contacts:
+    - name: GitHub
+      href: https://github.com/zennnj
+    - name: Email
+      href: mailto:example@example.com
+  favorites:
+    - name: 黄金神威
+      author: 野田悟
+      category: anime
+    - name: Kingdom Come: Deliverance
+      category: game
+  other:
+    - label: 如果你想知道更多
+      value: https://example.com
+      href: https://example.com
+    - label: 游戏账号
+      value: example#1234
+  fun:
+    - title: 最近画了什么？
+      description: 折叠栏中的说明。
+      images:
+        - /gallery/example-1.png
+        - /gallery/example-2.png
+---
+
+hi，这里写介绍正文。
+
+可以继续使用普通 Markdown 段落、列表和链接。
+```
+
+### 网易云歌单
+
+`neteasePlaylistId` 填网易云歌单页面 URL 中的歌单 ID，不需要手写歌曲名和作者。当前使用网易云官方 `type=0` 外链播放器，高度为 450px，宽度会随页面自适应。
+
+```yaml
+playlist:
+  neteasePlaylistId: '歌单ID'
+  autoplay: false
+```
+
+浏览器可能阻止自动播放，即使 `autoplay: true` 也不能保证自动发声。iframe 内部属于网易云页面，本站 CSS 不能修改其中的字体、颜色、歌词或按钮，只能控制 iframe 的尺寸和外部布局。
+
+### MY FAVORITE
+
+- `name` 必填。
+- `author` 可省略；填写后显示为较淡的括号文字。
+- `category` 必须是 `game`、`anime`、`movie`、`video` 或 `book`。
+- name 前圆点的颜色读取 `src/config/reviews.ts` 中对应分类色。
+- 项目数量可以自由增减，后续区块会根据实际高度自动下移，不预留固定空间。
+
+### SOMETHING FUN
+
+`fun` 支持多个折叠分组，每组可以配置标题、说明和任意数量的图片。图片可以放在 `public/` 下，再从网站根路径引用。
+
+ABOUT ME 的 Markdown 正文仍由页面 CSS 指定为“猫啃网烟波宋-B”，将内容迁入 Markdown 不会改变字体。布局与响应式样式位于：
+
+```text
+src/pages/about/index.astro
+```
+
+桌面端的介绍、CONTACT 链接、播放器和右侧各区块共用同一条起始轴；左侧小标题与头像左边缘对齐。
+
+## 10. 配置 ABOUT SITE 与更新日志
+
+ABOUT SITE 正文和全站更新日志位于：
 
 ```text
 src/content/pages/site.md
 ```
 
-格式：
+示例：
 
 ```md
 ---
-title: About me
-description: A personal introduction.
+title: About this site
+description: The story and structure of Terminal 4.
+updates:
+  - date: '2026-08-10'
+    text: 更新 ABOUT 页面。
+  - date: '2026-08-08'
+    text: 迁移到 Astro。
 ---
 
-这里直接写 Markdown 正文。
+这里直接写 ABOUT SITE 的 Markdown 正文。
 
-## 标题
+## 本站使用的技术
 
-- 列表内容
-- 其他内容
+- 框架：Astro
+- 托管：Netlify
 ```
 
-对应的 Astro 布局和局部样式位于：
+`updates` 是更新日志的唯一配置入口。修改这里以后，ABOUT SITE 和首页的 SITE UPDATE LOG 会同时更新，不要再去首页重复维护一份日志。
+
+右侧 Current structure 卡片配置在：
 
 ```text
-src/pages/about/index.astro
-src/pages/site/index.astro
+src/config/site.ts
 ```
 
-一般编辑文字时只修改 `src/content/pages/*.md`。需要改变页面结构、卡片样式或响应式布局时，再修改对应 `.astro` 文件。
+其中 `structure` 的每一项包含 `label` 和 `description`。页面布局与 Markdown 样式位于 `src/pages/site/index.astro`。
 
-## 8. Markdown 支持
+## 11. Markdown 支持
 
 项目支持常用 GitHub Flavored Markdown：
 
 - 标题、段落和引用
-- 粗体、斜体、删除线
-- 有序和无序列表
-- 任务列表
+- 粗体、斜体和删除线
+- 有序、无序与任务列表
 - 链接和图片
-- 表格
-- 脚注
-- 行内代码与代码块
+- 表格与脚注
+- 行内代码和代码块
 - 原生 HTML
 - `.mdx`
 
@@ -459,9 +504,9 @@ graph TD
 ```
 ````
 
-MathJax 与 Mermaid 当前通过外部 CDN 加载，离线或 CDN 不可用时无法正常显示。这两个开关目前只接入 Blog 文章布局。
+MathJax 和 Mermaid 目前只接入 Blog 文章布局，并通过外部 CDN 加载。
 
-### 提示块
+### 提示块与折叠块
 
 ```md
 :::note[说明]
@@ -479,134 +524,131 @@ MathJax 与 Mermaid 当前通过外部 CDN 加载，离线或 CDN 不可用时�
 :::danger[危险]
 这里是危险提示。
 :::
-```
 
-折叠块：
-
-```md
 :::collapse[点击展开]
 这里是折叠内容。
 :::
 ```
 
-Markdown 插件配置位于 `astro.config.js`。
+Markdown 插件配置位于 `astro.config.js`，提示块样式位于 `src/styles/remark-aside.css`。
 
-## 9. Markdown 样式
+## 12. Markdown、颜色与字体样式
 
-主要样式文件：
+主要 Markdown 样式：
 
 ```text
 src/styles/github-markdown.css
 ```
 
-这里控制标题、段落、引用、表格、列表、代码和 Markdown 深浅色变量。
-
-项目的额外覆盖位于：
+全局主题、页面补充样式和字体变量：
 
 ```text
 src/styles/index.css
 ```
 
-例如：
+P4 主色变量：
 
 ```css
-.markdown-body p {
-  line-height: 1.8;
-}
-
-.markdown-body img {
-  margin: 1.5rem auto;
-  border-radius: 12px;
-}
+--p4-orange
+--p4-purple
+--p4-coral
+--p4-gray
+--p4-yellow
 ```
 
-提示块样式位于：
+本地字体位于 `public/assets/fonts/`：
 
-```text
-src/styles/remark-aside.css
-```
+| CSS 变量 | 字体 | 用途 |
+|---|---|---|
+| `--font-title` | PP Neue Montreal Bold | 大标题 |
+| `--font-display` | Boba Mono Regular | 引语与展示文字 |
+| `--font-body` | Wix Madefor Display Regular | 正文、导航与小标题 |
+| `--font-about-copy` | 猫啃网烟波宋-B Bold | ABOUT ME 与 ABOUT SITE 正文 |
 
-## 10. 网站信息、导航和功能配置
+修改页面布局、颜色、字体、首页资源、侧栏或交互前，先阅读根目录 `UI_STYLE_GUIDE.md`。侧栏必须保持覆盖式打开，不能挤压或移动页面内容。
 
-主要配置入口：
+## 13. 站点信息、导航、评论与统计
+
+旧模板和全站基础配置仍位于：
 
 ```text
 src/consts.ts
 ```
 
-常修改内容：
+其中包括：
 
-```ts
-export const site = {
-  title: 'Terminal 4',
-  description: '文章、随想、作品与生活记录。',
-  author: 'zennnj',
-  avatar: '/images/lol.jpg',
-  url: 'https://zennnj.github.io',
-  baseUrl: '',
-  motto: '列車は必ず次の駅へ',
-}
-```
+- `site`：站点标题、描述、作者、域名、baseUrl、分页数量。
+- `config`：语言、代码折叠和旧 Memos 服务参数。
+- `categories`：全站导航数据。
+- `infoLinks`：社交链接。
+- `donate`：赞赏配置。
+- `comment`：Waline / Giscus 配置。
+- `analytics`：Umami、Google Analytics 和不蒜子开关。
 
-同一文件中还包含：
-
-- 导航菜单 `categories`
-- 社交链接 `infoLinks`
-- 赞赏配置 `donate`
-- 评论配置 `comment`
-- 统计配置 `analytics`
-- 语言与代码折叠配置 `config`
-
-如果部署在 GitHub Pages 的仓库子路径，例如 `https://name.github.io/repo/`，需要检查并设置：
+如果部署在 GitHub Pages 仓库子路径，例如 `https://name.github.io/repo/`，需要设置：
 
 ```ts
 baseUrl: '/repo'
 ```
 
-## 11. 主题色与字体
+当前首页的视觉导航和链接优先读取 `src/config/home.ts`；`src/consts.ts` 仍被其他传统页面与站点基础功能使用，两者用途不同。
 
-主要主题变量在 `src/styles/index.css`。
+## 14. Waline 图片上传与 OSS
 
-语义颜色：
-
-```css
---color-fill
---color-fill-secondary
---color-card
---color-text
---color-text-dodge
---color-text-active
---color-border
---color-border-active
---color-modal
-```
-
-新版页面布局颜色：
-
-```css
---paper
---paper-deep
---ink
---purple
---purple-soft
---pink
-```
-
-当前主站浅色与深色变量基本相同，所以切换主题时主体颜色变化不明显。Markdown 区域在 `github-markdown.css` 中有独立的深浅色变量。
-
-全站默认字体文件：
+Waline 评论组件位于：
 
 ```text
-src/styles/JetBrainsMono-Regular.ttf
+src/components/WalineComment.astro
 ```
 
-注册和全局字体栈位于 `src/styles/index.css`。代码块字体在 `astro.config.js` 的 Expressive Code 配置中修改。
+项目支持浏览器直传阿里云 OSS。签名由以下入口生成：
 
-Review 页面有多处显式使用 `Georgia, serif`。如果要完全统一字体，还需要修改 `src/pages/reviews/` 中的局部样式。
+```text
+netlify/functions/oss-upload-policy.mjs
+```
 
-## 12. 发布前检查
+本地开发时，同一路径由 `scripts/local-oss-policy-vite.mjs` 处理，不需要启动 Netlify CLI。
 
-建议每次发布前执行：
+服务端常用环境变量：
+
+```text
+OSS_ACCESS_KEY_ID
+OSS_ACCESS_KEY_SECRET
+OSS_BUCKET
+OSS_REGION
+OSS_ENDPOINT
+OSS_MAX_FILE_SIZE_MB
+OSS_PUBLIC_BASE_URL
+OSS_ALLOWED_ORIGINS
+```
+
+浏览器端开关：
+
+```text
+PUBLIC_OSS_UPLOAD_ENABLED=true
+PUBLIC_OSS_MAX_FILE_SIZE_MB=5
+```
+
+不要给服务端密钥添加 `PUBLIC_` 前缀，也不要提交真实 AccessKey。完整的 Bucket CORS、RAM 最小权限和本地测试说明见：
+
+```text
+docs/WALINE_OSS.md
+```
+
+## 15. Netlify 部署
+
+部署配置位于：
+
+```text
+netlify.toml
+netlify/functions/
+```
+
+发布前需要在 Netlify 控制台配置生产环境变量。`dist/` 是静态输出目录，OSS 签名接口由 Netlify Function 提供。
+
+## 16. 发布前检查
+
+每次发布前执行：
 
 ```bash
 pnpm build
@@ -614,17 +656,21 @@ pnpm build
 
 检查：
 
-- 新内容的 `draft` 是否已经改为 `false`
-- Blog 图片相对路径是否正确
-- Review `type` 是否为合法英文值
-- Gallery `kind` 是否为 `oc` 或 `fanart`
-- Gallery 原始图片是否成功复制到 `src/image/gallery/`
-- 构建是否存在 schema 或图片错误
-- 网站域名和 `baseUrl` 是否符合部署地址
+- 新内容的 `draft` 是否已经改为 `false`。
+- Blog 图片相对路径是否正确。
+- Review `type` 是否为合法英文值。
+- Gallery `kind` 是否为 `oc` 或 `fanart`。
+- ABOUT ME 的网易云歌单 ID、图片路径和分类是否正确。
+- ABOUT SITE 的更新日志是否只在 `site.md` 中维护。
+- 首页替换图片是否保持 `image`、`mask`、`outline` 对应关系。
+- 构建是否存在 schema 或图片错误。
+- 正式域名、`site.url` 和 `baseUrl` 是否符合部署地址。
+- Netlify 中的 OSS 环境变量和允许来源是否正确。
+- 桌面端与手机端是否存在横向滚动。
 
-代码块语言名不受支持时，Expressive Code 会退回纯文本并给出警告。例如旧文章中的 `Linux` 或 `mysql` 可能产生提示，但不会阻止构建。
+代码块语言名不受支持时，Expressive Code 会回退为纯文本并发出警告。例如旧文章中的 `Linux` 或 `mysql` 可能产生提示，但不会阻止构建。
 
-## 13. 旧 Hexo 内容迁移
+## 17. 旧 Hexo 内容迁移
 
 迁移脚本：
 
@@ -632,21 +678,19 @@ pnpm build
 scripts/migrate-hexo.mjs
 ```
 
-它会从：
+默认从以下位置导入旧文章和图片：
 
 ```text
 D:/blog/source/_posts
 ```
 
-导入旧文章和图片。带 `hidden` 或 frontmatter `password` 的旧文章会自动标记为草稿，避免意外公开。
+带 `hidden` 或 frontmatter `password` 的旧文章会自动标记为草稿，避免意外公开。不要在已修改迁移结果后随意重复运行迁移脚本，否则可能覆盖或重新生成内容。执行前应确认 Git 工作区状态并做好备份。
 
-不要在已有内容修改后随意重复执行迁移脚本，否则可能覆盖或重新生成迁移内容。执行前应先确认 Git 工作区状态并做好备份。
+## 18. 相关文档
 
-## 14. 相关文档
-
-- Astro 文档：https://docs.astro.build
-- 内容集合：https://docs.astro.build/zh-cn/guides/content-collections/
-- Markdown：https://docs.astro.build/zh-cn/guides/markdown-content/
-- 图片：https://docs.astro.build/zh-cn/guides/images/
-- 样式：https://docs.astro.build/zh-cn/guides/styling/
-- 路由：https://docs.astro.build/zh-cn/guides/routing/
+- [Astro 文档](https://docs.astro.build)
+- [内容集合](https://docs.astro.build/zh-cn/guides/content-collections/)
+- [Markdown](https://docs.astro.build/zh-cn/guides/markdown-content/)
+- [图片](https://docs.astro.build/zh-cn/guides/images/)
+- [样式](https://docs.astro.build/zh-cn/guides/styling/)
+- [路由](https://docs.astro.build/zh-cn/guides/routing/)
