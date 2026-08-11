@@ -404,6 +404,7 @@ menu {
   --p4-coral: #e86252;
   --p4-gray: #e1e6e1;
   --p4-yellow: #f4ffc1;
+  --about-top-gradient: linear-gradient(180deg, var(--p4-yellow) 0, color-mix(in srgb, var(--p4-yellow) 48%, var(--p4-gray)) 42svh, var(--p4-gray) 82svh);
   --paper: var(--p4-gray);
   --paper-deep: var(--p4-yellow);
   --ink: var(--p4-purple);
@@ -454,6 +455,12 @@ button {
   min-height: 100vh;
   margin-left: 0;
   padding: var(--content-gutter) clamp(6.5rem, 8vw, 9rem);
+}
+
+.about-gradient-surface {
+  background-color: var(--p4-gray);
+  background-image: var(--about-top-gradient);
+  background-repeat: no-repeat;
 }
 
 @media (min-width: 901px) {

@@ -69,7 +69,9 @@ ABOUT ME embeds the official NetEase Cloud Music playlist player from the `netea
 
 ABOUT ME section labels (`CONTACT`, `MY PLAYLIST`, `MY FAVORITE`, and similar headings) must never render smaller than the contact-link text beside them.
 
-The ABOUT pages use a yellow-to-gray gradient at the top, coral editorial text, and the same overlay sidebar contract as the homepage. The reusable question dialog is `src/components/AskBox.astro`; homepage and ABOUT ME triggers must continue to open the same form behavior.
+The ABOUT pages use the shared `.about-gradient-surface` style and `--about-top-gradient` token from `src/styles/index.css`, coral editorial text, and the same overlay sidebar contract as the homepage. Its color stops use `svh`, not percentages, so ABOUT ME and ABOUT SITE render the same color at the same viewport Y coordinate even though their containers have different heights. Do not define separate page gradients or percentage-based stops. The reusable question dialog is `src/components/AskBox.astro`; homepage and ABOUT ME triggers must continue to open the same form behavior.
+
+On desktop, ABOUT ME uses a stable `330px` left column and `6rem` column gap. The portrait-to-introduction distance must not vary with viewport or panel width. Below the mobile breakpoint the layout stacks vertically.
 
 For each Main2 card:
 

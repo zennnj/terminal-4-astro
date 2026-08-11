@@ -17,7 +17,7 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
 
 <IndexPage title={page.data.title} description={page.data.description} contentClass="about-shell" bodyClass="about-route">
   <article class="about-page">
-    <section class="about-hero" aria-labelledby="about-title">
+    <section class="about-hero about-gradient-surface" aria-labelledby="about-title">
       <h1 id="about-title">ABOUT ME</h1>
 
       <div class="profile-grid">
@@ -103,8 +103,8 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
   :global(.site-content.about-shell) { padding: 0; background: var(--p4-yellow); }
   :global(body.about-route) { margin: 0; background: var(--p4-yellow); }
   .about-page {
-    --about-left: minmax(250px, 31%);
-    --about-gap: clamp(2rem, 4vw, 4.5rem);
+    --about-left: 330px;
+    --about-gap: 6rem;
     min-height: 100svh;
     margin: 0;
     background: var(--p4-gray);
@@ -115,7 +115,6 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
   .about-hero {
     padding-top: clamp(.6rem, 1.5svh, 1.25rem);
     padding-bottom: clamp(.75rem, 1.5vw, 1.25rem);
-    background: linear-gradient(180deg, var(--p4-yellow) 0%, color-mix(in srgb, var(--p4-yellow) 52%, var(--p4-gray)) 38%, var(--p4-gray) 78%);
   }
   .about-hero > h1 {
     margin: 0 0 clamp(1.5rem, 3vw, 2.7rem);
