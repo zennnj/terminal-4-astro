@@ -223,7 +223,7 @@ const footerColumns = [
     position: relative;
     min-height: 100svh;
     overflow: hidden;
-    padding-inline: clamp(8.25rem, 8vw, 9.75rem) clamp(2rem, 4vw, 5rem);
+    padding-inline: clamp(2rem, 4vw, 5rem);
   }
 
   .hero-panel {
@@ -237,14 +237,15 @@ const footerColumns = [
     position: absolute;
     z-index: 12;
     top: clamp(0.3rem, 0.65vw, 0.7rem);
-    left: 50%;
+    right: 0;
+    left: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     color: var(--p4-coral);
     font: 400 clamp(0.95rem, 1.25vw, 1.35rem)/1 var(--font-body);
     letter-spacing: -0.02em;
-    transform: translateX(-50%);
+    text-align: center;
   }
 
   .hero-scroll-cue {
@@ -272,8 +273,9 @@ const footerColumns = [
 
   .hero-art {
     position: relative;
-    width: min(76vw, 1020px, calc(100svh - 4.5rem));
-    height: min(91svh, 940px);
+    width: min(68vw, 900px, 85.8svh);
+    aspect-ratio: 1020 / 940;
+    transform: translateY(-2.5%);
   }
 
   .hero-layer {
@@ -310,9 +312,9 @@ const footerColumns = [
 
   .hero-title {
     z-index: 4;
-    bottom: 1.5%;
+    bottom: 0;
     left: 50%;
-    width: min(88%, 880px);
+    width: 88%;
     filter: drop-shadow(10px 13px 6px rgba(122, 89, 128, 0.2));
     transform: translateX(-50%);
   }
@@ -389,9 +391,12 @@ const footerColumns = [
   }
 
   .portal-heading {
+    width: 100%;
+    max-width: 1320px;
     margin: 0;
+    margin-inline: auto;
     color: var(--p4-coral);
-    font: 400 clamp(1.8rem, 3.2vw, 3.8rem)/1.12 var(--font-display);
+    font: 400 clamp(1.35rem, 2vw, 2.5rem)/1.16 var(--font-display);
     letter-spacing: 0.025em;
     text-align: center;
   }
@@ -402,13 +407,18 @@ const footerColumns = [
 
   .portal-grid {
     display: grid;
+    width: 100%;
+    max-width: 1212px;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
-    gap: clamp(1rem, 2vw, 2.4rem);
+    justify-items: center;
+    gap: clamp(0.75rem, 1vw, 1.25rem);
+    margin-inline: auto;
   }
 
   .portal-link {
     display: grid;
+    width: 100%;
     min-width: 0;
     justify-items: center;
     gap: clamp(0.8rem, 1.5svh, 1.5rem);
@@ -419,7 +429,7 @@ const footerColumns = [
     position: relative;
     display: block;
     width: 100%;
-    max-width: 410px;
+    max-width: 288px;
     aspect-ratio: 0.76;
     filter: drop-shadow(8px 12px 0 rgba(122, 89, 128, 0));
     transition:
@@ -452,7 +462,7 @@ const footerColumns = [
   }
 
   .portal-label {
-    font: 400 clamp(1.8rem, 3vw, 3.8rem)/1 var(--font-body);
+    font: 400 clamp(1.45rem, 2vw, 2.5rem)/1 var(--font-body);
     letter-spacing: -0.035em;
     transition:
       letter-spacing 0.3s ease,
@@ -772,11 +782,11 @@ const footerColumns = [
 
   @media (max-width: 1050px) {
     .home-panel {
-      padding-inline: 6.5rem 2rem;
+      padding-inline: 2rem;
     }
 
     .hero-art {
-      width: min(84vw, 900px, calc(100svh - 4.5rem));
+      width: min(72vw, 820px, 85.8svh);
     }
 
     .portal-panel {
@@ -784,12 +794,14 @@ const footerColumns = [
     }
 
     .portal-grid {
+      max-width: 590px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      row-gap: 3rem;
+      column-gap: clamp(1.25rem, 3vw, 2rem);
+      row-gap: 2.5rem;
     }
 
     .portal-art {
-      max-width: 370px;
+      max-width: 275px;
     }
 
     .info-content,
@@ -818,10 +830,6 @@ const footerColumns = [
   }
 
   @media (max-height: 760px) and (min-width: 721px) {
-    .hero-title {
-      bottom: 8%;
-    }
-
     .hero-scroll-cue {
       bottom: 0.15rem;
     }
@@ -837,30 +845,7 @@ const footerColumns = [
     }
 
     .hero-art {
-      width: 100vw;
-      height: min(83svh, 760px);
-      margin-top: 5svh;
-    }
-
-    .hero-person {
-      width: min(94%, 620px);
-    }
-
-    .hero-stickers {
-      top: 12%;
-      width: 108%;
-    }
-
-    .hero-spirit {
-      top: 17%;
-      left: 3%;
-      width: 27%;
-    }
-
-    .hero-title {
-      top: 61%;
-      bottom: auto;
-      width: 100%;
+      width: min(86vw, calc(95.49svh - 6.7rem));
     }
 
     .contact-stack {
@@ -894,20 +879,21 @@ const footerColumns = [
     }
 
     .portal-heading {
-      font-size: clamp(1.5rem, 7vw, 2.4rem);
+      font-size: clamp(1.3rem, 5.5vw, 1.8rem);
     }
 
     .portal-grid {
+      max-width: 266px;
       grid-template-columns: 1fr;
-      gap: 3.25rem;
+      gap: 2.5rem;
     }
 
     .portal-art {
-      width: min(82vw, 390px);
+      width: min(70vw, 266px);
     }
 
     .portal-label {
-      font-size: clamp(2.1rem, 11vw, 3.6rem);
+      font-size: clamp(1.65rem, 8vw, 2.35rem);
     }
 
     .info-content {

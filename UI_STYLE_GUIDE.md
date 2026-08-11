@@ -77,6 +77,8 @@ For each Main2 card:
 - `mask` supplies the clipping silhouette.
 - `outline` is the visible hand-drawn border layer.
 
+Main2 intentionally uses a compact editorial scale: the quotation and four navigation labels must not compete with the artwork, and navigation art is capped at the calibrated midpoint values of `288px` on wide desktop, `275px` on the two-column layout, and `min(70vw, 266px)` on mobile. The centered four-column grid is capped at `1212px` with a compact `12–20px` gap; the two-column grid is capped at `590px`, while the single-column grid is capped at `266px`.
+
 ## 5. Homepage structure
 
 The homepage implementation is `src/pages/index.astro` and contains three major panels:
@@ -102,17 +104,18 @@ Current placement intent:
 
 - Person, stickers, and title share the exact viewport center axis.
 - `.hero-panel` uses symmetrical horizontal padding. Never use extra left padding to compensate for the sidebar.
-- `.hero-art` has no top margin; its box is vertically and horizontally centered.
+- `.hero-art` remains horizontally centered. Because the visible layered content occupies roughly `5%–100%` of its internal canvas, the complete coordinate system uses `translateY(-2.5%)` so the visible person/title composition—not the transparent canvas box—is vertically centered.
+- `.hero-art` keeps a fixed `1020 / 940` aspect ratio. Responsive rules may resize the wrapper, but must not independently change its height or reposition/resize the person, stickers, or title.
 - OMO intentionally sits left of the person (`top: 11%`, `left: -6%`) so it does not crowd the character.
-- On short desktop viewports, the title is raised and the scroll triangle stays at the bottom.
+- The title keeps `bottom: 0` and `width: 88%` at every viewport size so it overlaps only the lower part of the person, matching the Main1 reference relationship. The scroll triangle stays independently anchored to the panel bottom.
 
 The composition is sized with both width and height constraints, for example:
 
 ```css
-width: min(76vw, 1020px, calc(100svh - 4.5rem));
+width: min(68vw, 900px, 85.8svh);
 ```
 
-Do not replace this with a width-only size. Browser zoom at 100% does not guarantee a 1920×1080 CSS viewport: Windows display scaling and browser chrome can create a much shorter content viewport and cause width-sized artwork to be cropped.
+Do not replace this with a width-only size or an independently calculated height. The pure `svh` cap intentionally avoids subtracting a fixed `rem` value: browser zoom reduces the CSS viewport, and a fixed subtraction would otherwise make the artwork counter-intuitively shrink after zooming. Browser zoom at 100% does not guarantee a 1920×1080 CSS viewport: Windows display scaling and browser chrome can create a much shorter content viewport and cause width-sized artwork to be cropped.
 
 ## 7. Sidebar contract
 
