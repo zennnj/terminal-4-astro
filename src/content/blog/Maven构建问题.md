@@ -1,10 +1,8 @@
 ---
-category: 杂项
 title: Maven构建问题
 abbrlink: 4ee3286d
 date: 2025-05-02 21:05:30
 tags: problems
-categories: 杂项
 ---
 
 哎呀我草这个maven怎么一直爆红啊，记录一下解决方案。。。

@@ -1,8 +1,6 @@
 ---
-category: 系统技术
 title: Linux
 tags: learn
-categories: 系统技术
 abbrlink: 15691
 date: 2024-09-10 19:03:02
 ---

@@ -1,8 +1,6 @@
 ---
-category: 后端
 title: JAVA
 tags: learn
-categories: 后端
 abbrlink: 40121
 date: 2024-09-11 21:47:16
 ---

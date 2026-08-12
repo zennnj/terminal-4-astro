@@ -1,8 +1,6 @@
 ---
-category: unity
 title: C#
 tags: learn
-categories: unity
 abbrlink: 59760
 date: 2024-10-25 13:57:01
 ---

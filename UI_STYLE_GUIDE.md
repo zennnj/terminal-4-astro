@@ -83,7 +83,7 @@ Main2 intentionally uses a compact editorial scale: the quotation and four navig
 
 ## 5. Homepage structure
 
-The homepage implementation is `src/pages/index.astro` and contains three major panels:
+The homepage route is composed in `src/pages/index.astro`; its three major panels are implemented in `src/components/home/`:
 
 1. Main1 / hero: neutral gray background, layered character composition, Contact, bottom scroll cue, and homepage-only question box.
 2. Main2 / navigation: yellow background, quotation heading, and four large masked navigation cards.
@@ -186,7 +186,12 @@ Use the repository-required background development flow from `AGENTS.md`. Before
 
 | File                             | Responsibility                                                     |
 | -------------------------------- | ------------------------------------------------------------------ |
-| `src/pages/index.astro`          | Homepage structure, local responsive layout, homepage interactions |
+| `src/pages/index.astro`          | Homepage route composition                                          |
+| `src/components/home/`           | Homepage hero, navigation, and information sections                 |
+| `src/components/articles/`       | Article directory sections and interactions                         |
+| `src/components/memos/`          | Memo/Junk sections and interactions                                 |
+| `src/components/reviews/`        | Review directory sections and interactions                          |
+| `src/styles/pages/`              | Route-level styles extracted from page components                   |
 | `src/config/home.ts`             | Homepage content, accounts, navigation targets, replaceable images |
 | `src/content/pages/about.md`     | ABOUT ME Markdown prose, profile, playlist, favorites, and groups  |
 | `src/config/site.ts`             | ABOUT SITE structure cards and update-log display title            |

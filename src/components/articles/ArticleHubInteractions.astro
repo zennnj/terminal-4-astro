@@ -1,0 +1,58 @@
+<script>
+  function initArticleHub() {
+    const hub = document.querySelector('.article-hub-shell');
+    if (!(hub instanceof HTMLElement) || hub.dataset.ready === 'true') return;
+    hub.dataset.ready = 'true';
+    const viewButtons = [...hub.querySelectorAll('[data-view-button]')].filter((item): item is HTMLButtonElement => item instanceof HTMLButtonElement);
+    const panels = [...hub.querySelectorAll('[data-view-panel]')].filter((item): item is HTMLElement => item instanceof HTMLElement);
+    const searchControl = hub.querySelector('#search-control');
+    const searchToggle = hub.querySelector('#search-toggle');
+    const searchInput = hub.querySelector('#article-search');
+    let activeTag = '';
+
+    const applyFilters = () => {
+      const term = searchInput instanceof HTMLInputElement ? searchInput.value.trim().toLowerCase() : '';
+      let visible = 0;
+      hub.querySelectorAll('[data-filter-item]').forEach((node) => {
+        if (!(node instanceof HTMLElement)) return;
+        const tags = (node.dataset.tags ?? '').split('|');
+        const match = (!activeTag || tags.includes(activeTag)) && (node.dataset.search ?? '').includes(term);
+        node.hidden = !match;
+        if (match && node.closest('[data-view-panel="list"]')) visible += 1;
+      });
+      const count = hub.querySelector('#visible-count');
+      const empty = hub.querySelector('#no-results');
+      if (count instanceof HTMLElement) count.textContent = String(visible);
+      if (empty instanceof HTMLElement) empty.hidden = visible !== 0;
+    };
+
+    const setView = (view: string) => {
+      viewButtons.forEach((button) => button.classList.toggle('active', button.dataset.viewButton === view));
+      panels.forEach((panel) => { panel.hidden = panel.dataset.viewPanel !== view; });
+      const url = new URL(window.location.href);
+      if (view === 'archive') url.searchParams.set('view', 'archive');
+      else url.searchParams.delete('view');
+      history.replaceState(null, '', url);
+    };
+    viewButtons.forEach((button) => button.addEventListener('click', () => setView(button.dataset.viewButton ?? 'list')));
+    setView(new URLSearchParams(location.search).get('view') === 'archive' ? 'archive' : 'list');
+
+    hub.querySelectorAll('[data-tag]').forEach((node) => {
+      if (!(node instanceof HTMLButtonElement)) return;
+      node.addEventListener('click', () => {
+        activeTag = activeTag === node.dataset.tag ? '' : (node.dataset.tag ?? '');
+        hub.querySelectorAll('[data-tag]').forEach((item) => item.classList.toggle('active', item instanceof HTMLElement && item.dataset.tag === activeTag));
+        applyFilters();
+      });
+    });
+    if (searchInput instanceof HTMLInputElement) searchInput.addEventListener('input', applyFilters);
+    if (searchToggle instanceof HTMLButtonElement) searchToggle.addEventListener('click', () => {
+      const expanded = searchControl instanceof HTMLElement ? searchControl.classList.toggle('is-open') : false;
+      searchToggle.setAttribute('aria-expanded', String(expanded));
+      searchToggle.setAttribute('aria-label', expanded ? 'Close article search' : 'Open article search');
+      if (expanded && searchInput instanceof HTMLInputElement) searchInput.focus();
+      else if (searchInput instanceof HTMLInputElement) { searchInput.value = ''; applyFilters(); }
+    });
+  }
+  document.addEventListener('astro:page-load', initArticleHub);
+</script>

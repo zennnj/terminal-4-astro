@@ -1,8 +1,6 @@
 ---
-category: 前端
 title: nginx
 tags: learn
-categories: 前端
 abbrlink: a477be03
 date: 2025-12-03 13:11:30
 ---

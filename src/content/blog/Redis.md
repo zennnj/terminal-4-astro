@@ -1,10 +1,8 @@
 ---
-category: 数据库
 title: Redis
 abbrlink: bae4ff13
 date: 2025-04-30 14:44:00
 tags: learn
-categories: 数据库
 ---
 
 学

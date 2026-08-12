@@ -1,0 +1,33 @@
+---
+import { getEntry } from 'astro:content';
+import { homeConfig } from '@/config/home';
+import { siteConfig } from '@/config/site';
+import getUrl from '@/utils/getUrl';
+
+const sitePage = await getEntry('pages', 'site');
+if (!sitePage) throw new Error('Missing content entry: src/content/pages/site.md');
+---
+
+<section class="home-panel info-panel" id="information" aria-label="About and site updates">
+  <div class="info-content">
+    <article class="home-about">
+      <h2>{homeConfig.about.title}</h2>
+      <div class="info-copy">
+        {homeConfig.about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+        <a class="info-more" href={getUrl(homeConfig.about.href)}>more <span aria-hidden="true">&gt;</span></a>
+      </div>
+    </article>
+
+    <section class="home-log" aria-labelledby="site-log-heading">
+      <h2 id="site-log-heading">{siteConfig.updateLogTitle.map((line) => <span>{line}</span>)}</h2>
+      <div class="log-copy">
+        <ol>
+          {sitePage.data.updates.map((entry) => (
+            <li><time datetime={entry.date}>{entry.date}</time><span>{entry.text}</span></li>
+          ))}
+        </ol>
+        <a class="info-more" href={getUrl('/site')}>more <span aria-hidden="true">&gt;</span></a>
+      </div>
+    </section>
+  </div>
+</section>

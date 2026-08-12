@@ -1,0 +1,15 @@
+---
+import WalineComment from '@/components/WalineComment.astro';
+interface Props { enabled: boolean; avatar: string; }
+const { enabled, avatar } = Astro.props;
+---
+
+<section data-memo-panel="junk" hidden>
+  <div class="memo-head"><h1>JUNK</h1><span>Anonymous fragments and passing thoughts.</span></div>
+  {enabled && (
+    <div class="junk-thread" aria-label="Post to junk">
+      <button class="junk-reload" id="junk-reload" type="button">RELOAD THREAD</button>
+      <WalineComment id="waline-junk" standalone path="/discuss/" {avatar} />
+    </div>
+  )}
+</section>

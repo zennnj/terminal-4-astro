@@ -11,6 +11,9 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
+    "check": "astro check",
+    "typecheck": "tsc --noEmit",
+    "verify": "pnpm check && pnpm build",
     "preview": "astro preview",
     "astro": "astro",
     "new:post": "node scripts/new-post.mjs",
@@ -40,13 +43,14 @@
     "remixicon": "^4.9.1",
     "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3",
-    "typescript": "^6.0.3",
     "unist-util-remove": "^4.0.0",
     "unist-util-visit": "^5.1.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "@types/lodash-es": "^4.17.12",
     "baseline-browser-mapping": "^2.11.12",
-    "sass": "^1.102.0"
+    "sass": "^1.102.0",
+    "typescript": "^6.0.3"
   }
 }

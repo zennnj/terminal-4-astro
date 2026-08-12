@@ -57,12 +57,12 @@ let title = Astro.props.title ? `${Astro.props.title} - ${site.title}` : site.ti
   <title>{title}</title>
   <ClientRouter />
   {
-    mathjax && <script async type="text/javascript" src=`${getUrl("/load-mathjax.js")}`></script>
+    mathjax && <script is:inline async type="text/javascript" src=`${getUrl("/load-mathjax.js")}`></script>
   }
 
   {
     mermaid &&
-    <script async type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
+    <script is:inline async type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/mermaid/10.9.0/mermaid.min.js"></script>
   }
   <GoogleAnalytics />
   <UmamiAnalytics />

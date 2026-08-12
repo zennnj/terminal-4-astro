@@ -1,8 +1,6 @@
 ---
-category: 后端
 title: Mybatis
 tags: learn
-categories: 后端
 abbrlink: da3e1361
 date: 2025-04-22 10:06:47
 ---

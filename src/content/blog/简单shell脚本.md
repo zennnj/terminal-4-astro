@@ -1,10 +1,8 @@
 ---
-category: 系统技术
 title: 简单shell脚本
 abbrlink: 26c51008
 date: 2025-09-28 10:50:55
 tags: learn
-categories: 系统技术
 ---
 
 简单贝壳

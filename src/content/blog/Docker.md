@@ -1,10 +1,8 @@
 ---
-category: 系统技术
 title: Docker
 abbrlink: f5f9fa9b
 date: 2025-10-18 13:55:53
 tags: learn
-categories: 系统技术
 ---
 
 图标好看。

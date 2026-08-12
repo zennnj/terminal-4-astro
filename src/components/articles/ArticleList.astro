@@ -1,0 +1,57 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import readingTime from 'reading-time';
+import { dealLabel } from '@/utils/dealLabel';
+import getUrl from '@/utils/getUrl';
+
+interface Props {
+  posts: CollectionEntry<'blog'>[];
+  currentPage: number;
+  totalPages: number;
+  totalPosts: number;
+}
+
+const { posts, currentPage, totalPages, totalPosts } = Astro.props;
+---
+
+<div class="article-primary">
+  <header class="view-heading">
+    <h1>ARTICLE</h1>
+    <p class="page-summary">Page {currentPage} · Showing <span id="visible-count">{posts.length}</span> of {totalPosts} posts</p>
+  </header>
+  <div class="article-list" id="article-list">
+    {posts.map((post) => {
+      const postTags = dealLabel(post.data.tags);
+      const excerpt = post.data.description?.trim() || (post.body ?? '')
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+        .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+        .replace(/[#>*_`~|\-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 120);
+      const searchText = `${post.data.title} ${excerpt} ${postTags.join(' ')}`.toLowerCase();
+      const words = readingTime(post.body ?? '').words;
+      return (
+        <article class="article-card" data-filter-item data-tags={postTags.join('|')} data-search={searchText}>
+          <a href={getUrl(`/blog/${post.id}`)}>
+            <time>{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+            <h2>{post.data.title}</h2>
+            {excerpt && <p class="card-description">{excerpt}{!post.data.description && excerpt.length === 120 ? '…' : ''}</p>}
+            <div class="card-footer">
+              <span class="word-count"><i class="ri-quill-pen-line"></i>{words} words</span>
+              <span class="card-tags">{postTags.map((tag) => <span>#{tag}</span>)}</span>
+            </div>
+          </a>
+        </article>
+      );
+    })}
+    <p class="no-results" id="no-results" hidden>No matching articles.</p>
+  </div>
+  {totalPages > 1 && (
+    <nav class="article-pagination" aria-label="Article pagination">
+      {currentPage > 1 ? <a class="previous-posts" href={getUrl(`/blog/${currentPage - 1}`)}><i class="ri-arrow-left-line"></i> Previous Posts</a> : <span></span>}
+      {currentPage < totalPages && <a class="next-posts" href={getUrl(`/blog/${currentPage + 1}`)}>Next Posts <i class="ri-arrow-right-line"></i></a>}
+    </nav>
+  )}
+</div>

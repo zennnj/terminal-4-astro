@@ -1,8 +1,6 @@
 ---
-category: unity
 title: unity
 tags: learn
-categories: unity
 abbrlink: 56743
 date: 2024-10-26 08:45:24
 ---

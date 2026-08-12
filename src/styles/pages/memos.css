@@ -1,0 +1,272 @@
+.memos-shell {
+    width: var(--article-shell-width);
+    margin: 0 auto;
+    padding: 1rem var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem);
+  }
+  .memo-toolbar {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    margin-bottom: clamp(1.6rem, 3vw, 3rem);
+  }
+  [data-memo-panel][hidden] {
+    display: none;
+  }
+  .memo-head {
+    margin-bottom: 0.6rem;
+  }
+  .memo-head h1 {
+    margin: 0;
+    font-family: var(--font-title);
+    font-size: var(--article-detail-title-size);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+  }
+  .memo-head > span {
+    display: block;
+    margin: 0.8rem 0 0.55rem;
+    color: var(--purple-soft);
+    font: 400 1.1rem/1.4 var(--font-body);
+  }
+  .memo-feed,
+  .junk-thread {
+    width: 100%;
+    margin: 0 0 4rem;
+    background: transparent;
+  }
+  .junk-reload {
+    display: block;
+    margin: 0 0 1rem auto;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid currentColor;
+    color: var(--purple-soft);
+    cursor: pointer;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+  }
+
+  .memo-feed,
+  .junk-thread {
+    --waline-bg-color: transparent;
+    --waline-bg-color-light: color-mix(
+      in srgb,
+      var(--p4-yellow) 55%,
+      transparent
+    );
+    --waline-border-color: color-mix(
+      in srgb,
+      var(--p4-purple) 30%,
+      transparent
+    );
+    --waline-theme-color: var(--p4-coral);
+    --waline-active-color: var(--p4-purple);
+    --waline-color: var(--p4-purple);
+    --waline-font-family: var(--font-body);
+  }
+  .memo-feed [data-waline-root],
+  .junk-thread [data-waline-root],
+  .memo-feed [data-waline],
+  .junk-thread [data-waline] {
+    width: 100%;
+    background: transparent !important;
+  }
+  .memo-feed .wl-reaction,
+  .junk-thread .wl-reaction,
+  .memo-feed .wl-meta-head,
+  .junk-thread .wl-meta-head,
+  .memo-feed .wl-meta-foot,
+  .junk-thread .wl-meta-foot,
+  .memo-feed .wl-power,
+  .junk-thread .wl-power {
+    display: none !important;
+  }
+  .memo-feed .wl-header,
+  .junk-thread .wl-header,
+  .memo-feed .wl-login-info,
+  .junk-thread .wl-login-info {
+    display: none !important;
+  }
+  .memo-feed .wl-footer,
+  .junk-thread .wl-footer {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    margin: 0.5em 0.75em !important;
+  }
+  .memo-feed .wl-actions,
+  .junk-thread .wl-actions {
+    display: flex !important;
+    min-width: 0;
+    flex: 2 !important;
+    align-items: center !important;
+  }
+  .memo-feed .wl-actions .upload,
+  .junk-thread .wl-actions .upload {
+    display: none !important;
+  }
+  .memo-feed .wl-info,
+  .junk-thread .wl-info {
+    display: flex !important;
+    flex: 3 !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+  }
+  .memo-feed .wl-action,
+  .junk-thread .wl-action {
+    display: inline-flex !important;
+    width: 1.5em !important;
+    height: 1.5em !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 2px !important;
+  }
+  .memo-feed .wl-gif-popup,
+  .junk-thread .wl-gif-popup {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .memo-feed .wl-comment,
+  .junk-thread .wl-comment {
+    width: 100%;
+    margin: 0 0 2.5rem;
+  }
+  .memo-feed .wl-panel {
+    width: 100%;
+    margin: 0;
+    border: 0 !important;
+    border-radius: 1.5rem !important;
+    box-shadow: none !important;
+    background: var(--p4-yellow) !important;
+  }
+  .junk-thread .wl-panel {
+    width: calc(100% - 2px);
+    margin: 0;
+    border: 1px solid color-mix(in srgb, var(--p4-purple) 42%, transparent) !important;
+    border-radius: 1rem !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+  .memo-feed .wl-editor,
+  .junk-thread .wl-editor {
+    min-height: 7.5rem !important;
+    background: transparent !important;
+    font-size: 1rem !important;
+  }
+
+  .memo-feed .wl-card-item {
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding: 0 !important;
+  }
+  .memo-feed .wl-card-item .wl-card-item {
+    margin: 1rem 0 0;
+    padding: 0 !important;
+  }
+  .memo-feed .wl-card {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 1.1rem 1.35rem !important;
+    border: 0 !important;
+    border-radius: 1.5rem !important;
+    background: var(--p4-yellow) !important;
+  }
+  .memo-feed .wl-card .wl-nick,
+  .memo-feed .wl-card .wl-badge,
+  .memo-feed .wl-card .wl-meta {
+    display: none !important;
+  }
+  .memo-feed .wl-card .wl-comment-actions {
+    display: block !important;
+  }
+  .memo-feed .wl-card .wl-like,
+  .memo-feed .wl-card .wl-rss,
+  .memo-feed .wl-card .wl-delete,
+  .memo-feed .wl-card .wl-edit {
+    display: none !important;
+  }
+  .memo-feed .wl-card .wl-reply svg {
+    display: none !important;
+  }
+  .memo-feed .wl-card .wl-reply::after {
+    content: 'COMMENTS';
+    border-bottom: 1px solid currentColor;
+    color: var(--purple-soft);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+  }
+  .memo-feed .wl-card .wl-head {
+    min-height: 1rem;
+  }
+  .memo-feed .wl-card .wl-time {
+    color: var(--purple-soft);
+    font-size: 0.78rem;
+  }
+  .memo-feed .wl-card .wl-content {
+    margin: 0 !important;
+    padding-top: 0.45rem !important;
+    font-size: 1rem !important;
+    line-height: 1.8 !important;
+  }
+
+  .junk-thread .wl-cards {
+    width: 100%;
+  }
+  .junk-thread .wl-card-item,
+  .junk-thread .wl-card-item .wl-card-item {
+    display: block !important;
+    width: 100%;
+    padding: 0 !important;
+  }
+  .junk-thread .wl-card-item > .wl-user {
+    display: none !important;
+  }
+  .junk-thread .wl-card,
+  .junk-thread .wl-card:first-child {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 1.25rem 0 1.35rem !important;
+    border: 0 !important;
+    border-bottom: 1px solid
+      color-mix(in srgb, var(--p4-purple) 28%, transparent) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+  .junk-thread .wl-card .wl-head,
+  .junk-thread .wl-card .wl-comment-actions,
+  .junk-thread .wl-card .wl-meta {
+    display: none !important;
+  }
+  .junk-thread .junk-post-heading {
+    margin-bottom: 0.55rem;
+    color: var(--p4-coral);
+    font: 400 0.82rem/1.4 var(--font-body);
+  }
+  .junk-thread .wl-card .wl-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--purple);
+    font-size: 1rem !important;
+    line-height: 1.8 !important;
+  }
+
+  @media (max-width: 900px) {
+    .memos-shell {
+      width: 100%;
+      margin-left: 0;
+      padding-inline: 1.1rem;
+    }
+  }
+  @media (max-width: 560px) {
+    .memo-feed .wl-user {
+      display: none !important;
+    }
+    .memo-feed .wl-card-item {
+      display: block !important;
+    }
+    .memo-feed .wl-card {
+      width: 100% !important;
+    }
+  }

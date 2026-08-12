@@ -1,8 +1,6 @@
 ---
-category: 后端
 title: JVM
 tags: learn
-categories: 后端
 abbrlink: 17374
 date: 2024-09-28 16:57:28
 ---

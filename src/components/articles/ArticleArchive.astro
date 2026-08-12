@@ -1,0 +1,32 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { dealLabel } from '@/utils/dealLabel';
+import getUrl from '@/utils/getUrl';
+
+interface Props {
+  years: [string, CollectionEntry<'blog'>[]][];
+}
+const { years } = Astro.props;
+---
+
+<section class="archive-view" data-view-panel="archive" hidden>
+  <header class="view-heading"><h1>ARCHIVES</h1></header>
+  <div class="archive-years">
+    {years.map(([year, yearPosts], yearIndex) => (
+      <section class:list={['year-group', { 'is-lower-year': yearIndex > 0 }]}>
+        <header><h2>{year}</h2><span>{yearPosts.length} posts</span></header>
+        <div class="year-posts">
+          {yearPosts.map((post) => {
+            const postTags = dealLabel(post.data.tags);
+            return (
+              <a href={getUrl(`/blog/${post.id}`)} data-filter-item data-tags={postTags.join('|')} data-search={`${post.data.title} ${postTags.join(' ')}`.toLowerCase()}>
+                <time>{post.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+                <span>{post.data.title}</span><i class="ri-arrow-right-s-line"></i>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+  </div>
+</section>

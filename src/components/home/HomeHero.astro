@@ -1,0 +1,42 @@
+---
+import { homeConfig } from '@/config/home';
+import getUrl from '@/utils/getUrl';
+
+const localUrl = (href: string) => (href.startsWith('/') ? getUrl(href) : href);
+---
+
+<section class="home-panel hero-panel" id="home" aria-labelledby="hero-brand">
+  <div class="hero-brand" id="hero-brand">{homeConfig.brand}</div>
+  <button class="hero-scroll-cue" id="hero-scroll-cue" type="button" aria-label="Scroll to navigation" aria-controls="explore">
+    <span class="hero-caret" aria-hidden="true"></span>
+  </button>
+
+  <div class="hero-art" aria-label="Terminal 4 main artwork">
+    <img class="hero-layer hero-person" src={getUrl(homeConfig.hero.portrait)} width="822" height="930" alt="Purple-haired Terminal 4 character" />
+    <img class="hero-layer hero-stickers" src={getUrl(homeConfig.hero.stickers)} width="1082" height="814" alt="" aria-hidden="true" />
+    <img class="hero-layer hero-spirit" src={getUrl(homeConfig.hero.spirit)} width="322" height="276" alt="" aria-hidden="true" />
+    <img class="hero-layer hero-title" src={getUrl(homeConfig.hero.title)} width="995" height="211" alt="Terminal 4" />
+  </div>
+
+  <aside class="contact-stack" aria-label="Contact accounts">
+    <span class="contact-label">CONTACT</span>
+    {homeConfig.contacts.map((contact) => (
+      <a href={localUrl(contact.href)} target={contact.href.startsWith('http') ? '_blank' : undefined} rel={contact.href.startsWith('http') ? 'noreferrer' : undefined} aria-label={contact.name} title={contact.name}>
+        <i class={contact.icon} />
+        <span>{contact.name}</span>
+      </a>
+    ))}
+  </aside>
+</section>
+
+<script>
+  function initHomeScroll() {
+    const heroLink = document.querySelector('#hero-scroll-cue');
+    const portalPanel = document.querySelector('#explore');
+    if (!(heroLink instanceof HTMLButtonElement) || !(portalPanel instanceof HTMLElement) || heroLink.dataset.ready === 'true') return;
+    heroLink.dataset.ready = 'true';
+    heroLink.addEventListener('click', () => portalPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  }
+
+  document.addEventListener('astro:page-load', initHomeScroll);
+</script>

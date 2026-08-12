@@ -1,8 +1,6 @@
 ---
-category: 后端
 title: Java多线程
 tags: learn
-categories: 后端
 abbrlink: 58846
 date: 2024-10-13 16:07:42
 ---

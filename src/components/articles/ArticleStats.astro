@@ -1,0 +1,16 @@
+---
+interface Props {
+  total: number;
+  tags: [string, number][];
+}
+const { total, tags } = Astro.props;
+---
+
+<aside class="article-stats">
+  <div class="stat-total"><span>TOTAL</span><strong>{total}</strong></div>
+  <div class="tag-filter">
+    <p>TAGS</p>
+    {tags.map(([tag, count]) => <button type="button" data-tag={tag}># {tag}<span>{count}</span></button>)}
+  </div>
+  <p class="filter-help">No selected tag means all articles.</p>
+</aside>

@@ -1,8 +1,6 @@
 ---
-category: 杂项
 title: temp
 tags: learn
-categories: 杂项
 abbrlink: b5385ca
 date: 2025-11-28 13:25:39
 ---

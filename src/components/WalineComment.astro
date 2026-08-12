@@ -101,7 +101,9 @@ const { id = 'waline', standalone = false, force = false, path = '', avatar = ''
       reaction: false,
       search: standalone ? false : undefined,
       meta: standalone ? [] : ['nick', 'mail', 'link'],
-      requiredMeta: standalone ? [] : comment.walineConfig.requiredMeta,
+      requiredMeta: standalone ? [] : comment.walineConfig.requiredMeta.filter(
+        (item): item is 'nick' | 'mail' | 'link' => ['nick', 'mail', 'link'].includes(item),
+      ),
       login: standalone ? 'disable' : 'enable',
       locale: standalone ? { placeholder: 'Write anonymously...' } : undefined,
       dark: 'html[data-theme="dark"]',

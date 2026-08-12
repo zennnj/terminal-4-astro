@@ -4,6 +4,8 @@ Before changing layout, colors, typography, homepage assets, the sidebar, or int
 
 ## Development
 
+Follow [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) for project structure, content conventions, checks, and review requirements.
+
 When starting the dev server, use background mode:
 
 ```
@@ -11,6 +13,12 @@ astro dev --background
 ```
 
 Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
+
+Before handing off code changes, run:
+
+```
+pnpm verify
+```
 
 ## Documentation
 

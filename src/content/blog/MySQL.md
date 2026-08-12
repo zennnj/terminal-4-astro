@@ -1,8 +1,6 @@
 ---
-category: 数据库
 title: MySQL
 tags: learn
-categories: 数据库
 abbrlink: 9977
 date: 2024-09-26 16:32:33
 ---

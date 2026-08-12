@@ -1,0 +1,72 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import getUrl from '@/utils/getUrl';
+import { getReviewAccentColor } from '@/config/reviews';
+
+interface Props { reviews: CollectionEntry<'reviews'>[]; }
+const { reviews } = Astro.props;
+const types = [
+  { value: 'all', label: 'ALL' },
+  { value: 'game', label: 'GAME' },
+  { value: 'movie', label: 'MOVIE' },
+  { value: 'anime', label: 'ANI/COMIC' },
+  { value: 'video', label: 'VIDEO' },
+  { value: 'book', label: 'BOOK' },
+];
+---
+
+<nav class="review-filters" aria-label="Review type">
+  {types.map((type) => <button class:list={[{ active: type.value === 'all' }]} type="button" data-type={type.value}>{type.label}</button>)}
+</nav>
+
+<section class="review-list" aria-label="Reviews">
+  {reviews.length > 0 ? reviews.map((review) => (
+    <a class="review-row" data-review-type={review.data.type} href={getUrl(`/reviews/${review.id}`)}>
+      <span class="review-color" style={`--accent:${getReviewAccentColor(review.data.type)}`} />
+      <strong>{review.data.title}</strong>
+      <time datetime={review.data.date.toISOString()}>{review.data.date.getFullYear()}.{String(review.data.date.getMonth() + 1).padStart(2, '0')}</time>
+    </a>
+  )) : <div class="empty-rows" aria-label="No reviews yet"><span /><span /><span /></div>}
+</section>
+
+<nav class="review-pagination" aria-label="Review pages">
+  <span class="page-count" aria-live="polite">PAGE 1/1</span>
+  <span class="page-actions"><button class="page-prev" type="button" hidden>&lt;&lt; PREV PAGE</button><button class="page-next" type="button" hidden>NEXT PAGE &gt;&gt;</button></span>
+</nav>
+
+<script>
+  const PAGE_SIZE = 20;
+  function bindReviewDirectory() {
+    const shell = document.querySelector('.reviews-shell');
+    if (!(shell instanceof HTMLElement) || shell.dataset.directoryBound === 'true') return;
+    shell.dataset.directoryBound = 'true';
+    const rows = [...shell.querySelectorAll('[data-review-type]')].filter((item): item is HTMLElement => item instanceof HTMLElement);
+    const filters = [...shell.querySelectorAll('[data-type]')].filter((item): item is HTMLButtonElement => item instanceof HTMLButtonElement);
+    const count = shell.querySelector('.page-count');
+    const previous = shell.querySelector('.page-prev');
+    const next = shell.querySelector('.page-next');
+    let activeType = 'all';
+    let page = 1;
+    const renderPage = () => {
+      const matches = rows.filter((row) => activeType === 'all' || row.dataset.reviewType === activeType);
+      const pageTotal = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
+      page = Math.min(Math.max(1, page), pageTotal);
+      const visible = new Set(matches.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE));
+      rows.forEach((row) => { row.hidden = !visible.has(row); });
+      if (count instanceof HTMLElement) count.textContent = `PAGE ${page}/${pageTotal}`;
+      if (previous instanceof HTMLButtonElement) previous.hidden = page === 1;
+      if (next instanceof HTMLButtonElement) next.hidden = page === pageTotal;
+    };
+    filters.forEach((button) => button.addEventListener('click', () => {
+      filters.forEach((item) => item.classList.remove('active'));
+      button.classList.add('active');
+      activeType = button.dataset.type ?? 'all';
+      page = 1;
+      renderPage();
+    }));
+    if (previous instanceof HTMLButtonElement) previous.addEventListener('click', () => { page -= 1; renderPage(); });
+    if (next instanceof HTMLButtonElement) next.addEventListener('click', () => { page += 1; renderPage(); });
+    renderPage();
+  }
+  document.addEventListener('astro:page-load', bindReviewDirectory);
+</script>

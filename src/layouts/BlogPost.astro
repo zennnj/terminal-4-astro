@@ -10,12 +10,13 @@ import getUrl from '@/utils/getUrl';
 interface Props {
   frontmatter: {
     title: string;
-    description?: string;
-    comment?: boolean;
-    donate?: boolean;
-    toc?: boolean;
-    mathjax?: boolean;
-    mermaid?: boolean;
+    description?: string | null;
+    tags?: string | string[] | null;
+    comment?: boolean | null;
+    donate?: boolean | null;
+    toc?: boolean | null;
+    mathjax?: boolean | null;
+    mermaid?: boolean | null;
     ogImage?: string;
   };
   headings: MarkdownHeading[];
@@ -36,9 +37,9 @@ const {
 
 <SiteShell
   title={frontmatter.title}
-  description={frontmatter.description}
-  mathjax={frontmatter.mathjax}
-  mermaid={frontmatter.mermaid}
+  description={frontmatter.description ?? undefined}
+  mathjax={frontmatter.mathjax ?? false}
+  mermaid={frontmatter.mermaid ?? false}
   ogImage={frontmatter.ogImage}
   contentClass="article-detail-shell"
 >

@@ -1,7 +1,5 @@
 ---
-category: 系统技术
 title: Git使用指南
-categories: 系统技术
 abstract: 
 abbrlink: 74add858
 date: 2024-11-10 09:49:24

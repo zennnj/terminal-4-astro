@@ -1,0 +1,4 @@
+interface:
+  display_name: "Terminal 4 Maintenance"
+  short_description: "Safely maintain and verify Terminal 4"
+  default_prompt: "Use $terminal4-maintenance to implement and verify this Terminal 4 blog change."

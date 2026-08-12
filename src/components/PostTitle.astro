@@ -6,9 +6,9 @@ import getUrl from "@/utils/getUrl";
 interface Props {
   title: string;
   date: string | Date;
-  tags?: string | string[];
+  tags?: string | string[] | null;
   lastModified?: string;
-  draft?: boolean;
+  draft?: boolean | null;
   readingTime?: {
     minutes?: number;
     words?: number;

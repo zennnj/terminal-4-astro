@@ -1,8 +1,6 @@
 ---
-category: 杂项
 title: Github访问连接失败问题
 tags: problems
-categories: 杂项
 abbrlink: 7165
 date: 2024-09-11 20:22:42
 ---

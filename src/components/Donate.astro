@@ -33,7 +33,7 @@ import {donate} from "@/consts";
   // ClientRouter swaps <body> on navigation, so #alipay/#wechatpay are fresh
   // on each page. Re-bind the hover handlers on astro:page-load.
   function bindDonate() {
-    const qrDiv = document.getElementsByClassName("qrshow");
+    const qrDiv = [...document.querySelectorAll<HTMLElement>(".qrshow")];
     const aliDiv = document.getElementById("alipay");
     const wechatDiv = document.getElementById("wechatpay");
 
