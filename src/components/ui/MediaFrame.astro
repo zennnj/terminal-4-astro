@@ -1,0 +1,79 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  src?: string | ImageMetadata;
+  alt: string;
+  aspectRatio?: string;
+  fit?: 'cover' | 'contain';
+  eager?: boolean;
+  class?: string;
+}
+
+const { src, alt, aspectRatio = '4 / 3', fit = 'cover', eager = false, class: className = '' } = Astro.props;
+const loading = eager ? 'eager' : 'lazy';
+const intrinsic = aspectRatio === 'auto';
+---
+
+<div class:list={['media-frame', className, { 'media-frame--intrinsic': intrinsic }]} data-media-frame style={`--media-aspect:${aspectRatio};--media-fit:${fit}`}>
+  {src ? (
+    typeof src === 'string'
+      ? <img src={src} {alt} {loading} decoding="async" fetchpriority={eager ? 'high' : 'auto'} />
+      : <Image src={src} {alt} {loading} decoding="async" fetchpriority={eager ? 'high' : 'auto'} />
+  ) : <i class="ri-image-line" aria-hidden="true"></i>}
+</div>
+
+<script>
+  function initMediaFrames() {
+    document.querySelectorAll<HTMLElement>('[data-media-frame]').forEach((frame) => {
+      if (frame.dataset.mediaBound === 'true') return;
+      frame.dataset.mediaBound = 'true';
+      const image = frame.querySelector('img');
+      if (!image) return;
+      const finish = () => { frame.classList.remove('is-loading'); frame.classList.add('is-loaded'); };
+      const fail = () => { frame.classList.remove('is-loading'); frame.classList.add('is-error'); };
+      if (image.complete) image.naturalWidth > 0 ? finish() : fail();
+      else {
+        frame.classList.add('is-loading');
+        image.addEventListener('load', finish, { once: true });
+        image.addEventListener('error', fail, { once: true });
+      }
+    });
+  }
+  document.addEventListener('astro:page-load', initMediaFrames);
+  initMediaFrames();
+</script>
+
+<style>
+  .media-frame {
+    position: relative;
+    display: grid;
+    aspect-ratio: var(--media-aspect);
+    place-items: center;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--p4-yellow) 76%, var(--p4-gray));
+  }
+  .media-frame :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: var(--media-fit);
+    transition: opacity var(--motion-base) var(--ease-standard), transform var(--motion-slow) var(--ease-standard);
+  }
+  .media-frame--intrinsic :global(img) { height: auto; }
+  .media-frame.is-loading :global(img) { opacity: .25; }
+  .media-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, white 55%, transparent) 48%, transparent 66%);
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
+  .media-frame.is-loading::after { opacity: 1; animation: media-shimmer 1.35s ease-in-out infinite; }
+  .media-frame.is-error::before { content: 'IMAGE UNAVAILABLE'; color: var(--purple-soft); font-size: var(--text-xs); letter-spacing: .12em; }
+  .media-frame.is-error :global(img) { display: none; }
+  .media-frame > i { color: var(--purple-soft); font-size: 3rem; }
+  @keyframes media-shimmer { to { transform: translateX(100%); } }
+</style>

@@ -2,11 +2,13 @@
 import IndexPage from "@/layouts/IndexPage.astro";
 import getUniqueTags from "@/utils/getUniqueTags";
 import getPostsByTag from "@/utils/getPostsByTag";
-import SearchTitle from "@/components/SearchTitle.astro";
 import {formatDate} from "@/utils/formatDate";
 import {sortPostsByDate} from "@/utils/sortPostsByDate";
 import {getCollectionByName} from "@/utils/getCollectionByName";
 import getUrl from "@/utils/getUrl";
+import PageHeader from '@/components/ui/PageHeader.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import '@/styles/pages/content-pages.css';
 export async function getStaticPaths() {
   const posts = await getCollectionByName("blog");
   //   过滤没有分类的文章，todo 后期可能会强制需要文章分类
@@ -21,30 +23,19 @@ const tagPosts = getPostsByTag(posts, tag);
 const resultPosts = sortPostsByDate(tagPosts);
 ---
 
-<IndexPage title={tag} contentClass="tag-results-shell">
-  <header class="tag-results-head"><p>TAGGED ARTICLES</p><h1>#{tag}</h1></header>
-  <SearchTitle label={tag}/>
-  <ul class="tag-results text-skin-base">
-    {
-      resultPosts.map((post) => (
-        <li style="list-style-type: disc;" class="ml-4 my-2">
-          <a href={getUrl('/') + post.collection + '/' + post.id}>
-            <span class="mr-4">{formatDate(post.data.date)}</span>
-            <span class="hover:text-skin-active">{post.data.title}</span>
+<IndexPage title={tag} contentClass="utility-shell tag-results-shell">
+  <PageHeader title={`#${tag}`} eyebrow="TAGGED ARTICLES" description={`${resultPosts.length} article${resultPosts.length === 1 ? '' : 's'} in this topic.`} />
+  {resultPosts.length > 0 ? (
+    <div class="content-results">
+      {resultPosts.map((post) => (
+        <article class="content-result">
+          <a href={getUrl(`/${post.collection}/${post.id}`)}>
+            <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+            <div><h2>{post.data.title}</h2>{post.data.description && <p>{post.data.description}</p>}</div>
+            <i class="ri-arrow-right-line" aria-hidden="true"></i>
           </a>
-        </li>
-      ))
-    }
-  </ul>
+        </article>
+      ))}
+    </div>
+  ) : <EmptyState title="No articles found" description="This tag does not have any published articles yet." />}
 </IndexPage>
-
-<style>
-  :global(.tag-results-shell) { max-width: 1100px; margin: 0 auto; padding-top: clamp(4rem, 9vw, 8rem); }
-  .tag-results-head p { margin: 0 0 .55rem; color: var(--p4-coral); font-size: .72rem; letter-spacing: .16em; }
-  .tag-results-head h1 { margin: 0 0 2rem; font: 700 clamp(3rem, 8vw, 7rem)/.9 var(--font-title); letter-spacing: -.055em; }
-  .tag-results { margin-top: 1.5rem; border-top: 1px solid var(--p4-purple); }
-  .tag-results li { margin: 0 !important; padding: 1rem .25rem; border-bottom: 1px solid color-mix(in srgb, var(--p4-purple) 24%, transparent); list-style: none !important; }
-  .tag-results a { display: grid; grid-template-columns: 120px 1fr; gap: 1rem; }
-  .tag-results a:hover { color: var(--p4-coral); }
-  @media (max-width: 560px) { .tag-results a { grid-template-columns: 1fr; gap: .15rem; } }
-</style>

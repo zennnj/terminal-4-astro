@@ -30,18 +30,23 @@ Semantic aliases such as `--paper`, `--ink`, `--purple`, and `--pink` map to the
 
 Font files are stored in `public/assets/fonts/` and registered in `src/styles/index.css`.
 
-| CSS token        | Font                        | Use                                                                 |
-| ---------------- | --------------------------- | ------------------------------------------------------------------- |
-| `--font-title`   | PP Neue Montreal Bold       | Large section titles and strong display headings                    |
-| `--font-display` | Boba Mono Regular           | sentence/quotation heading                                          |
-| `--font-body`    | Wix Madefor Display Regular | Body copy, small headings, navigation labels, `TERMINAL4` top label |
-| `--font-about-copy` | 猫啃网烟波宋-B Bold       | ABOUT ME introduction and ABOUT SITE Markdown copy                  |
+| CSS token              | Font stack                                      | Use                                      |
+| ---------------------- | ----------------------------------------------- | ---------------------------------------- |
+| `--font-title`         | PP Neue Montreal + CJK heading fallback         | Large section titles                     |
+| `--font-display`       | Boba Mono Regular                               | Sentence/quotation headings              |
+| `--font-index`         | Wix Madefor Display + explicit system CJK stack | Decorative/index labels and homepage UI |
+| `--font-body`          | Explicit system CJK sans-serif stack            | Body copy and ordinary controls          |
+| `--font-article-title` | Explicit system CJK heading stack               | Mixed-language article and detail titles |
+| `--font-about-copy`    | Maoken Yanbo Song + serif fallback              | ABOUT prose                              |
 
 Rules:
 
-- Small headings and body text use Wix Madefor Display Regular.
+- Body text uses the system CJK sans-serif stack. Wix Madefor Display is reserved for decorative/index text and homepage UI.
+- ABOUT ME introduction copy changes only its font family to `--font-body`; preserve its established `700` weight, responsive display size, line height, and Markdown emphasis rendering.
 - Large textual titles use PP Neue Montreal Bold.
 - Keep local fallback stacks declared in the shared font tokens; do not load replacements from a remote font service.
+- Mixed Chinese/Latin copy relies on per-glyph fallback. Keep both stacks explicit so rendering does not depend on an undeclared local font.
+- Standard content pages use the shared `--text-*`, `--page-title-size`, and `--detail-title-size` scale.
 
 ## 4. Asset organization and configuration
 
@@ -141,27 +146,41 @@ Never implement `.rail-open` by changing `.site-content` width, margin, padding,
 ## 8. Shared page footer and article surfaces
 
 - The purple homepage footer is a global site footer rendered by `src/components/GlobalFooter.astro` on every route.
-- The global footer reuses the Article shell width and inline padding so its HOME column aligns with the shared Article/Memo/Review/Gallery content line. Do not change the existing gap between its two navigation columns when adjusting this alignment.
+- The global footer reuses the standard content shell width and inline padding so its HOME column aligns with Article/Memo/Review/Gallery/Search/Tags. Do not change the existing gap between its two navigation columns when adjusting this alignment.
 - The global footer uses a fixed `14.4px` font size and a compact `126px` desktop minimum height.
-- Article, Memo, Review, and Gallery index/detail pages share `--article-shell-width: min(1240px, calc(100% - 27rem))` and `--article-shell-padding-inline: 2.5rem`, producing one enlarged desktop left-content line. At `900px` and below, their shell width becomes `100%` with `1.1rem` inline padding.
-- Unless a page has an explicit exception, Memos, Reviews, Gallery, their detail views, and article detail reuse the Article hub's `--article-shell-width` and `--article-shell-padding-inline` values. Homepage and About are explicit exceptions.
+- Standard index/detail/utility pages share `--page-content-width: 1180px`, `--article-shell-width: min(var(--page-content-width), 100%)`, and responsive `--article-shell-padding-inline`. The legacy `--article-*` names remain compatibility aliases until route styles are renamed.
+- Article, Memo, Review, Gallery, Search, Tags, 404, and their detail views use the shared page primitives in `src/components/ui/`. Homepage and both About routes are explicit composition exceptions.
 - Article lists paginate at 10 posts per page and keep navigation aligned at the lower right.
+- Article page/count status is compact `--text-xs` metadata immediately above the card list, not a `PageHeader` description.
 - Article-detail BACK is a real link to `/blog/1`, not a `history.back()` control, so ClientRouter navigation cannot leave the URL and rendered page out of sync.
-- Archive year numerals are background layers: the first post card overlaps the lower portion of each outlined year.
+- Archive year numerals are transparent background layers with a `2px` P4 orange outline: the first post card overlaps the lower portion of each year.
 - Archive post cards use a solid surface slightly lighter than the page gray so the outlined year stays visibly behind the cards.
 - Article/Archive tabs use `--p4-coral` in both active and inactive states.
+- Article/Archive and Memos/Junk tabs sit at the upper right of their index toolbar. Article search stays at the upper left.
+- Gallery and Review directory shells share the more relaxed `clamp(2rem, 4vw, 3.5rem)` desktop top inset used by the original Review layout.
 - Sidebar navigation must not close the rail before route navigation; its open state remains visually stable across page transitions.
-- Article titles use the `Noto Sans SC` stack through `--font-article-title`; other display headings continue to use `--font-title`.
-- ARTICLE and REVIEW page/detail titles share the canonical responsive size `--article-detail-title-size: clamp(2.4rem, 4vw, 3.8rem)`. ARTICLE and REVIEW index headings keep `--font-title`; article-detail titles and latest-review titles use `Noto Sans SC` through `--font-article-title`. REVIEW-detail NOTES and REVIEW headings use `--font-title` and share `--markdown-h2-size: 1.55rem` with Markdown `h2` headings.
+- Article and mixed-language detail titles use the explicit CJK stack through `--font-article-title`; other display headings continue to use `--font-title`.
+- Standard index headings share `--page-title-size`; detail headings share the smaller `--detail-title-size`. REVIEW-detail NOTES and REVIEW headings share `--markdown-h2-size` with Markdown `h2` headings.
 - REVIEW-detail metadata labels and values are both fixed at `15px`; compact desktop metadata rows use a `140px` label column and `.85rem` column gap so DESCRIPTION retains a wide reading column.
 - REVIEW pages reuse the Article shell padding. On REVIEW detail pages, the back link, title, cover, NOTES, and REVIEW have no extra desktop inset: their left edge must exactly align with the REVIEW directory's large `REVIEW` heading. The back link is a separate row and must not consume a column in the cover/metadata grid.
 - REVIEW detail uses a dense overview: the cover column is much narrower than the metadata column, the inter-column gap stays at or below `2.5rem`, metadata rows use a `.6rem` gap, and the title/NOTES/REVIEW vertical spacing must remain compact.
 - The REVIEW directory uses a compact yellow latest-review feature card. Its orange `Latest` burst intentionally overlaps outside the card's upper-left edge, while the Noto Sans SC `Latest` text must remain fully contained inside the orange burst. The card is followed by a two-column desktop list. Filter selection is a contained capsule. Category markers are circles, dates remain visible, and filtered results paginate at 20 entries per page with a bottom page count and navigation.
 - REVIEW category accents are a dedicated five-color palette configured in `src/config/reviews.ts`: GAME `#e36397`, MOVIE `#f6e27f`, ANI/COMIC `#44ccff`, VIDEO `#6e2594`, and BOOK `#169873`.
 - Markdown tables of contents include heading levels 1 through 4 and remain vertically scrollable within the viewport.
-- Article Markdown body copy is `16px`; TOC headings and entries are `15px`. Article detail keeps the original body left edge, the original `clamp(2rem, 3.5vw, 3.5rem)` body-to-TOC gap, and the original `210px–240px` TOC column. Its grid alone grows 5rem to the right (`min(1320px, calc(100% - 22rem))`), so all added width belongs to the body column and the right outer margin becomes smaller. Do not center, translate, or resize either panel to achieve this.
-- ARTICLE index descriptions are `15px`; dates and word counts are `12px`; page summaries plus TOTAL/TAGS labels are `14.5px`; article and filter tags are `12.5px`.
+- Article Markdown body copy is responsive `15px–16px`, uses `1.82` line height, and is capped by `--reading-width: 72ch`. Other Markdown surfaces retain the shared `17px–18px` scale. The TOC remains `190px–240px`; collapse to one column at the mobile breakpoint rather than squeezing the reading column.
+- ARTICLE descriptions use the base text size; dates, word counts, tags, and secondary metadata use `--text-xs`/`--text-sm`.
 - Markdown soft line endings, including consecutive blockquote lines, render as visible single line breaks on CRLF, LF, and CR-authored files.
+
+## 9. Standard page primitives, media, and motion
+
+- `PageHeader.astro` owns eyebrow, title, description, optional actions, and index/detail title scale.
+- `BackLink.astro` owns the consistent return affordance on detail routes.
+- `EmptyState.astro` owns empty-content messaging.
+- `MediaFrame.astro` owns stable aspect ratios, lazy/eager loading, decoding, shimmer state, error state, and image fade-in.
+- Standard route CSS belongs in `src/styles/pages/`; route files should primarily load data and compose components.
+- Motion uses `--motion-fast`, `--motion-base`, `--motion-slow`, and `--ease-standard`. Prefer restrained feedback and state transitions.
+- All motion must obey the global `prefers-reduced-motion` rule.
+- Static HTML does not need a loading spinner. Use local skeletons only for asynchronously fetched content such as Search or comments.
 
 ## 10. Responsive validation
 

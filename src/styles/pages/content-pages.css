@@ -1,0 +1,145 @@
+.utility-shell {
+  width: var(--article-shell-width);
+  margin: 0 auto;
+  padding: 1rem var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem);
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.tag-chip {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  padding: .55rem .85rem;
+  border: 1px solid color-mix(in srgb, var(--p4-purple) 58%, transparent);
+  border-radius: var(--radius-pill);
+  color: var(--p4-purple);
+  font-size: var(--text-sm);
+  transition: color var(--motion-fast) var(--ease-standard), background-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+}
+
+.tag-chip:hover,
+.tag-chip:focus-visible {
+  background: var(--p4-purple);
+  color: var(--p4-yellow);
+  transform: translateY(-2px);
+}
+
+.content-results {
+  border-top: 1px solid color-mix(in srgb, var(--p4-purple) 62%, transparent);
+}
+
+.content-result {
+  border-bottom: 1px solid color-mix(in srgb, var(--p4-purple) 24%, transparent);
+}
+
+.content-result > a {
+  display: grid;
+  min-height: 4.5rem;
+  grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-control);
+  transition: background-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+}
+
+.content-result > a:hover,
+.content-result > a:focus-visible {
+  background: color-mix(in srgb, var(--p4-yellow) 84%, transparent);
+  transform: translateX(.25rem);
+}
+
+.content-result time,
+.content-result-meta {
+  color: var(--purple-soft);
+  font-size: var(--text-xs);
+}
+
+.content-result h2 {
+  margin: 0;
+  font-family: var(--font-article-title);
+  font-size: var(--text-lg);
+  line-height: 1.3;
+}
+
+.content-result p {
+  margin: var(--space-2) 0 0;
+  color: var(--purple-soft);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.search-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  padding: .8rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--p4-purple) 58%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--p4-yellow) 70%, transparent);
+  transition: border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+.search-field:focus-within {
+  border-color: var(--p4-coral);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--p4-coral) 16%, transparent);
+}
+
+.search-field input {
+  min-width: 0;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  font-size: var(--text-md);
+}
+
+.search-status {
+  min-height: 2rem;
+  margin: var(--space-4) 0;
+  color: var(--purple-soft);
+  font-size: var(--text-sm);
+}
+
+.search-status strong { color: var(--p4-coral); }
+
+.search-skeleton {
+  display: grid;
+  gap: var(--space-3);
+  padding-block: var(--space-4);
+}
+
+.search-skeleton span {
+  display: block;
+  height: 4.5rem;
+  border-radius: var(--radius-control);
+  background: linear-gradient(105deg, color-mix(in srgb, var(--p4-purple) 8%, transparent) 30%, color-mix(in srgb, white 52%, transparent) 48%, color-mix(in srgb, var(--p4-purple) 8%, transparent) 66%);
+  background-size: 220% 100%;
+  animation: search-shimmer 1.3s ease-in-out infinite;
+}
+
+.not-found-shell {
+  display: grid;
+  min-height: 100svh;
+  place-items: center;
+}
+
+.not-found { text-align: center; }
+.not-found .page-eyebrow { margin: 0; }
+.not-found h1 { margin: .25rem 0; color: var(--p4-purple); font: 700 clamp(7rem, 24vw, 18rem)/.8 var(--font-title); letter-spacing: -.08em; }
+.not-found p { margin: 0 0 var(--space-6); font-size: var(--text-md); }
+.primary-action { display: inline-flex; align-items: center; gap: var(--space-2); padding: .75rem 1rem; border-radius: var(--radius-pill); background: var(--p4-purple); color: var(--p4-yellow); transition: background-color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard); }
+.primary-action:hover, .primary-action:focus-visible { background: var(--p4-coral); transform: translateY(-2px); }
+
+@keyframes search-shimmer { to { background-position: -220% 0; } }
+
+@media (max-width: 700px) {
+  .utility-shell { padding: 5.5rem 1.1rem 3rem; }
+  .content-result > a { grid-template-columns: 1fr; gap: var(--space-1); }
+  .content-result-meta { margin-top: var(--space-2); }
+}

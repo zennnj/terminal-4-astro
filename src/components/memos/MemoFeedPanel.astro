@@ -1,13 +1,11 @@
 ---
 import WalineComment from '@/components/WalineComment.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
 interface Props { enabled: boolean; avatar: string; }
 const { enabled, avatar } = Astro.props;
 ---
 
 <section data-memo-panel="memos">
-  <div class="memo-head">
-    <h1>MEMOS</h1>
-    <span>列車は必ず次の駅へ。<br />では舞台は？あなたたちは？</span>
-  </div>
+  <PageHeader title="MEMOS" eyebrow="NOTES IN MOTION" description="列車は必ず次の駅へ。では舞台は？あなたたちは？" compact />
   {enabled && <div class="memo-feed" aria-label="Post a memo"><WalineComment id="waline-memos" standalone path="/memos-feed/" {avatar} /></div>}
 </section>

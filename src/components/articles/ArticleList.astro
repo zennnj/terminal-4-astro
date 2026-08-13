@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import readingTime from 'reading-time';
 import { dealLabel } from '@/utils/dealLabel';
 import getUrl from '@/utils/getUrl';
+import PageHeader from '@/components/ui/PageHeader.astro';
 
 interface Props {
   posts: CollectionEntry<'blog'>[];
@@ -15,10 +16,8 @@ const { posts, currentPage, totalPages, totalPosts } = Astro.props;
 ---
 
 <div class="article-primary">
-  <header class="view-heading">
-    <h1>ARTICLE</h1>
-    <p class="page-summary">Page {currentPage} · Showing <span id="visible-count">{posts.length}</span> of {totalPosts} posts</p>
-  </header>
+  <PageHeader title="ARTICLE" eyebrow="ARTICLE INDEX" compact />
+  <p class="article-list-summary">Page {currentPage} · Showing <span id="visible-count">{posts.length}</span> of {totalPosts} posts</p>
   <div class="article-list" id="article-list">
     {posts.map((post) => {
       const postTags = dealLabel(post.data.tags);

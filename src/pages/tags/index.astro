@@ -3,31 +3,17 @@ import IndexPage from "@/layouts/IndexPage.astro";
 import {getCollectionByName} from "@/utils/getCollectionByName";
 import getUniqueTags from "@/utils/getUniqueTags";
 import getUrl from "@/utils/getUrl";
+import PageHeader from '@/components/ui/PageHeader.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import '@/styles/pages/content-pages.css';
 
 const blogs = await getCollectionByName('blog')
 let tagArr = getUniqueTags(blogs);
 ---
 
-<IndexPage title="Tags" contentClass="tags-shell">
-  <header class="tags-head"><p>ARTICLE INDEX</p><h1>TAGS</h1></header>
-  <div class="tag-cloud flex flex-wrap">
-    {
-      (
-        tagArr
-        &&
-          tagArr.map((tag) =>
-            <a class="inline-block truncate" title={tag} href={getUrl("/tags/") + tag}>#{tag}</a>
-          )
-      )
-    }
-  </div>
+<IndexPage title="Tags" contentClass="utility-shell tags-shell">
+  <PageHeader title="TAGS" eyebrow="ARTICLE INDEX" description="Browse the archive by topic." />
+  {tagArr.length > 0
+    ? <div class="tag-cloud">{tagArr.map((tag) => <a class="tag-chip" title={tag} href={getUrl(`/tags/${encodeURIComponent(tag)}`)}>#{tag}</a>)}</div>
+    : <EmptyState title="No tags yet" description="Tags will appear here when articles are published." />}
 </IndexPage>
-
-<style>
-  :global(.tags-shell) { max-width: 1100px; margin: 0 auto; padding-top: clamp(4rem, 9vw, 8rem); }
-  .tags-head p { margin: 0 0 .55rem; color: var(--p4-coral); font-size: .72rem; letter-spacing: .16em; }
-  .tags-head h1 { margin: 0 0 2rem; font: 700 clamp(3rem, 8vw, 7rem)/.9 var(--font-title); letter-spacing: -.055em; }
-  .tag-cloud { gap: .65rem; }
-  .tag-cloud a { padding: .6rem .9rem; border: 1px solid var(--p4-purple); border-radius: 999px; background: transparent; color: var(--p4-purple); transition: color .2s, background-color .2s; }
-  .tag-cloud a:hover { background: var(--p4-purple); color: var(--p4-yellow); }
-</style>

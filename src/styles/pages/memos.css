@@ -6,28 +6,12 @@
   .memo-toolbar {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: clamp(1.5rem, 3vw, 3rem);
     margin-bottom: clamp(1.6rem, 3vw, 3rem);
   }
   [data-memo-panel][hidden] {
     display: none;
-  }
-  .memo-head {
-    margin-bottom: 0.6rem;
-  }
-  .memo-head h1 {
-    margin: 0;
-    font-family: var(--font-title);
-    font-size: var(--article-detail-title-size);
-    font-weight: 700;
-    line-height: 0.95;
-    letter-spacing: -0.035em;
-  }
-  .memo-head > span {
-    display: block;
-    margin: 0.8rem 0 0.55rem;
-    color: var(--purple-soft);
-    font: 400 1.1rem/1.4 var(--font-body);
   }
   .memo-feed,
   .junk-thread {
@@ -256,7 +240,7 @@
     .memos-shell {
       width: 100%;
       margin-left: 0;
-      padding-inline: 1.1rem;
+      padding: 5.5rem 1.1rem 3rem;
     }
   }
   @media (max-width: 560px) {

@@ -1,0 +1,23 @@
+---
+interface Props { title: string; description?: string; icon?: string; }
+const { title, description, icon = 'ri-inbox-2-line' } = Astro.props;
+---
+
+<section class="empty-state" aria-live="polite">
+  <i class={icon} aria-hidden="true"></i>
+  <h2>{title}</h2>
+  {description && <p>{description}</p>}
+</section>
+
+<style>
+  .empty-state {
+    padding: clamp(3rem, 8vw, 6rem) var(--space-5);
+    border: 1px dashed color-mix(in srgb, var(--p4-purple) 28%, transparent);
+    border-radius: var(--radius-card);
+    color: var(--purple-soft);
+    text-align: center;
+  }
+  i { color: var(--p4-coral); font-size: 2.5rem; }
+  h2 { margin: var(--space-3) 0 0; font-size: var(--text-xl); }
+  p { max-width: 42ch; margin: var(--space-2) auto 0; line-height: 1.6; }
+</style>

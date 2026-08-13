@@ -16,7 +16,7 @@ const types = [
 ---
 
 <nav class="review-filters" aria-label="Review type">
-  {types.map((type) => <button class:list={[{ active: type.value === 'all' }]} type="button" data-type={type.value}>{type.label}</button>)}
+  {types.map((type) => <button class:list={[{ active: type.value === 'all' }]} type="button" data-type={type.value} aria-pressed={type.value === 'all'}>{type.label}</button>)}
 </nav>
 
 <section class="review-list" aria-label="Reviews">
@@ -59,6 +59,7 @@ const types = [
     };
     filters.forEach((button) => button.addEventListener('click', () => {
       filters.forEach((item) => item.classList.remove('active'));
+      filters.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
       button.classList.add('active');
       activeType = button.dataset.type ?? 'all';
       page = 1;

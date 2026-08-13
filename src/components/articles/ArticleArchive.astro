@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { dealLabel } from '@/utils/dealLabel';
 import getUrl from '@/utils/getUrl';
+import PageHeader from '@/components/ui/PageHeader.astro';
 
 interface Props {
   years: [string, CollectionEntry<'blog'>[]][];
@@ -10,10 +11,10 @@ const { years } = Astro.props;
 ---
 
 <section class="archive-view" data-view-panel="archive" hidden>
-  <header class="view-heading"><h1>ARCHIVES</h1></header>
+  <PageHeader title="ARCHIVES" eyebrow="ARTICLE INDEX" description="Browse every published article by year." compact />
   <div class="archive-years">
-    {years.map(([year, yearPosts], yearIndex) => (
-      <section class:list={['year-group', { 'is-lower-year': yearIndex > 0 }]}>
+    {years.map(([year, yearPosts]) => (
+      <section class="year-group">
         <header><h2>{year}</h2><span>{yearPosts.length} posts</span></header>
         <div class="year-posts">
           {yearPosts.map((post) => {

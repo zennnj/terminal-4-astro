@@ -1,0 +1,55 @@
+# Terminal 4 UI system
+
+This is the practical entry point for ordinary content-page work. `UI_STYLE_GUIDE.md` remains the visual contract; this file explains how to apply it.
+
+## Page families
+
+- Special compositions: `/`, `/about`, and `/site`. Preserve their dedicated layout rules.
+- Index pages: Article, Memo, Review, Gallery, Search, and Tags. Use the standard shell and `PageHeader`.
+- Index toolbars place view-switching tabs at the upper right; Article search occupies the upper left. Gallery and Review share a relaxed `clamp(2rem, 4vw, 3.5rem)` desktop shell top inset.
+- Article page/count status belongs directly above the card list as compact metadata; do not pass it to `PageHeader.description`. Archive year numerals use transparent fill and a P4 orange outline.
+- Detail pages: Article, Memo, and Review details. Use `BackLink`, the detail title scale, readable content width, and optional TOC/media regions.
+
+## Shared primitives
+
+```astro
+---
+import PageHeader from '@/components/ui/PageHeader.astro';
+import BackLink from '@/components/ui/BackLink.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+import MediaFrame from '@/components/ui/MediaFrame.astro';
+---
+```
+
+- `PageHeader`: pass `title`, optional `eyebrow`, `description`, `compact`, or `detail`. Use the `actions` slot for filters and the `description` slot when live values must update.
+- `BackLink`: pass a stable route and label; do not use `history.back()` for primary navigation.
+- `EmptyState`: use when a collection or filtered result is empty.
+- `MediaFrame`: pass local `ImageMetadata` or a string URL, `alt`, `aspectRatio`, `fit`, and optional `eager`. Use eager loading only for critical above-the-fold media.
+
+## Tokens
+
+Use the shared values in `src/styles/index.css`:
+
+- Type: `--text-xs` through `--text-xl`, `--page-title-size`, `--detail-title-size`.
+- Space: `--space-1` through `--space-8`.
+- Shape: `--radius-control`, `--radius-card`, `--radius-pill`.
+- Layout: `--page-content-width`, `--reading-width`, `--article-shell-width`, `--article-shell-padding-inline`.
+- Motion: `--motion-fast`, `--motion-base`, `--motion-slow`, `--ease-standard`.
+
+Avoid one-off `clamp()` values for a role already represented by a token.
+
+## Interaction states
+
+Every asynchronous or filterable feature should define the applicable states:
+
+1. Initial or idle.
+2. Loading.
+3. Populated.
+4. Empty.
+5. Error.
+
+Buttons that represent a selected view or filter use `aria-pressed`. Keyboard focus must remain visible. ClientRouter behavior binds on `astro:page-load` and guards duplicate listeners when elements persist.
+
+## Verification
+
+Run `pnpm verify`, then inspect standard pages at `1482x706`, `1920x1080`, and `390x844`. Check title hierarchy, readable line length, horizontal overflow, media loading/error states, keyboard focus, filters/search, ClientRouter navigation, and sidebar layout shift.

@@ -1,0 +1,67 @@
+---
+interface Props {
+  title: string;
+  eyebrow?: string;
+  description?: string;
+  id?: string;
+  compact?: boolean;
+  detail?: boolean;
+}
+
+const { title, eyebrow, description, id, compact = false, detail = false } = Astro.props;
+const hasDescriptionSlot = Astro.slots.has('description');
+---
+
+<header class:list={['page-header', { 'page-header--compact': compact, 'page-header--detail': detail }]}>
+  <div class="page-header-copy">
+    {eyebrow && <p class="page-eyebrow">{eyebrow}</p>}
+    <h1 id={id}>{title}</h1>
+    {hasDescriptionSlot
+      ? <div class="page-description"><slot name="description" /></div>
+      : description && <p class="page-description">{description}</p>}
+  </div>
+  <div class="page-header-actions"><slot name="actions" /></div>
+</header>
+
+<style>
+  .page-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+  }
+  .page-header-copy { min-width: 0; }
+  .page-eyebrow {
+    margin: 0 0 var(--space-2);
+    color: var(--p4-coral);
+    font-size: var(--text-xs);
+    line-height: 1;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  h1 {
+    margin: 0;
+    color: var(--p4-purple);
+    font-family: var(--font-title);
+    font-size: var(--page-title-size);
+    font-weight: 700;
+    line-height: .95;
+    letter-spacing: -.045em;
+    overflow-wrap: anywhere;
+  }
+  .page-description {
+    max-width: 68ch;
+    margin: var(--space-3) 0 0;
+    color: var(--purple-soft);
+    font-size: var(--text-md);
+    line-height: 1.55;
+  }
+  .page-header--compact { margin-bottom: var(--space-5); }
+  .page-header--detail h1 { font-family: var(--font-article-title); font-size: var(--detail-title-size); line-height: 1.05; }
+  .page-header-actions:empty { display: none; }
+  @media (max-width: 700px) {
+    .page-header { align-items: start; flex-direction: column; gap: var(--space-4); }
+    .page-header-actions { width: 100%; }
+  }
+</style>

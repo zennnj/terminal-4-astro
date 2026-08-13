@@ -27,7 +27,11 @@
     };
 
     const setView = (view: string) => {
-      viewButtons.forEach((button) => button.classList.toggle('active', button.dataset.viewButton === view));
+      viewButtons.forEach((button) => {
+        const active = button.dataset.viewButton === view;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
       panels.forEach((panel) => { panel.hidden = panel.dataset.viewPanel !== view; });
       const url = new URL(window.location.href);
       if (view === 'archive') url.searchParams.set('view', 'archive');
@@ -41,7 +45,11 @@
       if (!(node instanceof HTMLButtonElement)) return;
       node.addEventListener('click', () => {
         activeTag = activeTag === node.dataset.tag ? '' : (node.dataset.tag ?? '');
-        hub.querySelectorAll('[data-tag]').forEach((item) => item.classList.toggle('active', item instanceof HTMLElement && item.dataset.tag === activeTag));
+        hub.querySelectorAll('[data-tag]').forEach((item) => {
+          const active = item instanceof HTMLElement && item.dataset.tag === activeTag;
+          item.classList.toggle('active', active);
+          item.setAttribute('aria-pressed', String(active));
+        });
         applyFilters();
       });
     });

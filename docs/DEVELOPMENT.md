@@ -6,6 +6,7 @@
 - Put page-section components under a domain folder such as `src/components/home/`, `articles/`, `memos/`, or `reviews/`.
 - Put page-level styles in `src/styles/pages/`. Scope selectors under the route shell class when a name could collide with another page.
 - Keep reusable site chrome in `src/components/`, shared layouts in `src/layouts/`, and editable site content/configuration in `src/content/` and `src/config/`.
+- Build ordinary index/detail/utility routes from the primitives in `src/components/ui/` before adding route-specific equivalents.
 - Prefer extracting a section when a route mixes several independent sections, client interactions, or grows beyond roughly 250 lines.
 
 ## Content conventions
@@ -32,10 +33,13 @@ pnpm astro dev logs
 pnpm astro dev stop
 ```
 
+Check `pnpm astro dev status` before starting UI validation. Treat a server that was already running as user-owned: reuse it and leave it running after validation. Stop the server only when the current task started it. Do not restart a pre-existing server merely to obtain a clean session.
+
 ## Review checklist
 
 - No unused components, utilities, or duplicate assets were introduced.
 - Route files remain composition-focused.
 - Client scripts are safe across Astro ClientRouter navigation and bind on `astro:page-load` without duplicate listeners.
+- Async UI exposes loading, empty, and error states; images reserve space and use the shared media-frame behavior where possible.
 - `pnpm check` reports zero errors and `pnpm build` succeeds.
 - Visual changes follow `UI_STYLE_GUIDE.md`, with no sidebar-induced layout shift or horizontal overflow.

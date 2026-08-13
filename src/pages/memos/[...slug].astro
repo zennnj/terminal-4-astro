@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import IndexPage from '@/layouts/IndexPage.astro';
 import WalineComment from '@/components/WalineComment.astro';
-import getUrl from '@/utils/getUrl';
+import BackLink from '@/components/ui/BackLink.astro';
 
 export async function getStaticPaths() {
   const memos = (await getCollection('memos')).filter((memo) => !memo.data.draft);
@@ -15,7 +15,7 @@ const commentPath = `/memos/${memo.id}`;
 ---
 
 <IndexPage title="Memo" contentClass="memo-detail-shell">
-  <a class="memo-back" href={getUrl('/memos')}><i class="ri-arrow-left-line"></i> MEMOS</a>
+  <BackLink href="/memos" label="MEMOS" />
   <article class="memo-detail">
     {memo.data.tags.length > 0 && <div class="memo-tags">{memo.data.tags.map((tag) => <span>#{tag}</span>)}</div>}
     <div class="markdown-body"><Content /></div>
@@ -29,10 +29,9 @@ const commentPath = `/memos/${memo.id}`;
 
 <style>
   :global(.memo-detail-shell) { width: var(--article-shell-width); margin: 0 auto; padding: clamp(2rem, 5vw, 5rem) var(--article-shell-padding-inline); }
-  .memo-back { display: inline-flex; align-items: center; gap: .5rem; margin-bottom: 2rem; font-size: .85rem; letter-spacing: .1em; }
   .memo-detail { padding: clamp(1.5rem, 4vw, 3rem); border-radius: 1.5rem; background: var(--p4-yellow); }
   .memo-tags { display: flex; flex-wrap: wrap; gap: .7rem; margin-bottom: 1rem; color: var(--purple-soft); font-size: .85rem; }
-  .memo-detail .markdown-body { font-size: 1.05rem; line-height: 1.9; }.memo-detail footer { display: flex; gap: 1rem; margin-top: 2rem; color: var(--purple-soft); font-size: .8rem; }
+  .memo-detail .markdown-body { max-width: var(--reading-width); }.memo-detail footer { display: flex; gap: 1rem; margin-top: 2rem; color: var(--purple-soft); font-size: .8rem; }
   .memo-comments { margin-top: clamp(3rem, 7vw, 6rem); }.memo-comments h1 { margin: 0 0 1.5rem; font: 700 clamp(1.5rem, 3vw, 2.2rem)/1 var(--font-title); }
-  @media (max-width: 900px) { :global(.memo-detail-shell) { width: 100%; margin-left: 0; padding-inline: 1.1rem; } }
+  @media (max-width: 900px) { :global(.memo-detail-shell) { width: 100%; margin-left: 0; padding: 5.5rem 1.1rem 3rem; } }
 </style>

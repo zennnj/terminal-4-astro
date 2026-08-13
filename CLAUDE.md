@@ -14,6 +14,8 @@ astro dev --background
 
 Manage the background server with `astro dev stop`, `astro dev status`, and `astro dev logs`.
 
+Before UI validation, run `astro dev status` and record whether the server is already running. Reuse a pre-existing server and never stop or restart it. Only run `astro dev stop` when the current Codex task started that server itself.
+
 Before handing off code changes, run:
 
 ```
