@@ -49,15 +49,18 @@ const navItems = [
     <script is:inline>
       (() => {
         try {
-          if (sessionStorage.getItem('terminal4-loaded')) document.documentElement.dataset.loaderSeen = 'true';
+          if (sessionStorage.getItem('terminal4-home-loaded')) document.documentElement.dataset.homeLoaderSeen = 'true';
         } catch (_) {}
         if (window.matchMedia('(max-width: 900px)').matches) document.body.classList.remove('rail-open');
       })();
     </script>
 
-    <div class="site-loader" id="site-loader" aria-label="Loading page" role="status">
-      <img src={getUrl('/loading.png')} alt="Loading" />
-    </div>
+    {isHomepage && (
+      <div class="site-loader" id="site-loader" aria-label="Loading homepage" role="status">
+        <img src={getUrl('/loading.png')} alt="" />
+      </div>
+    )}
+    <div class="route-progress" id="route-progress" aria-hidden="true"></div>
 
     <aside class="side-rail" id="side-rail" aria-label="Main navigation">
       <nav class="rail-nav">
@@ -106,20 +109,22 @@ const navItems = [
     const backdrop = document.querySelector<HTMLButtonElement>('#rail-backdrop');
     const mobileRail = window.matchMedia('(max-width: 900px)');
 
-    if (loader && root.dataset.loaderSeen !== 'true') {
+    if (loader && root.dataset.homeLoaderSeen !== 'true') {
       const shownAt = performance.now();
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      let loadingFinished = false;
+      let finished = false;
       const finishLoading = () => {
-        if (loadingFinished) return;
-        loadingFinished = true;
-        const minimumVisible = reducedMotion ? 0 : 250;
-        const remaining = Math.max(0, minimumVisible - (performance.now() - shownAt));
+        if (finished) return;
+        finished = true;
+        const remaining = Math.max(0, (reducedMotion ? 0 : 250) - (performance.now() - shownAt));
         window.setTimeout(() => {
           loader.classList.add('is-leaving');
-          root.dataset.loaderSeen = 'true';
-          try { sessionStorage.setItem('terminal4-loaded', 'true'); } catch (_) {}
-          window.setTimeout(() => loader.remove(), reducedMotion ? 20 : 560);
+          try { sessionStorage.setItem('terminal4-home-loaded', 'true'); } catch (_) {}
+          window.setTimeout(() => {
+            root.dataset.homeLoaderSeen = 'true';
+            loader.remove();
+            document.dispatchEvent(new CustomEvent('terminal4:home-loader-cleared'));
+          }, reducedMotion ? 20 : 560);
         }, remaining);
       };
       if (document.readyState === 'complete') finishLoading();
@@ -167,4 +172,11 @@ const navItems = [
   }
 
   document.addEventListener('astro:page-load', initSiteShell);
+
+  if (document.documentElement.dataset.routeProgressBound !== 'true') {
+    document.documentElement.dataset.routeProgressBound = 'true';
+    const setProgress = (active: boolean) => document.querySelector('#route-progress')?.classList.toggle('is-active', active);
+    document.addEventListener('astro:before-preparation', () => setProgress(true));
+    document.addEventListener('astro:page-load', () => setProgress(false));
+  }
 </script>

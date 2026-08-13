@@ -34,11 +34,15 @@ Use the shared values in `src/styles/index.css`:
 - Space: `--space-1` through `--space-8`.
 - Shape: `--radius-control`, `--radius-card`, `--radius-pill`.
 - Layout: `--page-content-width`, `--reading-width`, `--article-shell-width`, `--article-shell-padding-inline`.
-- Motion: `--motion-fast`, `--motion-base`, `--motion-slow`, `--ease-standard`.
+- Motion: `--motion-fast`, `--motion-base`, `--motion-slow`, `--motion-page`, `--ease-standard`.
 
 Avoid one-off `clamp()` values for a role already represented by a token.
 
 ## Interaction states
+
+All routes inherit the shared `900ms` non-blocking page reveal from `.site-content`. ClientRouter swaps replay that duration and show the shared preparation progress line. Ordinary routes rise into place. Homepage is the direction exception: its hero artwork and Contact, Main2 heading/cards, and Main3 groups all descend from above with the same duration and short staggered starts. Main2/Main3 still wait until the panel is deeper in view. The Scroll cue stays in place and fades in after 5 seconds; the fixed question trigger never participates in motion. The full-screen `loading.png` remains a homepage-only, once-per-session exception; the hero layers and clipped title letters begin only after that overlay clears.
+
+Article, Memo, Review, and Gallery families use only the shared quiet white `28px` dot matrix over P4 gray. Do not combine it with light pools or paper grain. The Review latest card is opaque yellow frosted material: retain its local `/assets/ui/surface-noise.svg` roughness, single soft shadow, pointer tilt, orange hover light spot, and transparent Markdown excerpt background.
 
 Every asynchronous or filterable feature should define the applicable states:
 

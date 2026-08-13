@@ -9,17 +9,51 @@
   .recent-review {
     position: relative;
     margin-left: clamp(1.5rem, 3vw, 3rem);
+    perspective: 900px;
   }
   .recent-card {
+    --tilt-x: 0deg;
+    --tilt-y: 0deg;
+    --glow-x: 50%;
+    --glow-y: 50%;
     position: relative;
     display: block;
     min-height: 152px;
     padding: 1rem 1.75rem 2rem clamp(7.5rem, 12vw, 10rem);
-    border-radius: 7px 4px 8px 5px;
+    border: 1px solid rgba(255, 255, 255, .78);
+    border-radius: 18px;
     background: var(--p4-yellow);
     color: var(--p4-purple);
-    transform: rotate(-0.15deg);
+    box-shadow: 0 20px 48px rgba(74, 47, 79, .18);
+    transform: rotate(-.15deg) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+    transform-style: preserve-3d;
+    transition: transform 180ms ease-out, box-shadow 240ms ease, background 180ms ease;
   }
+  .recent-card::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    opacity: .42;
+    pointer-events: none;
+    background: url('/assets/ui/surface-noise.svg') repeat;
+    mix-blend-mode: soft-light;
+  }
+  .recent-card::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--glow-x) var(--glow-y), color-mix(in srgb, var(--p4-orange) 52%, transparent), transparent 30%);
+    transition: opacity var(--motion-base) ease;
+  }
+  .recent-card > * { position: relative; z-index: 1; }
+  .recent-card:not(.is-empty):hover { box-shadow: 0 26px 58px rgba(74, 47, 79, .24); }
+  .recent-card:not(.is-empty):hover::after { opacity: 1; }
   .latest-badge {
     position: absolute;
     top: 34%;
@@ -91,8 +125,10 @@
   .recent-excerpt {
     margin-top: 0.4rem;
     overflow: hidden;
+    background: transparent !important;
     font: 400 clamp(0.95rem, 1.25vw, 1.08rem)/1.45 var(--font-body);
   }
+  .recent-excerpt :where(p, a, span, strong, em) { background: transparent !important; }
   .recent-excerpt p:first-child {
     display: -webkit-box;
     margin: 0;

@@ -3,22 +3,46 @@ import { homeConfig } from '@/config/home';
 import getUrl from '@/utils/getUrl';
 
 const localUrl = (href: string) => (href.startsWith('/') ? getUrl(href) : href);
+const titleLetters = [
+  'polygon(0% 0%, 11% 0%, 10.5% 20%, 7% 17%, 5.4% 64%, 1.9% 61%, 3.8% 15%, 0% 13%)',
+  'polygon(9.1% 37%, 18.9% 37%, 18.9% 100%, 9.1% 100%)',
+  'polygon(20.3% 12%, 31.5% 12%, 31.5% 75%, 20.3% 75%)',
+  'polygon(33.1% 36%, 47% 36%, 47% 100%, 33.1% 100%)',
+  'polygon(48.6% 21%, 53% 21%, 53% 77%, 48.6% 77%)',
+  'polygon(54% 22%, 65.2% 22%, 65.2% 100%, 54% 100%)',
+  'polygon(66.4% 9%, 79.8% 9%, 79.8% 73%, 66.4% 73%)',
+  'polygon(80% 20%, 84% 20%, 84% 70%, 90.2% 70%, 90.2% 84%, 80% 84%)',
+  'polygon(89.2% 8%, 100% 8%, 100% 72%, 89.2% 72%)',
+] as const;
 ---
 
-<section class="home-panel hero-panel" id="home" aria-labelledby="hero-brand">
-  <div class="hero-brand" id="hero-brand">{homeConfig.brand}</div>
+<section class="home-panel hero-panel" id="home" aria-labelledby="hero-brand" data-home-hero>
+  <div class="hero-brand" id="hero-brand" data-home-hero-item style="--reveal-index:0">{homeConfig.brand}</div>
   <button class="hero-scroll-cue" id="hero-scroll-cue" type="button" aria-label="Scroll to navigation" aria-controls="explore">
     <span class="hero-caret" aria-hidden="true"></span>
   </button>
 
   <div class="hero-art" aria-label="Terminal 4 main artwork">
-    <img class="hero-layer hero-person" src={getUrl(homeConfig.hero.portrait)} width="822" height="930" alt="Purple-haired Terminal 4 character" />
-    <img class="hero-layer hero-stickers" src={getUrl(homeConfig.hero.stickers)} width="1082" height="814" alt="" aria-hidden="true" />
-    <img class="hero-layer hero-spirit" src={getUrl(homeConfig.hero.spirit)} width="322" height="276" alt="" aria-hidden="true" />
-    <img class="hero-layer hero-title" src={getUrl(homeConfig.hero.title)} width="995" height="211" alt="Terminal 4" />
+    <img class="hero-layer hero-person" src={getUrl(homeConfig.hero.portrait)} width="822" height="930" alt="Purple-haired Terminal 4 character" data-home-hero-item style="--reveal-index:1" />
+    <img class="hero-layer hero-stickers" src={getUrl(homeConfig.hero.stickers)} width="1082" height="814" alt="" aria-hidden="true" data-home-hero-item style="--reveal-index:2" />
+    <img class="hero-layer hero-spirit" src={getUrl(homeConfig.hero.spirit)} width="322" height="276" alt="" aria-hidden="true" data-home-hero-item style="--reveal-index:3" />
+    <div class="hero-title" data-hero-title role="img" aria-label="Terminal 4">
+      <img class="hero-title-final" src={getUrl(homeConfig.hero.title)} width="995" height="211" alt="" aria-hidden="true" />
+      {titleLetters.map((clip, index) => (
+        <img
+          class="hero-title-letter"
+          src={getUrl(homeConfig.hero.title)}
+          width="995"
+          height="211"
+          alt=""
+          aria-hidden="true"
+          style={`--letter-index:${index};--letter-clip:${clip}`}
+        />
+      ))}
+    </div>
   </div>
 
-  <aside class="contact-stack" aria-label="Contact accounts">
+  <aside class="contact-stack" aria-label="Contact accounts" data-home-hero-item style="--reveal-index:5">
     <span class="contact-label">CONTACT</span>
     {homeConfig.contacts.map((contact) => (
       <a href={localUrl(contact.href)} target={contact.href.startsWith('http') ? '_blank' : undefined} rel={contact.href.startsWith('http') ? 'noreferrer' : undefined} aria-label={contact.name} title={contact.name}>
@@ -38,5 +62,25 @@ const localUrl = (href: string) => (href.startsWith('/') ? getUrl(href) : href);
     heroLink.addEventListener('click', () => portalPanel.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   }
 
+  function initHeroTitle() {
+    const title = document.querySelector<HTMLElement>('[data-hero-title]');
+    const hero = document.querySelector<HTMLElement>('[data-home-hero]');
+    if (!title || title.dataset.ready === 'true') return;
+    title.dataset.ready = 'true';
+    const reveal = () => requestAnimationFrame(() => {
+      hero?.classList.add('is-visible');
+      title.classList.add('is-visible');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.setTimeout(() => title.classList.add('is-settled'), reducedMotion ? 0 : 1650);
+    });
+    const loader = document.querySelector('#site-loader');
+    if (loader && document.documentElement.dataset.homeLoaderSeen !== 'true') {
+      document.addEventListener('terminal4:home-loader-cleared', reveal, { once: true });
+    } else {
+      reveal();
+    }
+  }
+
   document.addEventListener('astro:page-load', initHomeScroll);
+  document.addEventListener('astro:page-load', initHeroTitle);
 </script>

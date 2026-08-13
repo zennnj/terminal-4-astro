@@ -7,22 +7,38 @@ import { homeConfig } from '@/config/home';
 import getUrl from '@/utils/getUrl';
 
 const page = await getEntry('pages', 'about');
-if (!page?.data.about) throw new Error('Missing ABOUT ME configuration in src/content/pages/about.md');
+if (!page?.data.about)
+  throw new Error(
+    'Missing ABOUT ME configuration in src/content/pages/about.md',
+  );
 
 const about = page.data.about;
 const { Content } = await render(page);
-const localUrl = (href: string) => href.startsWith('/') ? getUrl(href) : href;
+const localUrl = (href: string) => (href.startsWith('/') ? getUrl(href) : href);
 const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURIComponent(about.playlist.neteasePlaylistId)}&auto=${about.playlist.autoplay ? 1 : 0}&height=430`;
 ---
 
-<IndexPage title={page.data.title} description={page.data.description} contentClass="about-shell" bodyClass="about-route">
+<IndexPage
+  title={page.data.title}
+  description={page.data.description}
+  contentClass="about-shell"
+  bodyClass="about-route"
+>
   <article class="about-page">
-    <section class="about-hero about-gradient-surface" aria-labelledby="about-title">
+    <section
+      class="about-hero about-gradient-surface"
+      aria-labelledby="about-title"
+    >
       <h1 id="about-title">ABOUT ME</h1>
 
       <div class="profile-grid">
         <figure class="portrait-frame">
-          <img src={getUrl(about.portrait)} width="600" height="600" alt="a3ync 的自画像" />
+          <img
+            src={getUrl(about.portrait)}
+            width="600"
+            height="600"
+            alt="a3ync 的自画像"
+          />
         </figure>
         <div class="intro-copy markdown-body"><Content /></div>
       </div>
@@ -30,14 +46,25 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
       <div class="contact-row">
         <h2>CONTACT</h2>
         <nav aria-label="Contact links">
-          {about.contacts.map((contact) => (
-            <a href={localUrl(contact.href)} target={contact.href.startsWith('http') ? '_blank' : undefined} rel={contact.href.startsWith('http') ? 'noreferrer' : undefined}>{contact.name}</a>
-          ))}
+          {
+            about.contacts.map((contact) => (
+              <a
+                href={localUrl(contact.href)}
+                target={contact.href.startsWith('http') ? '_blank' : undefined}
+                rel={contact.href.startsWith('http') ? 'noreferrer' : undefined}
+              >
+                {contact.name}
+              </a>
+            ))
+          }
         </nav>
       </div>
     </section>
 
-    <section class="about-section playlist-section" aria-labelledby="playlist-heading">
+    <section
+      class="about-section playlist-section"
+      aria-labelledby="playlist-heading"
+    >
       <h2 id="playlist-heading">MY PLAYLIST</h2>
       <div class="playlist-embed">
         <iframe
@@ -47,31 +74,57 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
           height="450"
           style="border: 0"
           loading="lazy"
-          allow="autoplay"
-        ></iframe>
+          allow="autoplay"></iframe>
       </div>
     </section>
 
-    <section class="about-section favorites-section" aria-labelledby="favorites-heading">
-      <h2 id="favorites-heading">MY FAVORITE <span>(PIECE OF MEDIA<br />THAT INFLUENCED ME A LOT)</span></h2>
+    <section
+      class="about-section favorites-section"
+      aria-labelledby="favorites-heading"
+    >
+      <h2 id="favorites-heading">
+        MY FAVORITE <span>(PIECE OF MEDIA<br />THAT INFLUENCED ME A LOT)</span>
+      </h2>
       <ul class="favorite-list">
-        {about.favorites.map((favorite) => (
-          <li style={`--favorite-color:${getReviewAccentColor(favorite.category)}`}>
-            <span class="favorite-dot" aria-hidden="true">•</span>
-            <strong>{favorite.name}</strong>
-            {favorite.author && <span class="favorite-author">（{favorite.author}）</span>}
-          </li>
-        ))}
+        {
+          about.favorites.map((favorite) => (
+            <li
+              style={`--favorite-color:${getReviewAccentColor(favorite.category)}`}
+            >
+              <span class="favorite-dot" aria-hidden="true">
+                •
+              </span>
+              <strong>{favorite.name}</strong>
+              {favorite.author && (
+                <span class="favorite-author">（{favorite.author}）</span>
+              )}
+            </li>
+          ))
+        }
       </ul>
     </section>
 
-    <section class="about-section other-section" aria-labelledby="other-heading">
+    <section
+      class="about-section other-section"
+      aria-labelledby="other-heading"
+    >
       <h2 id="other-heading">OTHER</h2>
       <div class="other-content">
         <div class="other-copy">
-          {about.other.map((item) => (
-            <p><span>{item.label}：</span>{item.href ? <a href={item.href} target="_blank" rel="noreferrer">{item.value}</a> : item.value}</p>
-          ))}
+          {
+            about.other.map((item) => (
+              <p>
+                <span>{item.label}：</span>
+                {item.href ? (
+                  <a href={item.href} target="_blank" rel="noreferrer">
+                    {item.value}
+                  </a>
+                ) : (
+                  item.value
+                )}
+              </p>
+            ))
+          }
         </div>
         <div class="ask-area">
           <h2>ASK BOX</h2>
@@ -83,25 +136,42 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
     <section class="about-section fun-section" aria-labelledby="fun-heading">
       <h2 id="fun-heading">SOMETHING<br />FUN</h2>
       <div class="fun-accordions">
-        {about.fun.map((group, index) => (
-          <details open={index === 0}>
-            <summary>{group.title}<i class="ri-add-line" aria-hidden="true"></i></summary>
-            <div class="fun-content">
-              {group.description && <p>{group.description}</p>}
-              <div class="fun-images">
-                {group.images.map((image, imageIndex) => <img src={getUrl(image)} alt={`${group.title} ${imageIndex + 1}`} loading="lazy" />)}
+        {
+          about.fun.map((group, index) => (
+            <details open={index === 0}>
+              <summary>
+                {group.title}
+                <i class="ri-add-line" aria-hidden="true" />
+              </summary>
+              <div class="fun-content">
+                {group.description && <p>{group.description}</p>}
+                <div class="fun-images">
+                  {group.images.map((image, imageIndex) => (
+                    <img
+                      src={getUrl(image)}
+                      alt={`${group.title} ${imageIndex + 1}`}
+                      loading="lazy"
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          </details>
-        ))}
+            </details>
+          ))
+        }
       </div>
     </section>
   </article>
 </IndexPage>
 
 <style>
-  :global(.site-content.about-shell) { padding: 0; background: var(--p4-yellow); }
-  :global(body.about-route) { margin: 0; background: var(--p4-yellow); }
+  :global(.site-content.about-shell) {
+    padding: 0;
+    background: var(--p4-yellow);
+  }
+  :global(body.about-route) {
+    margin: 0;
+    background: var(--p4-yellow);
+  }
   .about-page {
     --about-left: 330px;
     --about-gap: 6rem;
@@ -111,24 +181,31 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
     color: var(--p4-coral);
     font-family: var(--font-body);
   }
-  .about-hero, .about-section { padding-inline: clamp(7rem, 11vw, 14rem) clamp(2rem, 6vw, 7rem); }
+  .about-hero,
+  .about-section {
+    padding-inline: clamp(7rem, 11vw, 14rem) clamp(2rem, 6vw, 7rem);
+  }
   .about-hero {
-    padding-top: clamp(.6rem, 1.5svh, 1.25rem);
-    padding-bottom: clamp(.75rem, 1.5vw, 1.25rem);
+    padding-top: clamp(0.6rem, 1.5svh, 1.25rem);
+    padding-bottom: clamp(0.75rem, 1.5vw, 1.25rem);
   }
   .about-hero > h1 {
     margin: 0 0 clamp(1.5rem, 3vw, 2.7rem);
     color: var(--p4-coral);
-    font: 700 clamp(4rem, 9vw, 9rem)/.82 var(--font-title);
-    letter-spacing: -.065em;
+    font: 700 clamp(4rem, 9vw, 9rem)/0.82 var(--font-title);
+    letter-spacing: -0.065em;
     text-align: right;
   }
-  .profile-grid, .contact-row, .about-section {
+  .profile-grid,
+  .contact-row,
+  .about-section {
     display: grid;
     grid-template-columns: var(--about-left) minmax(0, 1fr);
     gap: var(--about-gap);
   }
-  .profile-grid { align-items: center; }
+  .profile-grid {
+    align-items: center;
+  }
   .portrait-frame {
     width: min(100%, 330px);
     margin: 0;
@@ -137,76 +214,233 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
     border-radius: 1% 3% 2% 4%;
     background: color-mix(in srgb, var(--p4-purple) 12%, var(--p4-gray));
   }
-  .portrait-frame img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
-  :global(body.about-route) .intro-copy { color: var(--p4-coral); font: 700 clamp(1.15rem, 1.75vw, 1.85rem)/1.4 var(--font-body); }
-  .intro-copy :global(p) { margin: 0 0 .72rem; }
-  .intro-copy :global(p:first-child) { font-size: 1.08em; }
-  .contact-row { align-items: center; margin-top: clamp(1.3rem, 3vw, 2.5rem); }
-  .contact-row h2, .about-section > h2, .ask-area h2 {
+  .portrait-frame img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+  :global(body.about-route) .intro-copy {
+    color: var(--p4-coral);
+    font: 700 clamp(1rem, 1.57vw, 1.65rem)/1.4 var(--font-body);
+  }
+  .intro-copy :global(p) {
+    margin: 0 0 0.72rem;
+  }
+  .intro-copy :global(p:first-child) {
+    font-size: 1.08em;
+  }
+  .contact-row {
+    align-items: center;
+    margin-top: clamp(1.3rem, 3vw, 2.5rem);
+  }
+  .contact-row h2,
+  .about-section > h2,
+  .ask-area h2 {
     margin: 0;
     color: var(--p4-coral);
     font: 400 clamp(1.1rem, 1.7vw, 1.7rem)/1.08 var(--font-body);
-    letter-spacing: -.01em;
+    letter-spacing: -0.01em;
   }
-  .contact-row > h2, .about-section > h2 {
+  .contact-row > h2,
+  .about-section > h2 {
     width: min(100%, 330px);
     justify-self: center;
   }
-  .contact-row nav { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: .75rem clamp(1.5rem, 3.2vw, 3.5rem); }
-  .contact-row a { color: var(--p4-coral); font-size: clamp(1.1rem, 1.7vw, 1.7rem); }
-  .contact-row a:hover { color: var(--p4-purple); }
-  .about-section { padding-top: clamp(.8rem, 1.5vw, 1.5rem); padding-bottom: clamp(.8rem, 1.5vw, 1.5rem); }
-  .playlist-embed { min-width: 0; overflow: hidden; }
-  .playlist-embed iframe { display: block; width: 100%; height: 450px; }
-  .favorites-section { align-items: start; }
-  .favorites-section h2 span { display: block; margin-top: .6rem; font-size: .72em; line-height: 1.12; }
-  .favorite-list { display: flex; flex-wrap: wrap; align-content: flex-start; gap: .7rem .8rem; }
+  .contact-row nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.75rem clamp(1.5rem, 3.2vw, 3.5rem);
+  }
+  .contact-row a {
+    color: var(--p4-coral);
+    font-size: clamp(1.1rem, 1.7vw, 1.7rem);
+  }
+  .contact-row a:hover {
+    color: var(--p4-purple);
+  }
+  .about-section {
+    padding-top: clamp(0.8rem, 1.5vw, 1.5rem);
+    padding-bottom: clamp(0.8rem, 1.5vw, 1.5rem);
+  }
+  .playlist-embed {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .playlist-embed iframe {
+    display: block;
+    width: 100%;
+    height: 450px;
+  }
+  .favorites-section {
+    align-items: start;
+  }
+  .favorites-section h2 span {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: 0.72em;
+    line-height: 1.12;
+  }
+  .favorite-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 0.7rem 0.8rem;
+  }
   .favorite-list li {
     display: inline-flex;
     min-height: 2.65rem;
     align-items: center;
-    padding: .42rem 1rem .48rem;
+    padding: 0.42rem 1rem 0.48rem;
     border: 1.5px solid color-mix(in srgb, var(--p4-purple) 72%, transparent);
     border-radius: 999px;
     color: var(--p4-purple);
-    font-size: clamp(.95rem, 1.25vw, 1.18rem);
+    font-size: clamp(0.95rem, 1.25vw, 1.18rem);
     line-height: 1.1;
     white-space: nowrap;
   }
-  .favorite-dot { margin-right: .48rem; color: var(--favorite-color); font-size: 1.4em; line-height: 0; -webkit-text-stroke: .5px color-mix(in srgb, var(--p4-purple) 28%, transparent); }
-  .favorite-author { opacity: .62; }
-  .other-content { display: grid; min-width: 0; grid-template-columns: minmax(0, 1fr) minmax(150px, .34fr); gap: clamp(2rem, 4vw, 4rem); }
-  .other-copy { color: var(--p4-coral); font: 700 clamp(1.1rem, 1.65vw, 1.65rem)/1.35 var(--font-about-copy); }
-  .other-copy p { margin: 0 0 1.25rem; overflow-wrap: anywhere; }
-  .other-copy span { display: block; font-family: var(--font-body); font-size: .72em; letter-spacing: .04em; }
-  .other-copy a { color: inherit; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .18em; }
-  .ask-area { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
-  .fun-accordions { display: grid; min-width: 0; gap: 1rem; }
-  .fun-accordions details { border-top: 2px solid var(--p4-purple); border-bottom: 2px solid var(--p4-purple); color: var(--p4-purple); }
-  .fun-accordions summary { display: flex; cursor: pointer; align-items: center; justify-content: space-between; padding: 1rem .25rem; font: 700 clamp(1.15rem, 2vw, 1.8rem)/1 var(--font-title); list-style: none; }
-  .fun-accordions summary::-webkit-details-marker { display: none; }
-  .fun-accordions summary i { transition: transform .2s ease; }
-  .fun-accordions details[open] summary i { transform: rotate(45deg); }
-  .fun-content { padding: 0 .25rem 1.5rem; }
-  .fun-content p { margin: 0 0 1rem; opacity: .76; }
-  .fun-images { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-  .fun-images img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 2% 4% 3% 5%; }
+  .favorite-dot {
+    margin-right: 0.48rem;
+    color: var(--favorite-color);
+    font-size: 1.4em;
+    line-height: 0;
+    -webkit-text-stroke: 0.5px
+      color-mix(in srgb, var(--p4-purple) 28%, transparent);
+  }
+  .favorite-author {
+    opacity: 0.62;
+  }
+  .other-content {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 0.34fr);
+    gap: clamp(2rem, 4vw, 4rem);
+  }
+  .other-copy {
+    color: var(--p4-coral);
+    font: 700 clamp(1.1rem, 1.65vw, 1.65rem)/1.35 var(--font-about-copy);
+  }
+  .other-copy p {
+    margin: 0 0 1.25rem;
+    overflow-wrap: anywhere;
+  }
+  .other-copy span {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.72em;
+    letter-spacing: 0.04em;
+  }
+  .other-copy a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+  .ask-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .fun-accordions {
+    display: grid;
+    min-width: 0;
+    gap: 1rem;
+  }
+  .fun-accordions details {
+    border-top: 2px solid var(--p4-purple);
+    border-bottom: 2px solid var(--p4-purple);
+    color: var(--p4-purple);
+  }
+  .fun-accordions summary {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0.25rem;
+    font: 700 clamp(1.15rem, 2vw, 1.8rem)/1 var(--font-title);
+    list-style: none;
+  }
+  .fun-accordions summary::-webkit-details-marker {
+    display: none;
+  }
+  .fun-accordions summary i {
+    transition: transform 0.2s ease;
+  }
+  .fun-accordions details[open] summary i {
+    transform: rotate(45deg);
+  }
+  .fun-content {
+    padding: 0 0.25rem 1.5rem;
+  }
+  .fun-content p {
+    margin: 0 0 1rem;
+    opacity: 0.76;
+  }
+  .fun-images {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .fun-images img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 2% 4% 3% 5%;
+  }
   @media (max-width: 900px) {
-    .about-page { --about-left: minmax(0, 1fr); --about-gap: 1.25rem; }
-    .about-hero, .about-section { padding-inline: 1.25rem; }
-    .about-hero { padding-top: .75rem; }
-    .profile-grid, .contact-row, .about-section { grid-template-columns: 1fr; }
-    .portrait-frame { width: min(72vw, 330px); justify-self: start; }
-    .contact-row > h2, .about-section > h2 { width: auto; justify-self: start; }
-    .contact-row nav { justify-content: flex-start; }
-    .other-content { grid-template-columns: 1fr; }
-    .ask-area { align-items: flex-start; }
+    .about-page {
+      --about-left: minmax(0, 1fr);
+      --about-gap: 1.25rem;
+    }
+    .about-hero,
+    .about-section {
+      padding-inline: 1.25rem;
+    }
+    .about-hero {
+      padding-top: 0.75rem;
+    }
+    .profile-grid,
+    .contact-row,
+    .about-section {
+      grid-template-columns: 1fr;
+    }
+    .portrait-frame {
+      width: min(72vw, 330px);
+      justify-self: start;
+    }
+    .contact-row > h2,
+    .about-section > h2 {
+      width: auto;
+      justify-self: start;
+    }
+    .contact-row nav {
+      justify-content: flex-start;
+    }
+    .other-content {
+      grid-template-columns: 1fr;
+    }
+    .ask-area {
+      align-items: flex-start;
+    }
   }
   @media (max-width: 560px) {
-    .about-hero > h1 { font-size: 19vw; }
-    .portrait-frame { width: min(100%, 300px); }
-    .playlist-embed iframe { height: 450px; }
-    .favorite-list li { max-width: 100%; white-space: normal; }
-    .fun-images { grid-template-columns: 1fr; }
+    .about-hero > h1 {
+      font-size: 19vw;
+    }
+    .portrait-frame {
+      width: min(100%, 300px);
+    }
+    .playlist-embed iframe {
+      height: 450px;
+    }
+    .favorite-list li {
+      max-width: 100%;
+      white-space: normal;
+    }
+    .fun-images {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

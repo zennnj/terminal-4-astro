@@ -4,7 +4,7 @@ description: 关于 a3ync、喜欢的作品和一些有趣的东西。
 about:
   portrait: /assets/about/selfpic.png
   playlist:
-    neteasePlaylistId: '17606083772'
+    neteasePlaylistId: '18247618371'
     autoplay: false
   contacts:
     - name: GitHub
@@ -31,8 +31,8 @@ about:
     - name: 迷宫饭
       author: 九井谅子
       category: anime
-    - name: 银河系漫游指南
-      author: Douglas Adams
+    - name: 页面还在修改
+      author: 我
       category: book
     - name: The Stanley Parable
       category: game
@@ -44,7 +44,7 @@ about:
       value: https://lit.link/zh-tw/a3ync
       href: https://lit.link/zh-tw/a3ync
     - label: 明日方舟账号
-      value: a3ync#1234
+      value: A3yNc#6968
   fun:
     - title: 最近画了什么？
       description: 这里先放几张示例图，之后直接替换本文件中的图片路径即可。
@@ -59,10 +59,11 @@ about:
         - /assets/home/navigation/image-4.png
 ---
 
-hi，我是 a3ync=async=异步。大学生。
+hi👋我是 a3ync=async=异步。
+名字虽然是计算机用语，但当时是取了[【BOF:ET】async【BGA】 ](https://b23.tv/0MiVge1) 的标题，事后才发现是*异步*的意思。
+可能把e->3更常见一点，但是我看mon3ter是s变的，所以我也学了（
 
-一般通过宅宅。注重故事本身（原作）> 其他。我不喜欢只有恋爱内容（指传统浪漫关系）的作品。
+自设虽然变了好几版，但自15年上网以来，一直是紫毛。
 
-不太有爬墙的概念，只能说人脑这个 CPU 能同时处理的线程是有限的，单纯看哪几个线程抢到了控制权而已，下一秒其他线程可能就抢回来了。
-
-希望自己能够有一天自如地通过画表达自己的想法。总的来说基本就是沉浸在自己的世界里，随便玩玩随便画画。
+大四。目前为毕业挣扎中。
+一般通过宅宅。终于找到了人生中真正感兴趣的事情，那就是打游戏。

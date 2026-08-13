@@ -11,6 +11,7 @@ Core principles:
 - Treat the sidebar as an overlay. Opening it must never reflow or shift page content.
 - Prefer the shared palette and font tokens over page-specific hard-coded values.
 - Use responsive rules based on both viewport width and viewport height.
+- Browser text selection uses a light-purple background with white foreground text.
 
 ## 2. P4 color palette
 
@@ -105,7 +106,7 @@ Layer order:
 1. `.hero-person` — character
 2. `.hero-stickers` — stickers with a soft purple drop shadow
 3. `.hero-spirit` — OMO/spirit
-4. `.hero-title` — title image with a soft purple drop shadow
+4. `.hero-title` — nine clipped title-letter layers with a hard-edged purple drop shadow
 
 Current placement intent:
 
@@ -114,7 +115,7 @@ Current placement intent:
 - `.hero-art` remains horizontally centered. Because the visible layered content occupies roughly `5%–100%` of its internal canvas, the complete coordinate system uses `translateY(-2.5%)` so the visible person/title composition—not the transparent canvas box—is vertically centered.
 - `.hero-art` keeps a fixed `1020 / 940` aspect ratio. Responsive rules may resize the wrapper, but must not independently change its height or reposition/resize the person, stickers, or title.
 - OMO intentionally sits left of the person (`top: 11%`, `left: -6%`) so it does not crowd the character.
-- The title keeps `bottom: 0` and `width: 88%` at every viewport size so it overlaps only the lower part of the person, matching the Main1 reference relationship. The scroll triangle stays independently anchored to the panel bottom.
+- The title keeps `bottom: 0` and `width: 88%` at every viewport size so it overlaps only the lower part of the person, matching the Main1 reference relationship. Its nine layers reuse clipped regions of `title.png` while entering from above in left-to-right order after the homepage loader clears. Once the sequence finishes, the clipped layers switch to one complete `title.png` layer so glyph edges and the zero-blur hard shadow cannot be cut by per-letter masks. The scroll triangle stays independently anchored to the panel bottom.
 
 The composition is sized with both width and height constraints, for example:
 
@@ -165,9 +166,11 @@ Never implement `.rail-open` by changing `.site-content` width, margin, padding,
 - REVIEW pages reuse the Article shell padding. On REVIEW detail pages, the back link, title, cover, NOTES, and REVIEW have no extra desktop inset: their left edge must exactly align with the REVIEW directory's large `REVIEW` heading. The back link is a separate row and must not consume a column in the cover/metadata grid.
 - REVIEW detail uses a dense overview: the cover column is much narrower than the metadata column, the inter-column gap stays at or below `2.5rem`, metadata rows use a `.6rem` gap, and the title/NOTES/REVIEW vertical spacing must remain compact.
 - The REVIEW directory uses a compact yellow latest-review feature card. Its orange `Latest` burst intentionally overlaps outside the card's upper-left edge, while the Noto Sans SC `Latest` text must remain fully contained inside the orange burst. The card is followed by a two-column desktop list. Filter selection is a contained capsule. Category markers are circles, dates remain visible, and filtered results paginate at 20 entries per page with a bottom page count and navigation.
+- The latest-review card uses an opaque yellow rough-frosted surface, one soft depth shadow, and restrained pointer-following tilt. Do not combine soft and hard offset shadows. Its Markdown excerpt remains transparent so the yellow material is continuous, and hover adds an orange pointer-following light spot. Touch interaction stays static and reduced-motion disables meaningful transition time.
+- Article, Memo, Review, and Gallery families use one quiet white `28px` dot matrix over the P4 gray surface. Do not stack light pools, paper grain, or a second texture on those page backgrounds. `surface-noise.svg` is reserved for the Review glass material itself.
 - REVIEW category accents are a dedicated five-color palette configured in `src/config/reviews.ts`: GAME `#e36397`, MOVIE `#f6e27f`, ANI/COMIC `#44ccff`, VIDEO `#6e2594`, and BOOK `#169873`.
 - Markdown tables of contents include heading levels 1 through 4 and remain vertically scrollable within the viewport.
-- Article Markdown body copy is responsive `15px–16px`, uses `1.82` line height, and is capped by `--reading-width: 72ch`. Other Markdown surfaces retain the shared `17px–18px` scale. The TOC remains `190px–240px`; collapse to one column at the mobile breakpoint rather than squeezing the reading column.
+- Article Markdown body copy is responsive `15px–16px`, uses `1.82` line height, and is capped by `--article-reading-width: 88ch` so it can use more of the existing main column. Other Markdown surfaces retain the shared `17px–18px` scale and `--reading-width: 72ch`. The TOC remains `190px–240px`; collapse to one column at the mobile breakpoint rather than squeezing the reading column.
 - ARTICLE descriptions use the base text size; dates, word counts, tags, and secondary metadata use `--text-xs`/`--text-sm`.
 - Markdown soft line endings, including consecutive blockquote lines, render as visible single line breaks on CRLF, LF, and CR-authored files.
 
@@ -178,7 +181,8 @@ Never implement `.rail-open` by changing `.site-content` width, margin, padding,
 - `EmptyState.astro` owns empty-content messaging.
 - `MediaFrame.astro` owns stable aspect ratios, lazy/eager loading, decoding, shimmer state, error state, and image fade-in.
 - Standard route CSS belongs in `src/styles/pages/`; route files should primarily load data and compose components.
-- Motion uses `--motion-fast`, `--motion-base`, `--motion-slow`, and `--ease-standard`. Prefer restrained feedback and state transitions.
+- Motion uses `--motion-fast`, `--motion-base`, `--motion-slow`, `--motion-page`, and `--ease-standard`. Page entrance motion uses the shared `--motion-page: 900ms` duration; do not give individual routes a faster or slower page entrance.
+- Every route uses the shared content-reveal transition on initial load and ClientRouter navigation. Ordinary routes rise into place; Homepage is the intentional direction exception: its hero layers, Contact, Main2 heading/cards, and Main3 content all enter downward from above with the same `--motion-page` duration. Main2 and Main3 start after roughly 30% of the panel reaches the reduced observer viewport and use short start-time staggering so the change remains legible instead of flashing in as one block. The Homepage Scroll cue does not move: it fades in at its final position after a fixed 5-second delay. The fixed bottom-right question trigger remains outside Homepage motion and permanently available. The legacy `loading.png` overlay plays only on the first homepage visit per browser session, then starts the hero and title reveals after it clears. ClientRouter preparation displays a non-blocking 3px coral progress line immediately after navigation begins.
 - All motion must obey the global `prefers-reduced-motion` rule.
 - Static HTML does not need a loading spinner. Use local skeletons only for asynchronously fetched content such as Search or comments.
 

@@ -8,19 +8,19 @@ const sitePage = await getEntry('pages', 'site');
 if (!sitePage) throw new Error('Missing content entry: src/content/pages/site.md');
 ---
 
-<section class="home-panel info-panel" id="information" aria-label="About and site updates">
+<section class="home-panel info-panel" id="information" aria-label="About and site updates" data-home-reveal>
   <div class="info-content">
     <article class="home-about">
-      <h2>{homeConfig.about.title}</h2>
-      <div class="info-copy">
+      <h2 data-home-reveal-item style="--reveal-index:0">{homeConfig.about.title}</h2>
+      <div class="info-copy" data-home-reveal-item style="--reveal-index:1">
         {homeConfig.about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
         <a class="info-more" href={getUrl(homeConfig.about.href)}>more <span aria-hidden="true">&gt;</span></a>
       </div>
     </article>
 
     <section class="home-log" aria-labelledby="site-log-heading">
-      <h2 id="site-log-heading">{siteConfig.updateLogTitle.map((line) => <span>{line}</span>)}</h2>
-      <div class="log-copy">
+      <h2 id="site-log-heading" data-home-reveal-item style="--reveal-index:2">{siteConfig.updateLogTitle.map((line) => <span>{line}</span>)}</h2>
+      <div class="log-copy" data-home-reveal-item style="--reveal-index:3">
         <ol>
           {sitePage.data.updates.map((entry) => (
             <li><time datetime={entry.date}>{entry.date}</time><span>{entry.text}</span></li>

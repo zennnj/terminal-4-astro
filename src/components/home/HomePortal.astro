@@ -3,16 +3,16 @@ import { homeConfig } from '@/config/home';
 import getUrl from '@/utils/getUrl';
 ---
 
-<section class="home-panel portal-panel" id="explore" aria-labelledby="portal-heading">
-  <h1 class="portal-heading" id="portal-heading">
+<section class="home-panel portal-panel" id="explore" aria-labelledby="portal-heading" data-home-reveal>
+  <h1 class="portal-heading" id="portal-heading" data-home-reveal-item style="--reveal-index:0">
     {homeConfig.navigation.heading.map((line) => <span>{line}</span>)}
   </h1>
   <nav class="portal-grid" aria-label="Featured navigation">
-    {homeConfig.navigation.items.map((item) => (
-      <a class="portal-link" href={getUrl(item.href)}>
+    {homeConfig.navigation.items.map((item, index) => (
+      <a class="portal-link" href={getUrl(item.href)} data-home-reveal-item style={`--reveal-index:${index + 1}`}>
         <span class="portal-art" style={`--portal-mask: url("${getUrl(item.mask)}")`}>
-          <img class="portal-image" src={getUrl(item.image)} alt="" loading="lazy" />
-          <img class="portal-outline" src={getUrl(item.outline)} alt="" aria-hidden="true" loading="lazy" />
+          <img class="portal-image" src={getUrl(item.image)} alt="" loading="eager" />
+          <img class="portal-outline" src={getUrl(item.outline)} alt="" aria-hidden="true" loading="eager" />
         </span>
         <span class="portal-label">{item.label}</span>
       </a>
