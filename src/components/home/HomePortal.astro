@@ -3,13 +3,15 @@ import { homeConfig } from '@/config/home';
 import getUrl from '@/utils/getUrl';
 ---
 
-<section class="home-panel portal-panel" id="explore" aria-labelledby="portal-heading" data-home-reveal>
-  <h1 class="portal-heading" id="portal-heading" data-home-reveal-item style="--reveal-index:0">
-    {homeConfig.navigation.heading.map((line) => <span>{line}</span>)}
-  </h1>
-  <nav class="portal-grid" aria-label="Featured navigation">
+<section class="home-panel portal-panel" id="explore" aria-labelledby="portal-heading">
+  <div data-home-reveal>
+    <h1 class="portal-heading" id="portal-heading" data-home-reveal-item>
+      {homeConfig.navigation.heading.map((line) => <span>{line}</span>)}
+    </h1>
+  </div>
+  <nav class="portal-grid" aria-label="Featured navigation" data-home-reveal data-home-reveal-threshold="0.06">
     {homeConfig.navigation.items.map((item, index) => (
-      <a class="portal-link" href={getUrl(item.href)} data-home-reveal-item style={`--reveal-index:${index + 1}`}>
+      <a class="portal-link" href={getUrl(item.href)} data-home-reveal-item style={`--reveal-index:${index}`}>
         <span class="portal-art" style={`--portal-mask: url("${getUrl(item.mask)}")`}>
           <img class="portal-image" src={getUrl(item.image)} alt="" loading="eager" />
           <img class="portal-outline" src={getUrl(item.outline)} alt="" aria-hidden="true" loading="eager" />

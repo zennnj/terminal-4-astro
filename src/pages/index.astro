@@ -17,22 +17,28 @@ import '@/styles/pages/home.css';
 
 <script>
   function initHomeReveals() {
-    const panels = [...document.querySelectorAll<HTMLElement>('[data-home-reveal]')];
-    if (!panels.length) return;
+    const targets = [...document.querySelectorAll<HTMLElement>('[data-home-reveal]')];
+    if (!targets.length) return;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    panels.forEach((panel) => panel.classList.add('is-reveal-ready'));
+    targets.forEach((target) => target.classList.add('is-reveal-ready'));
     if (reducedMotion || !('IntersectionObserver' in window)) {
-      panels.forEach((panel) => panel.classList.add('is-revealed'));
+      targets.forEach((target) => target.classList.add('is-revealed'));
       return;
     }
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        (entry.target as HTMLElement).classList.add('is-revealed');
-        observer.unobserve(entry.target);
+    const narrowViewport = window.matchMedia('(max-width: 720px)').matches;
+    targets.forEach((target) => {
+      const threshold = Number(target.dataset.homeRevealThreshold ?? .12);
+      const lateStage = target.dataset.homeRevealStage === 'late' && !narrowViewport;
+      const observer = new IntersectionObserver(([entry]) => {
+        if (!entry?.isIntersecting) return;
+        target.classList.add('is-revealed');
+        observer.disconnect();
+      }, {
+        threshold,
+        rootMargin: lateStage ? '0px 0px -34% 0px' : '0px 0px -12% 0px',
       });
-    }, { threshold: .3, rootMargin: '0px 0px -26% 0px' });
-    panels.forEach((panel) => observer.observe(panel));
+      observer.observe(target);
+    });
   }
 
   document.addEventListener('astro:page-load', initHomeReveals);

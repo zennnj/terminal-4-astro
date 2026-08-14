@@ -8,9 +8,9 @@ const sitePage = await getEntry('pages', 'site');
 if (!sitePage) throw new Error('Missing content entry: src/content/pages/site.md');
 ---
 
-<section class="home-panel info-panel" id="information" aria-label="About and site updates" data-home-reveal>
+<section class="home-panel info-panel" id="information" aria-label="About and site updates">
   <div class="info-content">
-    <article class="home-about">
+    <article class="home-about" data-home-reveal>
       <h2 data-home-reveal-item style="--reveal-index:0">{homeConfig.about.title}</h2>
       <div class="info-copy" data-home-reveal-item style="--reveal-index:1">
         {homeConfig.about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
@@ -18,9 +18,9 @@ if (!sitePage) throw new Error('Missing content entry: src/content/pages/site.md
       </div>
     </article>
 
-    <section class="home-log" aria-labelledby="site-log-heading">
-      <h2 id="site-log-heading" data-home-reveal-item style="--reveal-index:2">{siteConfig.updateLogTitle.map((line) => <span>{line}</span>)}</h2>
-      <div class="log-copy" data-home-reveal-item style="--reveal-index:3">
+    <section class="home-log" aria-labelledby="site-log-heading" data-home-reveal data-home-reveal-stage="late">
+      <h2 id="site-log-heading" data-home-reveal-item style="--reveal-index:0">{siteConfig.updateLogTitle.map((line) => <span>{line}</span>)}</h2>
+      <div class="log-copy" data-home-reveal-item style="--reveal-index:1">
         <ol>
           {sitePage.data.updates.map((entry) => (
             <li><time datetime={entry.date}>{entry.date}</time><span>{entry.text}</span></li>

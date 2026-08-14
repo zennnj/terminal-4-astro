@@ -23,7 +23,7 @@ export const homeConfig = {
   about: {
     title: 'ABOUT',
     paragraphs: [
-      'Hi, I’m zennnj. This is the small terminal where I collect things I have learned, made, watched, and almost forgotten.',
+      'Hi, I’m async. This is the small terminal where I collect things I have learned, made, watched, and almost forgotten.',
       'I write about backend development, systems, programming, art, and the ordinary details that make a day worth keeping.',
     ],
     href: '/about',
