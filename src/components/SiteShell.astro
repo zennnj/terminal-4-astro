@@ -29,7 +29,7 @@ const isHomepage = currentPath === '/';
 const usesRailCenteredLayout = !isHomepage && currentPath !== '/about' && currentPath !== '/site';
 const navItems = [
   { name: 'Home', href: '/', icon: 'ri-home-5-line', match: (path: string) => path === '/' },
-  { name: 'Articles', href: '/blog/1', icon: 'ri-article-line', match: (path: string) => path.startsWith('/blog') || path.startsWith('/archive') || path.startsWith('/tags') },
+  { name: 'Articles', href: '/articles', icon: 'ri-article-line', match: (path: string) => path.startsWith('/articles') || path.startsWith('/blog') || path.startsWith('/archive') || path.startsWith('/tags') },
   { name: 'Memos', href: '/memos', icon: 'ri-quill-pen-line', match: (path: string) => path.startsWith('/memos') },
   { name: 'Reviews', href: '/reviews', icon: 'ri-star-smile-line', match: (path: string) => path.startsWith('/reviews') },
   { name: 'Gallery', href: '/gallery', icon: 'ri-gallery-line', match: (path: string) => path.startsWith('/gallery') },

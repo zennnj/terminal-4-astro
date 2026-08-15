@@ -20,7 +20,7 @@ const { years } = Astro.props;
           {yearPosts.map((post) => {
             const postTags = dealLabel(post.data.tags);
             return (
-              <a href={getUrl(`/blog/${post.id}`)} data-filter-item data-tags={postTags.join('|')} data-search={`${post.data.title} ${postTags.join(' ')}`.toLowerCase()}>
+              <a href={getUrl(`/articles/${post.id}`)} data-filter-item data-tags={postTags.join('|')} data-search={`${post.data.title} ${postTags.join(' ')}`.toLowerCase()}>
                 <time>{post.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
                 <span>{post.data.title}</span><i class="ri-arrow-right-s-line"></i>
               </a>

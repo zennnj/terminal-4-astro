@@ -3,7 +3,6 @@ title: 样式测试
 description: test
 date: 2026-08-08
 tags: [Astro]
-description: ""
 sticky: 1
 draft: true
 ---

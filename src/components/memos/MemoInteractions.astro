@@ -43,7 +43,7 @@
       const url = new URL(location.href);
       if (view === 'junk') url.searchParams.set('view', 'junk');
       else url.searchParams.delete('view');
-      history.replaceState(null, '', url);
+      history.replaceState(history.state, '', url);
     };
     buttons.forEach((button) => button.addEventListener('click', () => setView(button.dataset.memoView ?? 'memos')));
     if (reload instanceof HTMLButtonElement) reload.addEventListener('click', () => window.dispatchEvent(new CustomEvent('waline:mount', { detail: { id: 'waline-junk', force: true } })));

@@ -37,7 +37,7 @@ const initialVisible = posts.slice(initialStart, initialEnd).length;
       const words = readingTime(post.body ?? '').words;
       return (
         <article class="article-card" data-filter-item data-tags={postTags.join('|')} data-search={searchText} hidden={index < initialStart || index >= initialEnd}>
-          <a href={getUrl(`/blog/${post.id}`)}>
+          <a href={getUrl(`/articles/${post.id}`)}>
             <time>{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
             <h2>{post.data.title}</h2>
             {excerpt && <p class="card-description">{excerpt}{!post.data.description && excerpt.length === 120 ? '…' : ''}</p>}
@@ -53,8 +53,8 @@ const initialVisible = posts.slice(initialStart, initialEnd).length;
   </div>
   {totalPages > 1 && (
     <nav class="article-pagination" aria-label="Article pagination" data-article-pagination>
-      <a class="previous-posts" data-page-nav="previous" href={getUrl(`/blog/${Math.max(1, currentPage - 1)}`)} hidden={currentPage <= 1}><i class="ri-arrow-left-line"></i> Previous Posts</a>
-      <a class="next-posts" data-page-nav="next" href={getUrl(`/blog/${Math.min(totalPages, currentPage + 1)}`)} hidden={currentPage >= totalPages}>Next Posts <i class="ri-arrow-right-line"></i></a>
+      <a class="previous-posts" data-page-nav="previous" href={getUrl(currentPage - 1 <= 1 ? '/articles' : `/articles/page/${currentPage - 1}`)} hidden={currentPage <= 1}><i class="ri-arrow-left-line"></i> Previous Posts</a>
+      <a class="next-posts" data-page-nav="next" href={getUrl(`/articles/page/${Math.min(totalPages, currentPage + 1)}`)} hidden={currentPage >= totalPages}>Next Posts <i class="ri-arrow-right-line"></i></a>
     </nav>
   )}
 </div>

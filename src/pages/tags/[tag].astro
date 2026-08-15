@@ -29,7 +29,7 @@ const resultPosts = sortPostsByDate(tagPosts);
     <div class="content-results">
       {resultPosts.map((post) => (
         <article class="content-result">
-          <a href={getUrl(`/${post.collection}/${post.id}`)}>
+          <a href={getUrl(`/articles/${post.id}`)}>
             <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
             <div><h2>{post.data.title}</h2>{post.data.description && <p>{post.data.description}</p>}</div>
             <i class="ri-arrow-right-line" aria-hidden="true"></i>

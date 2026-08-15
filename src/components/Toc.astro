@@ -47,7 +47,7 @@ const visibleHeadings = headings
       if (!targetId || !target) return;
       event.preventDefault();
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      history.replaceState(null, '', `#${encodeURIComponent(targetId)}`);
+      history.replaceState(history.state, '', `#${encodeURIComponent(targetId)}`);
     }));
 
     const observer = new IntersectionObserver((entries) => {

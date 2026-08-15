@@ -69,7 +69,7 @@ export const categories = [
   {
     name: "文章",
     iconClass: "ri-draft-line",
-    href: "/blog/1",
+    href: "/articles",
   },
   {
     name: "Memos",

@@ -148,7 +148,7 @@ comment: true
 
 ```text
 src/content/blog/Astro指南.md
-→ /blog/astro指南
+→ /articles/astro指南
 ```
 
 本地开发时 Blog 草稿仍会显示，生产构建时会排除 `draft: true` 的 Blog。

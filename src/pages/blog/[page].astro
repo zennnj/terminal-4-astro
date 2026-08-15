@@ -1,40 +1,15 @@
 ---
-import IndexPage from '@/layouts/IndexPage.astro';
-import ArticleToolbar from '@/components/articles/ArticleToolbar.astro';
-import ArticleList from '@/components/articles/ArticleList.astro';
-import ArticleStats from '@/components/articles/ArticleStats.astro';
-import ArticleArchive from '@/components/articles/ArticleArchive.astro';
-import ArticleHubInteractions from '@/components/articles/ArticleHubInteractions.astro';
 import { getCollectionByName } from '@/utils/getCollectionByName';
 import { orderBySticky } from '@/utils/orderBySticky';
-import { dealLabel } from '@/utils/dealLabel';
-import '@/styles/pages/article-hub.css';
 
 export async function getStaticPaths() {
   const entries = orderBySticky(await getCollectionByName('blog'));
-  return Array.from({ length: Math.ceil(entries.length / 10) }, (_, index) => ({ params: { page: String(index + 1) } }));
+  return Array.from({ length: Math.ceil(entries.length / 10) }, (_, index) => ({
+    params: { page: String(index + 1) },
+  }));
 }
 
-const allPosts = orderBySticky(await getCollectionByName('blog'));
-const postsPerPage = 10;
-const totalPages = Math.ceil(allPosts.length / postsPerPage);
-const currentPage = Math.min(Math.max(Number(Astro.params.page) || 1, 1), totalPages);
-const tagCounts = new Map<string, number>();
-for (const post of allPosts) for (const tag of dealLabel(post.data.tags)) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
-const postsByYear = allPosts.reduce<Record<string, typeof allPosts>>((groups, post) => {
-  (groups[String(post.data.date.getFullYear())] ??= []).push(post);
-  return groups;
-}, {});
-const yearEntries = Object.entries(postsByYear).sort(([a], [b]) => Number(b) - Number(a));
+const page = Math.max(Number(Astro.params.page) || 1, 1);
+const destination = page === 1 ? '/articles' : `/articles/page/${page}`;
+return Astro.redirect(destination, 301);
 ---
-
-<IndexPage title="Article" contentClass="article-hub-shell">
-  <ArticleToolbar />
-  <section class="article-layout" data-view-panel="list">
-    <ArticleList posts={allPosts} {currentPage} {totalPages} totalPosts={allPosts.length} />
-    <ArticleStats total={allPosts.length} {tags} />
-  </section>
-  <ArticleArchive years={yearEntries} />
-  <ArticleHubInteractions />
-</IndexPage>

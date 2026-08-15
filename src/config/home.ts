@@ -14,7 +14,7 @@ export const homeConfig = {
   navigation: {
     heading: ['THE PAST IS NEVER DEAD.', 'IT IS NOT EVEN PAST.'],
     items: [
-      { label: 'ARTICLES', href: '/blog/1', image: '/assets/home/navigation/image-1.png', mask: '/assets/home/navigation/column-1-background.png', outline: '/assets/home/navigation/column-1.png' },
+      { label: 'ARTICLES', href: '/articles', image: '/assets/home/navigation/image-1.png', mask: '/assets/home/navigation/column-1-background.png', outline: '/assets/home/navigation/column-1.png' },
       { label: 'MEMOS', href: '/memos', image: '/assets/home/navigation/image-2.png', mask: '/assets/home/navigation/column-2-background.png', outline: '/assets/home/navigation/column-2.png' },
       { label: 'REVIEWS', href: '/reviews', image: '/assets/home/navigation/image-3.png', mask: '/assets/home/navigation/column-3-background.png', outline: '/assets/home/navigation/column-3.png' },
       { label: 'GALLERY', href: '/gallery', image: '/assets/home/navigation/image-4.png', mask: '/assets/home/navigation/column-4-background.png', outline: '/assets/home/navigation/column-4.png' },
@@ -31,7 +31,7 @@ export const homeConfig = {
   footer: {
     navigation: [
       { label: 'HOME', href: '/' },
-      { label: 'ARTICLES', href: '/blog/1' },
+      { label: 'ARTICLES', href: '/articles' },
       { label: 'MEMOS', href: '/memos' },
       { label: 'REVIEWS', href: '/reviews' },
       { label: 'GALLERY', href: '/gallery' },

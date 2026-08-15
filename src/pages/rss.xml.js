@@ -18,8 +18,8 @@ export async function GET() {
       pubDate: post.data.date,
       description: post.data.description || (post.body ?? '').substring(0, 140).replace(/#/gi, "") + "...",
       // Compute RSS link from post `id`
-      // This example assumes all posts are rendered as `/blog/[slug]` routes
-      link: `${getUrl("/blog/")}${post.id}/`,
+      // Article detail pages are rendered as `/articles/[slug]` routes.
+      link: `${getUrl("/articles/")}${post.id}/`,
     })),
   });
 }
