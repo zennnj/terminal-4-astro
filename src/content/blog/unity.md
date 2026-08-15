@@ -3,9 +3,11 @@ title: unity
 tags: learn
 abbrlink: 56743
 date: 2024-10-26 08:45:24
+description: "前情提要：博主自愿被抓去做(玩)游戏，组内高手云集(真的吗)，令博主焦虑不安，坐在电脑前狂敲一千多行笔记，于是有了这篇文章"
+sticky: 0
+draft: false
 ---
 
-前情提要：博主自愿被抓去做(玩)游戏，组内高手云集(真的吗)，令博主焦虑不安，坐在电脑前狂敲一千多行笔记，于是有了这篇文章
 
 一天c#铺垫后的正文
 <font color = Darkblue>**PROBLEMS:**</font>

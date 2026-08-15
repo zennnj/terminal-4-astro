@@ -7,7 +7,7 @@ import EmptyState from '@/components/ui/EmptyState.astro';
 import '@/styles/pages/gallery.css';
 
 const works = (await getCollection('gallery'))
-  .filter((work) => !work.data.draft)
+  .filter((work) => import.meta.env.DEV || !work.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const galleryItems = await Promise.all(works.map(async (work) => ({
   work,
@@ -35,7 +35,7 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
         return (
           <article class="work-card" data-kind={work.data.kind}>
             <button class="work-image-button" type="button" data-gallery-open={dialogId} aria-label={`放大查看：${work.data.title}`}>
-              <MediaFrame src={work.data.image} alt={work.data.alt ?? work.data.title} aspectRatio="auto" />
+              <MediaFrame src={work.data.image} alt={work.data.alt ?? work.data.title} aspectRatio="4 / 3" fit="cover" />
               <span class="view-hint" aria-hidden="true"><i class="ri-fullscreen-line"></i> VIEW</span>
             </button>
             <div class="work-caption">
@@ -49,7 +49,7 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
             <dialog class="gallery-dialog" id={dialogId} aria-labelledby={titleId}>
               <div class="dialog-layout">
                 <div class="dialog-image">
-                  <MediaFrame src={work.data.image} alt={work.data.alt ?? work.data.title} aspectRatio="auto" fit="contain" />
+                  <MediaFrame src={work.data.image} alt={work.data.alt ?? work.data.title} aspectRatio="1 / 1" fit="contain" class="dialog-media" />
                 </div>
                 <aside class="dialog-description">
                   <button class="dialog-close" type="button" data-gallery-close aria-label="关闭作品预览"><i class="ri-close-line"></i></button>
@@ -60,6 +60,12 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
                   {work.data.tags.length > 0 && <p class="dialog-tags">{work.data.tags.map((tag) => <span>#{tag}</span>)}</p>}
                 </aside>
               </div>
+              {galleryItems.length > 1 && (
+                <>
+                  <button class="dialog-nav dialog-prev" type="button" data-gallery-prev aria-label="Previous artwork"><i class="ri-arrow-left-s-line"></i></button>
+                  <button class="dialog-nav dialog-next" type="button" data-gallery-next aria-label="Next artwork"><i class="ri-arrow-right-s-line"></i></button>
+                </>
+              )}
             </dialog>
           </article>
         );
@@ -85,6 +91,28 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
     };
 
     const filterButtons = [...gallery.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+    const dialogs = [...gallery.querySelectorAll<HTMLDialogElement>('.gallery-dialog')];
+    const getBrowsableDialogs = () => dialogs.filter((dialog) => {
+      const card = dialog.closest<HTMLElement>('.work-card');
+      return card && !card.hidden;
+    });
+    const syncDialogNavigation = () => {
+      const hideNavigation = getBrowsableDialogs().length < 2;
+      gallery.querySelectorAll<HTMLButtonElement>('[data-gallery-prev], [data-gallery-next]').forEach((button) => {
+        button.hidden = hideNavigation;
+      });
+    };
+    const switchDialog = (dialog: HTMLDialogElement, direction: -1 | 1) => {
+      const available = getBrowsableDialogs();
+      if (available.length < 2) return;
+      const currentIndex = available.indexOf(dialog);
+      if (currentIndex < 0) return;
+      const nextDialog = available[(currentIndex + direction + available.length) % available.length];
+      dialog.close();
+      nextDialog.showModal();
+      lockPageScroll();
+    };
+
     filterButtons.forEach((button) => {
       button.addEventListener('click', () => {
         filterButtons.forEach((item) => item.classList.toggle('active', item === button));
@@ -93,6 +121,7 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
         gallery.querySelectorAll<HTMLElement>('[data-kind]').forEach((card) => {
           card.hidden = filter !== 'all' && card.dataset.kind !== filter;
         });
+        syncDialogNavigation();
       });
     });
 
@@ -105,15 +134,24 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
       });
     });
 
-    gallery.querySelectorAll<HTMLDialogElement>('.gallery-dialog').forEach((dialog) => {
+    dialogs.forEach((dialog) => {
       dialog.querySelector<HTMLButtonElement>('[data-gallery-close]')?.addEventListener('click', () => dialog.close());
+      dialog.querySelector<HTMLButtonElement>('[data-gallery-prev]')?.addEventListener('click', () => switchDialog(dialog, -1));
+      dialog.querySelector<HTMLButtonElement>('[data-gallery-next]')?.addEventListener('click', () => switchDialog(dialog, 1));
       dialog.addEventListener('click', (event) => {
         if (event.target === dialog) dialog.close();
+      });
+      dialog.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        switchDialog(dialog, event.key === 'ArrowLeft' ? -1 : 1);
       });
       dialog.addEventListener('close', () => {
         if (!gallery.querySelector('.gallery-dialog[open]')) unlockPageScroll();
       });
     });
+
+    syncDialogNavigation();
 
     document.addEventListener('astro:before-swap', unlockPageScroll, { once: true });
   }

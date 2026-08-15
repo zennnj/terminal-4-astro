@@ -3,6 +3,9 @@ title: Mybatis-Plus
 abbrlink: 5d2bcff8
 date: 2025-12-11 17:49:50
 tags: learn
+description: ""
+sticky: 0
+draft: false
 ---
 
 [Mybatis · Terminal 4](https://zennnj.github.io/posts/da3e1361.html)

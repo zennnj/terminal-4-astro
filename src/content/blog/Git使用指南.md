@@ -4,6 +4,9 @@ abstract:
 abbrlink: 74add858
 date: 2024-11-10 09:49:24
 tags: learn
+description: "每次还是用图形化界面，实际没看过几次"
+sticky: 0
+draft: false
 ---
 
 重温

@@ -3,9 +3,12 @@ title: Linux
 tags: learn
 abbrlink: 15691
 date: 2024-09-10 19:03:02
+description: "只是简单个人记录，没有多少调理。"
+sticky: 0
+draft: false
 ---
 
-只是简单个人记录，没有多少调理
+
 ~~我现在看见运维二字就想笑~~
 
  windows subsystem for linux （WSL）

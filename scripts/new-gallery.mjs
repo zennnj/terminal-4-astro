@@ -12,7 +12,7 @@ import {
 const GALLERY_KINDS = ['oc', 'fanart'];
 const IMAGE_EXTENSIONS = new Set(['.avif', '.gif', '.jpeg', '.jpg', '.png', '.svg', '.webp']);
 const args = process.argv.slice(2);
-const options = { kind: 'oc', dryRun: false };
+const options = { kind: 'oc', tags: [], dryRun: false };
 let title;
 
 function takeValue(index, option) {
@@ -21,11 +21,16 @@ function takeValue(index, option) {
   return value;
 }
 
+function addTags(value) {
+  const tags = value.split(/[,，]/).map((tag) => tag.trim()).filter(Boolean);
+  options.tags = [...new Set([...options.tags, ...tags])];
+}
+
 try {
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === '--help') {
-      console.log('Usage: pnpm new:gallery "Artwork title" --image "path/to/image" [--kind oc|fanart] [--alt "description"] [--dry-run]');
+      console.log('Usage: pnpm new:gallery "Artwork title" --image "path/to/image" [--kind oc|fanart] [--tag "tag"] [--tags "tag1,tag2"] [--alt "image description"] [--description "artwork description"] [--dry-run]');
       process.exit(0);
     } else if (arg === '--dry-run') {
       options.dryRun = true;
@@ -39,11 +44,23 @@ try {
       index += 1;
     } else if (arg.startsWith('--kind=')) {
       options.kind = arg.slice('--kind='.length);
+    } else if (arg === '--tag' || arg === '--tags') {
+      addTags(takeValue(index, arg));
+      index += 1;
+    } else if (arg.startsWith('--tag=')) {
+      addTags(arg.slice('--tag='.length));
+    } else if (arg.startsWith('--tags=')) {
+      addTags(arg.slice('--tags='.length));
     } else if (arg === '--alt') {
       options.alt = takeValue(index, '--alt');
       index += 1;
     } else if (arg.startsWith('--alt=')) {
       options.alt = arg.slice('--alt='.length);
+    } else if (arg === '--description') {
+      options.description = takeValue(index, '--description');
+      index += 1;
+    } else if (arg.startsWith('--description=')) {
+      options.description = arg.slice('--description='.length);
     } else if (arg.startsWith('--')) {
       throw new Error(`Unknown option: ${arg}`);
     } else if (!title) {
@@ -54,7 +71,7 @@ try {
   }
 
   if (!title || !options.image) {
-    throw new Error('Usage: pnpm new:gallery "Artwork title" --image "path/to/image" [--kind oc|fanart] [--alt "description"] [--dry-run]');
+    throw new Error('Usage: pnpm new:gallery "Artwork title" --image "path/to/image" [--kind oc|fanart] [--tag "tag"] [--tags "tag1,tag2"] [--alt "image description"] [--description "artwork description"] [--dry-run]');
   }
   if (!GALLERY_KINDS.includes(options.kind)) {
     throw new Error(`Invalid gallery kind "${options.kind}". Expected one of: ${GALLERY_KINDS.join(', ')}`);
@@ -71,6 +88,7 @@ try {
 
   const fileName = safeFileName(title);
   const imageFileName = `${fileName}${extension}`;
+  const description = options.description || options.alt || 'Write the artwork description here.';
   const relativeContentPath = path.join('src', 'content', 'gallery', `${fileName}.md`);
   const targetContent = path.join(projectRoot, relativeContentPath);
   const targetImage = path.join(projectRoot, 'src', 'image', 'gallery', imageFileName);
@@ -96,13 +114,13 @@ try {
 title: ${yamlString(title)}
 date: ${today()}
 kind: ${options.kind}
-tags: []
+tags: [${options.tags.map(yamlString).join(', ')}]
 image: ../../image/gallery/${imageFileName}
 alt: ${yamlString(options.alt || title)}
-draft: true
+draft: false
 ---
 
-Write the artwork description here.
+${description}
 `;
 
   if (!options.dryRun && !sameImage) {
@@ -114,6 +132,7 @@ Write the artwork description here.
   console.log(`${options.dryRun ? 'Would create' : 'Created'}: ${targetContent}`);
   console.log(`${options.dryRun ? 'Would copy image to' : sameImage ? 'Using image' : 'Copied image to'}: ${targetImage}`);
   console.log(`Kind: ${options.kind}`);
+  console.log(`Tags: ${options.tags.length > 0 ? options.tags.join(', ') : '(none)'}`);
 } catch (error) {
   console.error(error.message);
   process.exit(1);

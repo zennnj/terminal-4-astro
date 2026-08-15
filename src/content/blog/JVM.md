@@ -3,9 +3,11 @@ title: JVM
 tags: learn
 abbrlink: 17374
 date: 2024-09-28 16:57:28
+description: "JVM 是 Java Virtual Machine 的缩写，它是一个虚构出来的计算机，一种规范。"
+sticky: 0
+draft: false
 ---
 
-JVM 是 Java Virtual Machine 的缩写，它是一个虚构出来的计算机，一种规范。
 [大白话带你认识 JVM](https://javaguide.cn/java/jvm/jvm-intro.html)
 
 # JVM跨平台原理

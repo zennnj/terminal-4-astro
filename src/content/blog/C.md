@@ -3,9 +3,10 @@ title: C#
 tags: learn
 abbrlink: 59760
 date: 2024-10-25 13:57:01
+description: "感觉和java区别没有很大"
+sticky: 0
+draft: false
 ---
-
-感觉和java区别没有很大
 
 [C#语法随记——Event?.Invoke()](https://www.cnblogs.com/BreezeJDK/p/16739052.html)
 

@@ -3,10 +3,10 @@ title: JAVA
 tags: learn
 abbrlink: 40121
 date: 2024-09-11 21:47:16
+description: "好深邃哇"
+sticky: 0
+draft: false
 ---
-
-好深邃哇
-
 
 --->[到最后一节](#后话)
 [java注解](https://www.runoob.com/w3cnote/java-annotation.html)

@@ -3,11 +3,10 @@ title: 简单shell脚本
 abbrlink: 26c51008
 date: 2025-09-28 10:50:55
 tags: learn
+description: "简单贝壳"
+sticky: 0
+draft: false
 ---
-
-简单贝壳
-
-
 
 编辑器`vim` / `nano` 左转Linux
 

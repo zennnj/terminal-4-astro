@@ -4,6 +4,9 @@ tags: learn
 categoties: 后端
 abbrlink: '808644e3'
 date: 2025-12-28 16:47:13
+description: "cache，cash"
+sticky: 0
+draft: false
 ---
 
 cache，cash

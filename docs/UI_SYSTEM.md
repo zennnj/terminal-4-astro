@@ -25,6 +25,8 @@ import MediaFrame from '@/components/ui/MediaFrame.astro';
 - `BackLink`: pass a stable route and label; do not use `history.back()` for primary navigation.
 - `EmptyState`: use when a collection or filtered result is empty.
 - `MediaFrame`: pass local `ImageMetadata` or a string URL, `alt`, `aspectRatio`, `fit`, and optional `eager`. Use eager loading only for critical above-the-fold media.
+- Gallery modal media is the exception to intrinsic directory sizing: its frame stretches across the available modal image column without inner padding, uses `object-fit: contain`, and stays transparent over the single purple preview canvas; the adjacent description rail explicitly retains its P4-gray surface. The transparent outer dialog allows its navigation buttons to sit beyond the rounded, shadowed content layer; edge buttons and the Left/Right Arrow keys cycle through the current filtered artwork set and wrap at both ends.
+- Gallery directory cards use a row-major two-column grid on desktop and one column on mobile so date-descending source order is also the visible left-to-right, top-to-bottom order. Directory previews use a fixed `4 / 3` cover crop and a fixed caption height to keep rows compact; the modal continues to show the complete uncropped artwork.
 
 ## Tokens
 

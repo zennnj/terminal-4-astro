@@ -3,9 +3,10 @@ title: Github访问连接失败问题
 tags: problems
 abbrlink: 7165
 date: 2024-09-11 20:22:42
+description: "感觉完全就是因为vpn的问题!!"
+sticky: 0
+draft: false
 ---
-
-感觉完全就是因为vpn的问题!!
 
 不知道出了什么问题来了学校之后git一直连接失败，几个办法换着用.....
 ![why..](/images/Github访问连接失败问题/1.png)

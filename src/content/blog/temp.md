@@ -3,9 +3,10 @@ title: temp
 tags: learn
 abbrlink: b5385ca
 date: 2025-11-28 13:25:39
+description: "未整理的文件"
+sticky: 0
+draft: true
 ---
-
-未整理的文件
 
 
 ## 在登录拦截器中封装全局上下文，基于ThreadLocal实现线程级用户身份共享，减少重复查询

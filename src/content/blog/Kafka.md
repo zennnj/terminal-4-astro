@@ -3,6 +3,9 @@ title: Kafka & RabbitMQ
 abbrlink: 9a7d5a13
 date: 2025-10-16 12:48:44
 tags: learn
+description: ""
+sticky: 0
+draft: false
 ---
 
 [如何在Linux下设置缩写命令命令-CSDN博客](https://blog.csdn.net/wt141643/article/details/107136038)

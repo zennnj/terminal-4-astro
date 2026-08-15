@@ -38,10 +38,10 @@ pnpm new:review "作品名称" --type anime
 
 ```bash
 pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind oc
-pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind fanart --alt "作品说明"
+pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind fanart --tags "Celeste, fanart" --alt "图片替代文本" --description "作品说明"
 ```
 
-命令会把图片复制到 `src/image/gallery/`，并在 `src/content/gallery/` 创建同名 Markdown。两个目标中的任意一个已经存在时都会拒绝覆盖；可附加 `--dry-run` 预演。
+命令会把图片复制到 `src/image/gallery/`，并在 `src/content/gallery/` 创建默认已发布（`draft: false`）的同名 Markdown。`--tag` 可重复指定单个标签，`--tags` 接受逗号分隔的多个标签并自动去重。`--alt` 用作图片替代文本，`--description` 写入弹窗显示的 Markdown 正文；省略 `--description` 时会沿用 `--alt`。两个目标中的任意一个已经存在时都会拒绝覆盖；可附加 `--dry-run` 预演。
 
 ## 本地开发
 

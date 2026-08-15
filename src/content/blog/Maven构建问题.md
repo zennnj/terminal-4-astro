@@ -3,12 +3,10 @@ title: Maven构建问题
 abbrlink: 4ee3286d
 date: 2025-05-02 21:05:30
 tags: problems
+description: "哎呀我草这个maven怎么一直爆红啊，记录一下解决方案。。。stackoverflow谢谢你...."
+sticky: 0
+draft: false
 ---
-
-哎呀我草这个maven怎么一直爆红啊，记录一下解决方案。。。
-
-stackoverflow谢谢你....
-
 
 
 > 2025/5/2

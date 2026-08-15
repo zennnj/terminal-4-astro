@@ -3,7 +3,7 @@ title: Astro 新站使用指南
 description: Terminal 4 的内容创建、页面配置、图片管理、Markdown、评论上传与发布指南。
 date: 2026-08-10
 tags: [Astro, 指南]
-sticky: 0
+sticky: 2
 draft: false
 toc: true
 mathjax: false
@@ -127,20 +127,20 @@ comment: true
 
 ### Blog 字段
 
-| 字段 | 必填 | 说明 |
-|---|---:|---|
-| `title` | 是 | 页面标题 |
-| `date` | 是 | 建议使用 `YYYY-MM-DD` |
-| `description` | 否 | 搜索、SEO 与分享摘要 |
-| `tags` | 否 | 标签数组，例如 `[Astro, Java]` |
-| `sticky` | 否 | 置顶权重，数字越大越靠前 |
-| `draft` | 否 | 是否为草稿 |
-| `toc` | 否 | 是否显示目录 |
-| `mathjax` | 否 | 是否加载 MathJax |
-| `mermaid` | 否 | 是否加载 Mermaid |
-| `donate` | 否 | 是否允许显示赞赏区域 |
-| `comment` | 否 | 是否允许显示评论区域 |
-| `ogImage` | 否 | 社交分享图片 |
+| 字段          | 必填 | 说明                           |
+| ------------- | ---: | ------------------------------ |
+| `title`       |   是 | 页面标题                       |
+| `date`        |   是 | 建议使用 `YYYY-MM-DD`          |
+| `description` |   否 | 搜索、SEO 与分享摘要           |
+| `tags`        |   否 | 标签数组，例如 `[Astro, Java]` |
+| `sticky`      |   否 | 置顶权重，数字越大越靠前       |
+| `draft`       |   否 | 是否为草稿                     |
+| `toc`         |   否 | 是否显示目录                   |
+| `mathjax`     |   否 | 是否加载 MathJax               |
+| `mermaid`     |   否 | 是否加载 Mermaid               |
+| `donate`      |   否 | 是否允许显示赞赏区域           |
+| `comment`     |   否 | 是否允许显示评论区域           |
+| `ogImage`     |   否 | 社交分享图片                   |
 
 当前 Blog 没有 `category`、`categories` 或 `abbrlink` 功能，新文章分类使用 `tags`。
 
@@ -274,10 +274,10 @@ pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind oc
 pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind fanart
 ```
 
-增加替代文字：
+增加替代文字和作品说明：
 
 ```bash
-pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind fanart --alt "画面说明"
+pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind fanart --tags "Celeste, fanart" --alt "图片替代文本" --description "作品说明"
 ```
 
 预演：
@@ -286,7 +286,7 @@ pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind fanart 
 pnpm new:gallery "作品名称" --image "D:/Pictures/artwork.png" --kind oc --dry-run
 ```
 
-命令会复制图片到 `src/image/gallery/`，并在 `src/content/gallery/` 创建对应 Markdown。允许的图片格式为 AVIF、GIF、JPEG、JPG、PNG、SVG 和 WebP。
+命令会复制图片到 `src/image/gallery/`，并在 `src/content/gallery/` 创建对应 Markdown。`--tag` 可重复指定单个标签，`--tags` 接受逗号分隔的多个标签并自动去重。`--alt` 用作图片替代文本，`--description` 写入弹窗显示的 Markdown 正文；省略 `--description` 时会沿用 `--alt`。允许的图片格式为 AVIF、GIF、JPEG、JPG、PNG、SVG 和 WebP。
 
 Gallery 的 `kind` 只能填写：
 
@@ -295,7 +295,7 @@ oc
 fanart
 ```
 
-发布前把 `draft: true` 改为 `draft: false`。创建脚本不会覆盖已存在的 Markdown 或目标图片。
+创建脚本默认写入 `draft: false`，作品会直接参与生产构建；需要暂缓发布时手动改为 `draft: true`。创建脚本不会覆盖已存在的 Markdown 或目标图片。
 
 ## 8. 配置首页
 
@@ -558,12 +558,12 @@ P4 主色变量：
 
 本地字体位于 `public/assets/fonts/`：
 
-| CSS 变量 | 字体 | 用途 |
-|---|---|---|
-| `--font-title` | PP Neue Montreal Bold | 大标题 |
-| `--font-display` | Boba Mono Regular | 引语与展示文字 |
-| `--font-body` | Wix Madefor Display Regular | 正文、导航与小标题 |
-| `--font-about-copy` | 猫啃网烟波宋-B Bold | ABOUT ME 与 ABOUT SITE 正文 |
+| CSS 变量            | 字体                        | 用途                        |
+| ------------------- | --------------------------- | --------------------------- |
+| `--font-title`      | PP Neue Montreal Bold       | 大标题                      |
+| `--font-display`    | Boba Mono Regular           | 引语与展示文字              |
+| `--font-body`       | Wix Madefor Display Regular | 正文、导航与小标题          |
+| `--font-about-copy` | 猫啃网烟波宋-B Bold         | ABOUT ME 与 ABOUT SITE 正文 |
 
 修改页面布局、颜色、字体、首页资源、侧栏或交互前，先阅读根目录 `UI_STYLE_GUIDE.md`。侧栏必须保持覆盖式打开，不能挤压或移动页面内容。
 
