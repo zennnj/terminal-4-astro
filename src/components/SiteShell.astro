@@ -70,16 +70,17 @@ const navItems = [
             href={getUrl(item.href)}
             aria-label={item.name}
             aria-current={item.match(currentPath) ? 'page' : undefined}
+            data-cursor-label={item.name}
           >
             <i class={item.icon}></i>
-            <span>{item.name}</span>
           </a>
         ))}
       </nav>
-      <a class="rail-side-icon" href={getUrl('/site')} aria-label="About this site">
+      <a class="rail-side-icon" href={getUrl('/site')} aria-label="About this site" data-cursor-label="About this site">
         <img src={getUrl('/assets/ui/side-icon.png')} width="111" height="102" alt="" />
       </a>
     </aside>
+    <span class="rail-cursor-label" id="rail-cursor-label" aria-hidden="true" hidden></span>
 
     <button
       class="rail-toggle"
@@ -107,6 +108,8 @@ const navItems = [
     const loader = document.querySelector<HTMLElement>('#site-loader');
     const toggle = document.querySelector<HTMLButtonElement>('#rail-menu-toggle');
     const backdrop = document.querySelector<HTMLButtonElement>('#rail-backdrop');
+    const rail = document.querySelector<HTMLElement>('#side-rail');
+    const railCursorLabel = document.querySelector<HTMLElement>('#rail-cursor-label');
     const mobileRail = window.matchMedia('(max-width: 900px)');
 
     if (loader && root.dataset.homeLoaderSeen !== 'true') {
@@ -135,6 +138,38 @@ const navItems = [
     }
 
     if (!toggle) return;
+
+    if (rail && railCursorLabel && rail.dataset.cursorLabelsReady !== 'true') {
+      rail.dataset.cursorLabelsReady = 'true';
+      const hideCursorLabel = () => { railCursorLabel.hidden = true; };
+      const showCursorLabel = (item: HTMLElement, clientX: number, clientY: number) => {
+        const label = item.dataset.cursorLabel;
+        if (!label) return hideCursorLabel();
+        railCursorLabel.textContent = label;
+        railCursorLabel.hidden = false;
+        const width = railCursorLabel.offsetWidth;
+        const height = railCursorLabel.offsetHeight;
+        const left = clientX + width + 24 > window.innerWidth ? clientX - width - 16 : clientX + 16;
+        const top = clientY + height + 24 > window.innerHeight ? clientY - height - 16 : clientY + 16;
+        railCursorLabel.style.left = `${Math.max(8, left)}px`;
+        railCursorLabel.style.top = `${Math.max(8, top)}px`;
+      };
+      rail.addEventListener('pointermove', (event) => {
+        if (event.pointerType === 'touch') return hideCursorLabel();
+        const item = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-cursor-label]') : null;
+        if (item) showCursorLabel(item, event.clientX, event.clientY);
+        else hideCursorLabel();
+      });
+      rail.addEventListener('pointerleave', hideCursorLabel);
+      rail.addEventListener('pointerdown', hideCursorLabel);
+      rail.addEventListener('focusin', (event) => {
+        const item = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-cursor-label]') : null;
+        if (!item) return;
+        const rect = item.getBoundingClientRect();
+        showCursorLabel(item, rect.right, rect.top + rect.height / 2);
+      });
+      rail.addEventListener('focusout', hideCursorLabel);
+    }
 
     const setRail = (open: boolean) => {
       const currentToggle = document.querySelector<HTMLButtonElement>('#rail-menu-toggle');

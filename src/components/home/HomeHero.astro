@@ -45,9 +45,8 @@ const titleLetters = [
   <aside class="contact-stack" aria-label="Contact accounts" data-home-hero-item style="--reveal-index:5">
     <span class="contact-label">CONTACT</span>
     {homeConfig.contacts.map((contact) => (
-      <a href={localUrl(contact.href)} target={contact.href.startsWith('http') ? '_blank' : undefined} rel={contact.href.startsWith('http') ? 'noreferrer' : undefined} aria-label={contact.name} title={contact.name}>
+      <a href={localUrl(contact.href)} target={contact.href.startsWith('http') ? '_blank' : undefined} rel={contact.href.startsWith('http') ? 'noreferrer' : undefined} aria-label={contact.name}>
         <i class={contact.icon} />
-        <span>{contact.name}</span>
       </a>
     ))}
   </aside>

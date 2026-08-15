@@ -243,33 +243,10 @@ body.home-page [data-home-reveal-item] {
     background-color 0.2s ease;
 }
 
-.contact-stack a>span {
-  position: absolute;
-  right: calc(100% + 0.65rem);
-  padding: 0.25rem 0.5rem;
-  border-radius: 999px;
-  opacity: 0;
-  background: var(--p4-coral);
-  color: var(--p4-yellow);
-  font: 0.66rem/1 var(--font-body);
-  letter-spacing: 0.06em;
-  transform: translateX(0.5rem);
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-  pointer-events: none;
-}
-
 .contact-stack a:hover,
 .contact-stack a:focus-visible {
   background: var(--p4-coral);
   color: var(--p4-yellow);
-}
-
-.contact-stack a:hover>span,
-.contact-stack a:focus-visible>span {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .portal-panel {
@@ -790,10 +767,6 @@ body.home-page [data-home-reveal-item] {
   .contact-stack a {
     width: 43px;
     border-width: 3px;
-  }
-
-  .contact-stack a>span {
-    display: none;
   }
 
   .portal-panel {

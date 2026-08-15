@@ -56,6 +56,8 @@ Every asynchronous or filterable feature should define the applicable states:
 
 Buttons that represent a selected view or filter use `aria-pressed`. Keyboard focus must remain visible. ClientRouter behavior binds on `astro:page-load` and guards duplicate listeners when elements persist.
 
+On fine-pointer devices, ordinary content inherits the shared orange-square cursor from `src/styles/index.css`. Semantic interactive elements must be represented by links, buttons, form controls, or an appropriate ARIA role so their complete child subtree receives the red-square interactive cursor without flickering back to the ordinary state. Text-entry and disabled controls keep their native semantic cursors. Sidebar link labels are rendered by the shared cursor-following label; Homepage Contact icons intentionally expose no visual hover label.
+
 ## Verification
 
 Run `pnpm verify`, then inspect standard pages at `1482x706`, `1920x1080`, and `390x844`. Check title hierarchy, readable line length, horizontal overflow, media loading/error states, keyboard focus, filters/search, ClientRouter navigation, and sidebar layout shift.

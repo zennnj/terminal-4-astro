@@ -404,6 +404,8 @@ menu {
   /* --p4-gray: #F5F9E9; */
   /* --p4-gray: #E9F1F7; */
   --p4-yellow: #f4ffc1;
+  --cursor-square: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Crect width='12' height='12' fill='%23f9a620'/%3E%3C/svg%3E") 6 6, auto;
+  --cursor-interactive: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Crect width='12' height='12' fill='%23e86252'/%3E%3C/svg%3E") 6 6, pointer;
   --about-top-gradient: linear-gradient(180deg, var(--p4-yellow) 0, color-mix(in srgb, var(--p4-yellow) 48%, var(--p4-gray)) 42svh, var(--p4-gray) 82svh);
   --paper: var(--p4-gray);
   --paper-deep: var(--p4-yellow);
@@ -697,23 +699,6 @@ button {
   transition: transform .25s ease;
 }
 
-.rail-link span {
-  position: absolute;
-  z-index: 2;
-  left: calc(100% + 18px);
-  padding: .38rem .65rem;
-  border-radius: 999px;
-  opacity: 0;
-  background: var(--p4-purple);
-  color: #fff;
-  font-size: .72rem;
-  line-height: 1;
-  white-space: nowrap;
-  transform: translateX(-8px);
-  transition: opacity .2s ease, transform .2s ease;
-  pointer-events: none;
-}
-
 .rail-link:hover,
 .rail-link:focus-visible,
 .rail-link.active {
@@ -724,12 +709,6 @@ button {
 .rail-link:hover i,
 .rail-link:focus-visible i {
   transform: scale(1.12);
-}
-
-.rail-link:hover span,
-.rail-link:focus-visible span {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .rail-side-icon {
@@ -747,6 +726,20 @@ button {
 
 .rail-side-icon:hover {
   transform: rotate(-5deg) scale(1.05);
+}
+
+.rail-cursor-label {
+  position: fixed;
+  z-index: 120;
+  padding: .38rem .65rem;
+  border-radius: 999px;
+  background: var(--p4-purple);
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--p4-coral) 75%, transparent);
+  color: #fff;
+  font: .72rem/1 var(--font-body);
+  letter-spacing: .04em;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .rail-backdrop {
@@ -1013,5 +1006,62 @@ body.site-body:not(.home-page) textarea {
     scroll-behavior: auto !important;
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
+  }
+}
+
+@media (pointer: fine) {
+  html,
+  body,
+  body * {
+    cursor: var(--element-cursor, var(--cursor-square)) !important;
+  }
+
+  body :is(
+    a[href],
+    button:not(:disabled),
+    summary,
+    select:not(:disabled),
+    label,
+    [role="button"],
+    [role="link"],
+    [role="tab"],
+    [role="menuitem"],
+    [role="option"],
+    [onclick],
+    [data-fancybox],
+    input[type="button"]:not(:disabled),
+    input[type="submit"]:not(:disabled),
+    input[type="reset"]:not(:disabled),
+    input[type="checkbox"]:not(:disabled),
+    input[type="radio"]:not(:disabled),
+    input[type="range"]:not(:disabled),
+    input[type="file"]:not(:disabled)
+  ) {
+    --element-cursor: var(--cursor-interactive);
+  }
+
+  body :is(
+    input:not([type]):not(:disabled),
+    input[type="text"]:not(:disabled),
+    input[type="search"]:not(:disabled),
+    input[type="email"]:not(:disabled),
+    input[type="url"]:not(:disabled),
+    input[type="tel"]:not(:disabled),
+    input[type="password"]:not(:disabled),
+    input[type="number"]:not(:disabled),
+    textarea:not(:disabled),
+    [contenteditable="true"]
+  ) {
+    --element-cursor: text;
+  }
+
+  body :is(button:disabled, input:disabled, select:disabled, textarea:disabled) {
+    --element-cursor: not-allowed;
+  }
+}
+
+@media (pointer: coarse) {
+  .rail-cursor-label {
+    display: none;
   }
 }

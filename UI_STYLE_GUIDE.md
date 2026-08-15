@@ -12,6 +12,7 @@ Core principles:
 - Prefer the shared palette and font tokens over page-specific hard-coded values.
 - Use responsive rules based on both viewport width and viewport height.
 - Browser text selection uses a light-purple background with white foreground text.
+- Fine-pointer devices use a centered `12px` P4-orange square cursor over ordinary content and a centered `12px` P4-coral red square across the complete subtree of clickable controls and links. Text-entry and disabled controls retain their semantic cursors; touch input is unaffected. Homepage Contact icons have no hover labels. Sidebar labels appear beside and follow the cursor instead of occupying fixed positions beside their icons.
 
 ## 2. P4 color palette
 
