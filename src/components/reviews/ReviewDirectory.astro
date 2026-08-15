@@ -22,8 +22,11 @@ const types = [
 <section class="review-list" aria-label="Reviews">
   {reviews.length > 0 ? reviews.map((review) => (
     <a class="review-row" data-review-type={review.data.type} href={getUrl(`/reviews/${review.id}`)}>
-      <span class="review-color" style={`--accent:${getReviewAccentColor(review.data.type)}`} />
-      <strong>{review.data.title}</strong>
+      <span class="review-color" style={`--accent:${getReviewAccentColor(review.data.type)}`} aria-hidden="true">•</span>
+      <span class="review-name">
+        <strong>{review.data.title}</strong>
+        {review.data.creator && <span class="review-creator">({review.data.creator})</span>}
+      </span>
       <time datetime={review.data.date.toISOString()}>{review.data.date.getFullYear()}.{String(review.data.date.getMonth() + 1).padStart(2, '0')}</time>
     </a>
   )) : <div class="empty-rows" aria-label="No reviews yet"><span /><span /><span /></div>}
@@ -35,11 +38,13 @@ const types = [
 </nav>
 
 <script>
-  const PAGE_SIZE = 20;
+  const ROWS_PER_PAGE = 10;
   function bindReviewDirectory() {
     const shell = document.querySelector('.reviews-shell');
     if (!(shell instanceof HTMLElement) || shell.dataset.directoryBound === 'true') return;
     shell.dataset.directoryBound = 'true';
+    const list = shell.querySelector('.review-list');
+    if (!(list instanceof HTMLElement)) return;
     const rows = [...shell.querySelectorAll('[data-review-type]')].filter((item): item is HTMLElement => item instanceof HTMLElement);
     const filters = [...shell.querySelectorAll('[data-type]')].filter((item): item is HTMLButtonElement => item instanceof HTMLButtonElement);
     const count = shell.querySelector('.page-count');
@@ -47,27 +52,74 @@ const types = [
     const next = shell.querySelector('.page-next');
     let activeType = 'all';
     let page = 1;
+    let pages: HTMLElement[][] = [[]];
+
     const renderPage = () => {
-      const matches = rows.filter((row) => activeType === 'all' || row.dataset.reviewType === activeType);
-      const pageTotal = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
+      const pageTotal = Math.max(1, pages.length);
       page = Math.min(Math.max(1, page), pageTotal);
-      const visible = new Set(matches.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE));
+      const visible = new Set(pages[page - 1] ?? []);
       rows.forEach((row) => { row.hidden = !visible.has(row); });
       if (count instanceof HTMLElement) count.textContent = `PAGE ${page}/${pageTotal}`;
       if (previous instanceof HTMLButtonElement) previous.hidden = page === 1;
       if (next instanceof HTMLButtonElement) next.hidden = page === pageTotal;
     };
+
+    const measurePages = () => {
+      const matches = rows.filter((row) => activeType === 'all' || row.dataset.reviewType === activeType);
+      const matchSet = new Set(matches);
+      list.classList.add('is-measuring');
+      rows.forEach((row) => { row.hidden = !matchSet.has(row); });
+
+      const packedRows: HTMLElement[][] = [];
+      let rowTop: number | null = null;
+      matches.forEach((row) => {
+        const top = row.offsetTop;
+        if (rowTop === null || Math.abs(top - rowTop) > 2) {
+          packedRows.push([]);
+          rowTop = top;
+        }
+        packedRows[packedRows.length - 1].push(row);
+      });
+
+      pages = [];
+      for (let index = 0; index < packedRows.length; index += ROWS_PER_PAGE) {
+        pages.push(packedRows.slice(index, index + ROWS_PER_PAGE).flat());
+      }
+      if (pages.length === 0) pages = [[]];
+      list.classList.remove('is-measuring');
+      renderPage();
+    };
+
     filters.forEach((button) => button.addEventListener('click', () => {
       filters.forEach((item) => item.classList.remove('active'));
       filters.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
       button.classList.add('active');
       activeType = button.dataset.type ?? 'all';
       page = 1;
-      renderPage();
+      measurePages();
     }));
     if (previous instanceof HTMLButtonElement) previous.addEventListener('click', () => { page -= 1; renderPage(); });
     if (next instanceof HTMLButtonElement) next.addEventListener('click', () => { page += 1; renderPage(); });
-    renderPage();
+
+    let listWidth = Math.round(list.getBoundingClientRect().width);
+    let resizeFrame = 0;
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      const nextWidth = Math.round(entry.contentRect.width);
+      if (nextWidth === listWidth) return;
+      listWidth = nextWidth;
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(measurePages);
+    });
+    resizeObserver.observe(list);
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(resizeFrame);
+      resizeObserver.disconnect();
+    }, { once: true });
+
+    measurePages();
+    document.fonts.ready.then(() => {
+      if (shell.isConnected) measurePages();
+    });
   }
   document.addEventListener('astro:page-load', bindReviewDirectory);
 </script>

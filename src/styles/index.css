@@ -842,6 +842,10 @@ html[data-home-loader-seen="true"] .site-loader { display: none; }
 
 .article-detail-main {
   min-width: 0;
+  padding: var(--space-6);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, white 92%, transparent);
+  box-shadow: 0 14px 34px rgba(74, 47, 79, .11);
 }
 
 .article-detail-aside {
@@ -976,6 +980,10 @@ body.site-body:not(.home-page) textarea {
     grid-template-columns: 1fr;
     margin-left: 0;
     padding-inline: 0;
+  }
+
+  .article-detail-main {
+    padding: var(--space-4);
   }
 
   .article-detail-aside {

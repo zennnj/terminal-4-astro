@@ -8,22 +8,42 @@
     const searchControl = hub.querySelector('#search-control');
     const searchToggle = hub.querySelector('#search-toggle');
     const searchInput = hub.querySelector('#article-search');
+    const articleList = hub.querySelector('#article-list');
+    const articleCards = [...hub.querySelectorAll<HTMLElement>('#article-list [data-filter-item]')];
+    const pagination = hub.querySelector<HTMLElement>('[data-article-pagination]');
+    const previousPage = hub.querySelector<HTMLAnchorElement>('[data-page-nav="previous"]');
+    const nextPage = hub.querySelector<HTMLAnchorElement>('[data-page-nav="next"]');
+    const staticPage = articleList instanceof HTMLElement ? Number(articleList.dataset.currentPage ?? 1) : 1;
+    const pageSize = articleList instanceof HTMLElement ? Number(articleList.dataset.pageSize ?? 10) : 10;
     let activeTag = '';
+    let resultPage = 1;
 
     const applyFilters = () => {
       const term = searchInput instanceof HTMLInputElement ? searchInput.value.trim().toLowerCase() : '';
-      let visible = 0;
-      hub.querySelectorAll('[data-filter-item]').forEach((node) => {
-        if (!(node instanceof HTMLElement)) return;
-        const tags = (node.dataset.tags ?? '').split('|');
-        const match = (!activeTag || tags.includes(activeTag)) && (node.dataset.search ?? '').includes(term);
-        node.hidden = !match;
-        if (match && node.closest('[data-view-panel="list"]')) visible += 1;
+      const filtering = Boolean(activeTag || term);
+      const matches = articleCards.filter((card) => {
+        const tags = (card.dataset.tags ?? '').split('|');
+        return (!activeTag || tags.includes(activeTag)) && (card.dataset.search ?? '').includes(term);
       });
+      const totalPages = Math.max(1, Math.ceil(matches.length / pageSize));
+      const page = filtering ? Math.min(resultPage, totalPages) : staticPage;
+      if (filtering) resultPage = page;
+      const start = (page - 1) * pageSize;
+      const visibleCards = filtering ? matches.slice(start, start + pageSize) : articleCards.slice(start, start + pageSize);
+      const visibleSet = new Set(visibleCards);
+      articleCards.forEach((card) => { card.hidden = !visibleSet.has(card); });
+
       const count = hub.querySelector('#visible-count');
+      const total = hub.querySelector('#result-count');
+      const pageNumber = hub.querySelector('#result-page');
       const empty = hub.querySelector('#no-results');
-      if (count instanceof HTMLElement) count.textContent = String(visible);
-      if (empty instanceof HTMLElement) empty.hidden = visible !== 0;
+      if (count instanceof HTMLElement) count.textContent = String(visibleCards.length);
+      if (total instanceof HTMLElement) total.textContent = String(filtering ? matches.length : articleCards.length);
+      if (pageNumber instanceof HTMLElement) pageNumber.textContent = String(page);
+      if (empty instanceof HTMLElement) empty.hidden = matches.length !== 0;
+      if (pagination instanceof HTMLElement) pagination.hidden = totalPages <= 1;
+      if (previousPage instanceof HTMLAnchorElement) previousPage.hidden = page <= 1;
+      if (nextPage instanceof HTMLAnchorElement) nextPage.hidden = page >= totalPages;
     };
 
     const setView = (view: string) => {
@@ -38,6 +58,7 @@
       else url.searchParams.delete('view');
       history.replaceState(null, '', url);
     };
+
     viewButtons.forEach((button) => button.addEventListener('click', () => setView(button.dataset.viewButton ?? 'list')));
     setView(new URLSearchParams(location.search).get('view') === 'archive' ? 'archive' : 'list');
 
@@ -45,6 +66,7 @@
       if (!(node instanceof HTMLButtonElement)) return;
       node.addEventListener('click', () => {
         activeTag = activeTag === node.dataset.tag ? '' : (node.dataset.tag ?? '');
+        resultPage = 1;
         hub.querySelectorAll('[data-tag]').forEach((item) => {
           const active = item instanceof HTMLElement && item.dataset.tag === activeTag;
           item.classList.toggle('active', active);
@@ -53,14 +75,47 @@
         applyFilters();
       });
     });
-    if (searchInput instanceof HTMLInputElement) searchInput.addEventListener('input', applyFilters);
+
+    if (searchInput instanceof HTMLInputElement) searchInput.addEventListener('input', () => {
+      resultPage = 1;
+      if (searchInput.value.trim()) setView('list');
+      applyFilters();
+    });
+
+    [previousPage, nextPage].forEach((link) => link?.addEventListener('click', (event) => {
+      const term = searchInput instanceof HTMLInputElement ? searchInput.value.trim() : '';
+      if (!activeTag && !term) return;
+      event.preventDefault();
+      resultPage += link.dataset.pageNav === 'previous' ? -1 : 1;
+      applyFilters();
+      const hubTop = window.scrollY + hub.getBoundingClientRect().top;
+      window.scrollTo({ top: hubTop, left: window.scrollX, behavior: 'smooth' });
+    }));
+
     if (searchToggle instanceof HTMLButtonElement) searchToggle.addEventListener('click', () => {
       const expanded = searchControl instanceof HTMLElement ? searchControl.classList.toggle('is-open') : false;
       searchToggle.setAttribute('aria-expanded', String(expanded));
       searchToggle.setAttribute('aria-label', expanded ? 'Close article search' : 'Open article search');
       if (expanded && searchInput instanceof HTMLInputElement) searchInput.focus();
-      else if (searchInput instanceof HTMLInputElement) { searchInput.value = ''; applyFilters(); }
+      else if (searchInput instanceof HTMLInputElement) {
+        searchInput.value = '';
+        resultPage = 1;
+        applyFilters();
+      }
     });
+
+    if (searchInput instanceof HTMLInputElement) searchInput.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !(searchControl instanceof HTMLElement) || !(searchToggle instanceof HTMLButtonElement)) return;
+      searchControl.classList.remove('is-open');
+      searchToggle.setAttribute('aria-expanded', 'false');
+      searchToggle.setAttribute('aria-label', 'Open article search');
+      searchInput.value = '';
+      resultPage = 1;
+      applyFilters();
+      searchToggle.focus();
+    });
+
+    applyFilters();
   }
   document.addEventListener('astro:page-load', initArticleHub);
 </script>

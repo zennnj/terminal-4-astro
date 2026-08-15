@@ -13,13 +13,17 @@ interface Props {
 }
 
 const { posts, currentPage, totalPages, totalPosts } = Astro.props;
+const postsPerPage = 10;
+const initialStart = (currentPage - 1) * postsPerPage;
+const initialEnd = initialStart + postsPerPage;
+const initialVisible = posts.slice(initialStart, initialEnd).length;
 ---
 
 <div class="article-primary">
   <PageHeader title="ARTICLE" eyebrow="ARTICLE INDEX" compact />
-  <p class="article-list-summary">Page {currentPage} · Showing <span id="visible-count">{posts.length}</span> of {totalPosts} posts</p>
-  <div class="article-list" id="article-list">
-    {posts.map((post) => {
+  <p class="article-list-summary">Page <span id="result-page">{currentPage}</span> · Showing <span id="visible-count">{initialVisible}</span> of <span id="result-count">{totalPosts}</span> posts</p>
+  <div class="article-list" id="article-list" data-current-page={currentPage} data-page-size={postsPerPage}>
+    {posts.map((post, index) => {
       const postTags = dealLabel(post.data.tags);
       const excerpt = post.data.description?.trim() || (post.body ?? '')
         .replace(/```[\s\S]*?```/g, ' ')
@@ -32,7 +36,7 @@ const { posts, currentPage, totalPages, totalPosts } = Astro.props;
       const searchText = `${post.data.title} ${excerpt} ${postTags.join(' ')}`.toLowerCase();
       const words = readingTime(post.body ?? '').words;
       return (
-        <article class="article-card" data-filter-item data-tags={postTags.join('|')} data-search={searchText}>
+        <article class="article-card" data-filter-item data-tags={postTags.join('|')} data-search={searchText} hidden={index < initialStart || index >= initialEnd}>
           <a href={getUrl(`/blog/${post.id}`)}>
             <time>{post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
             <h2>{post.data.title}</h2>
@@ -48,9 +52,9 @@ const { posts, currentPage, totalPages, totalPosts } = Astro.props;
     <p class="no-results" id="no-results" hidden>No matching articles.</p>
   </div>
   {totalPages > 1 && (
-    <nav class="article-pagination" aria-label="Article pagination">
-      {currentPage > 1 ? <a class="previous-posts" href={getUrl(`/blog/${currentPage - 1}`)}><i class="ri-arrow-left-line"></i> Previous Posts</a> : <span></span>}
-      {currentPage < totalPages && <a class="next-posts" href={getUrl(`/blog/${currentPage + 1}`)}>Next Posts <i class="ri-arrow-right-line"></i></a>}
+    <nav class="article-pagination" aria-label="Article pagination" data-article-pagination>
+      <a class="previous-posts" data-page-nav="previous" href={getUrl(`/blog/${Math.max(1, currentPage - 1)}`)} hidden={currentPage <= 1}><i class="ri-arrow-left-line"></i> Previous Posts</a>
+      <a class="next-posts" data-page-nav="next" href={getUrl(`/blog/${Math.min(totalPages, currentPage + 1)}`)} hidden={currentPage >= totalPages}>Next Posts <i class="ri-arrow-right-line"></i></a>
     </nav>
   )}
 </div>

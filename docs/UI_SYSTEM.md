@@ -6,9 +6,9 @@ This is the practical entry point for ordinary content-page work. `UI_STYLE_GUID
 
 - Special compositions: `/`, `/about`, and `/site`. Preserve their dedicated layout rules.
 - Index pages: Article, Memo, Review, Gallery, Search, and Tags. Use the standard shell and `PageHeader`.
-- Index toolbars place view-switching tabs at the upper right; Article search occupies the upper left. Gallery and Review share a relaxed `clamp(2rem, 4vw, 3.5rem)` desktop shell top inset.
-- Article page/count status belongs directly above the card list as compact metadata; do not pass it to `PageHeader.description`. Archive year numerals use transparent fill and a P4 orange outline.
-- Detail pages: Article, Memo, and Review details. Use `BackLink`, the detail title scale, readable content width, and optional TOC/media regions.
+- Index toolbars place view-switching tabs at the upper right. Article search is a single `36px` capsule at the upper left; it expands without reflow while its only icon remains flush with the capsule's right end, with no inset ring or seam. Gallery and Review share a relaxed `clamp(2rem, 4vw, 3.5rem)` desktop shell top inset.
+- Article page/count status belongs directly above the card list as compact metadata; do not pass it to `PageHeader.description`. Search and Tag filters operate on the complete collection and paginate matching results at 10 items per client-side page; the unfiltered state keeps static `/blog/N` links. Article list entries use separate `92%` white rough-frosted cards with gaps and a static yellow hover state. Archive year numerals use transparent fill and a P4 orange outline, with each post count centered immediately to the year's right; archive entry shapes stay unchanged while their surfaces use semi-transparent rough-frosted white and yellow.
+- Detail pages: Article, Memo, and Review details. Use `BackLink`, the detail title scale, readable content width, and optional TOC/media regions. Article details place the full left column in one `92%` white, shared-radius panel with the Article directory card shadow while keeping the TOC separate.
 
 ## Shared primitives
 
@@ -43,6 +43,8 @@ Avoid one-off `clamp()` values for a role already represented by a token.
 All routes inherit the shared `900ms` non-blocking page reveal from `.site-content`. ClientRouter swaps replay that duration and show the shared preparation progress line. Ordinary routes rise into place. Homepage is the direction exception: its hero artwork and Contact, Main2 heading/cards, and Main3 groups all descend from above with the same duration and short staggered starts. Main2 quotation and card grid are separate scroll stages; Main3 About and Site/Update Log are also separate, with the latter using a deeper desktop trigger line. Fine-pointer desktop Main1 applies restrained multi-depth pointer parallax only to its supplied character, sticker, OMO, and title layers; no separate rings, dots, or light blobs sit behind them, and the top brand and side Contact block stay fixed after entering. Touch and reduced-motion modes stay static. The Scroll cue stays in place and fades in after its configured delay; the fixed question trigger never participates in motion. The full-screen `loading.png` remains a homepage-only, once-per-session exception; the hero layers and clipped title letters begin only after that overlay clears.
 
 Article, Memo, Review, and Gallery families use only the shared quiet white `28px` dot matrix over P4 gray. Do not combine it with light pools or paper grain. The Review latest card is opaque yellow frosted material: retain its local `/assets/ui/surface-noise.svg` roughness, single soft shadow, pointer tilt, orange hover light spot, and transparent Markdown excerpt background.
+
+The Review directory uses content-width ABOUT-style capsules rather than a fixed card grid. Each capsule keeps its small category bullet, title, muted creator, and date together; filters expose hover/focus feedback, and pagination measures the responsive wrapping layout at 10 visual rows per page.
 
 Every asynchronous or filterable feature should define the applicable states:
 

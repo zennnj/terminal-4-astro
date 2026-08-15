@@ -19,7 +19,6 @@ const allPosts = orderBySticky(await getCollectionByName('blog'));
 const postsPerPage = 10;
 const totalPages = Math.ceil(allPosts.length / postsPerPage);
 const currentPage = Math.min(Math.max(Number(Astro.params.page) || 1, 1), totalPages);
-const posts = allPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
 const tagCounts = new Map<string, number>();
 for (const post of allPosts) for (const tag of dealLabel(post.data.tags)) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
 const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
@@ -33,7 +32,7 @@ const yearEntries = Object.entries(postsByYear).sort(([a], [b]) => Number(b) - N
 <IndexPage title="Article" contentClass="article-hub-shell">
   <ArticleToolbar />
   <section class="article-layout" data-view-panel="list">
-    <ArticleList {posts} {currentPage} {totalPages} totalPosts={allPosts.length} />
+    <ArticleList posts={allPosts} {currentPage} {totalPages} totalPosts={allPosts.length} />
     <ArticleStats total={allPosts.length} {tags} />
   </section>
   <ArticleArchive years={yearEntries} />
