@@ -446,7 +446,7 @@
 
 | 配置 | 当前值 |
 | --- | --- |
-| Server URL | `https://waline-blog-tau-three.vercel.app/` |
+| Server URL | 生产环境使用本站 `/waline-api/` 同源代理；localhost 直连 `https://waline-blog-tau-three.vercel.app/` |
 | 语言 | `en` |
 | 每页评论数 | `20` |
 | Pageview | `true` |

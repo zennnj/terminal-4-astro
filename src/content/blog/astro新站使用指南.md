@@ -601,6 +601,10 @@ Waline 评论组件位于：
 src/components/WalineComment.astro
 ```
 
+线上环境通过 Netlify 的 `/waline-api/*` 同源代理访问 Vercel 上的 Waline
+服务，避免访客浏览器直接连接 `*.vercel.app`。代理规则位于 `netlify.toml`；
+localhost 开发环境仍直连原 Waline Server，便于使用 Astro 开发服务器调试。
+
 项目支持浏览器直传阿里云 OSS。签名由以下入口生成：
 
 ```text

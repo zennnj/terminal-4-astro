@@ -5,3 +5,9 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/waline-api/*"
+  to = "https://waline-blog-tau-three.vercel.app/:splat"
+  status = 200
+  force = true

@@ -138,6 +138,18 @@
     background: transparent !important;
     font-size: 1rem !important;
   }
+  .memo-feed .wl-editor:focus-visible,
+  .junk-thread .wl-editor:focus-visible,
+  .memo-feed .wl-card .wl-reply:focus-visible,
+  .junk-thread .wl-card .wl-reply:focus-visible {
+    outline: 0;
+  }
+  .memo-feed .wl-panel:focus-within {
+    box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--p4-purple) 45%, transparent) !important;
+  }
+  .junk-thread .wl-panel:focus-within {
+    border-color: color-mix(in srgb, var(--p4-purple) 68%, transparent) !important;
+  }
 
   .memo-feed .wl-card-item {
     align-items: flex-start;
@@ -179,6 +191,10 @@
     color: var(--purple-soft);
     font-size: 0.72rem;
     letter-spacing: 0.05em;
+  }
+  .memo-feed .wl-card .wl-reply:focus-visible::after {
+    border-bottom-width: 2px;
+    color: var(--p4-purple);
   }
   .memo-feed .wl-card .wl-head {
     min-height: 1rem;
