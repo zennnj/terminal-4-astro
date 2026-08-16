@@ -49,5 +49,15 @@ export default defineConfig({
   // Tailwind v4 is wired through its Vite plugin (replaces the removed @astrojs/tailwind integration).
   vite: {
     plugins: [tailwindcss(), localOssPolicy()],
+    server: {
+      proxy: {
+        '/waline-api': {
+          // Local networks may block vercel.app entirely. Route local preview
+          // through the deployed Netlify proxy instead of contacting Vercel.
+          target: 'https://t3rminal4.netlify.app',
+          changeOrigin: true,
+        },
+      },
+    },
   },
 });

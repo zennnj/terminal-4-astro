@@ -18,10 +18,7 @@ const { id = 'waline', standalone = false, force = false, path = '', avatar = ''
 
   const walineInstances = new Map<string, ReturnType<typeof init>>();
   const walineAvatarObservers = new Map<string, MutationObserver>();
-  const isLocalPreview = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
-  const walineServerUrl = isLocalPreview
-    ? comment.walineConfig.serverUrl
-    : new URL('/waline-api/', window.location.origin).href;
+  const walineServerUrl = new URL('/waline-api/', window.location.origin).href;
   const ossUploadEnabled = import.meta.env.PUBLIC_OSS_UPLOAD_ENABLED === 'true';
   const configuredMaxFileSize = Number(import.meta.env.PUBLIC_OSS_MAX_FILE_SIZE_MB);
   const maxFileSizeMb = Number.isFinite(configuredMaxFileSize) && configuredMaxFileSize > 0

@@ -446,7 +446,7 @@
 
 | 配置 | 当前值 |
 | --- | --- |
-| Server URL | 生产环境使用本站 `/waline-api/` 同源代理；localhost 直连 `https://waline-blog-tau-three.vercel.app/` |
+| Server URL | 始终使用本站 `/waline-api/` 同源代理；生产环境由 Netlify Function 转发，localhost 由 Vite 开发代理转发至已部署的 Netlify 站点 |
 | 语言 | `en` |
 | 每页评论数 | `20` |
 | Pageview | `true` |
