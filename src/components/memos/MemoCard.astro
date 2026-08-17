@@ -1,0 +1,36 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import getUrl from '@/utils/getUrl';
+
+interface Props {
+  memo: CollectionEntry<'memos'>;
+  avatar: string;
+}
+
+const { memo, avatar } = Astro.props;
+const { Content } = await render(memo);
+const detailUrl = getUrl(`/memos/${memo.id}`);
+const dateLabel = memo.data.date.toISOString().slice(0, 10);
+---
+
+<article class="memo-stream-item">
+  <img class="memo-avatar" src={getUrl(avatar)} width="64" height="64" alt="a3ync 的头像" />
+  <div class="memo-bubble">
+    <time datetime={memo.data.date.toISOString()}>{dateLabel}</time>
+    <div class="memo-copy markdown-body"><Content /></div>
+    {memo.data.images.length > 0 && (
+      <div class:list={['memo-image-grid', `memo-image-grid--${memo.data.images.length}`]}>
+        {memo.data.images.map((image) => (
+          <a href={detailUrl} aria-label={`查看动态：${image.alt || dateLabel}`}>
+            <img src={getUrl(image.src)} alt={image.alt} loading="lazy" decoding="async" />
+          </a>
+        ))}
+      </div>
+    )}
+    <footer>
+      {memo.data.footnote && <div class="memo-card-meta"><span>{memo.data.footnote}</span></div>}
+      <a class="memo-comment-link" href={`${detailUrl}#comments`}>COMMENT</a>
+    </footer>
+  </div>
+</article>

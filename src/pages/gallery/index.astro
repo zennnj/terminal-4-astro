@@ -35,15 +35,18 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
         return (
           <article class="work-card" data-kind={work.data.kind}>
             <button class="work-image-button" type="button" data-gallery-open={dialogId} aria-label={`放大查看：${work.data.title}`}>
-              <MediaFrame src={work.data.image} alt={work.data.alt ?? work.data.title} aspectRatio="4 / 3" fit="cover" />
+              <MediaFrame src={work.data.image} alt={work.data.alt ?? work.data.title} aspectRatio="1 / 1" fit="cover" />
               <span class="view-hint" aria-hidden="true"><i class="ri-fullscreen-line"></i> VIEW</span>
             </button>
             <div class="work-caption">
-              <div>
-                <span>{kindLabel(work.data.kind)}</span>
-                <h2>{work.data.title}</h2>
+              <h2>{work.data.title}</h2>
+              <time datetime={work.data.date.toISOString()}>{work.data.date.toISOString().slice(0, 10)}</time>
+              <div class="work-meta">
+                <span class="work-kind">{kindLabel(work.data.kind)}</span>
+                <div class="work-tags">
+                  {work.data.tags.map((tag) => <span class="work-tag">#{tag}</span>)}
+                </div>
               </div>
-              <p>{work.data.tags.map((tag) => `#${tag}`).join(' ')}</p>
             </div>
 
             <dialog class="gallery-dialog" id={dialogId} aria-labelledby={titleId}>

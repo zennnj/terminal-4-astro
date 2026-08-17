@@ -1,272 +1,426 @@
 .memos-shell {
-    width: var(--article-shell-width);
-    margin: 0 auto;
-    padding: 1rem var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem);
-  }
-  .memo-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: clamp(1.5rem, 3vw, 3rem);
-    margin-bottom: clamp(1.6rem, 3vw, 3rem);
-  }
-  [data-memo-panel][hidden] {
-    display: none;
-  }
-  .memo-feed,
-  .junk-thread {
+  width: var(--article-shell-width);
+  margin: 0 auto;
+  padding: 1rem var(--article-shell-padding-inline) clamp(3rem, 5vw, 5rem);
+}
+
+.memo-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: clamp(1.6rem, 3vw, 3rem);
+}
+
+[data-memo-panel][hidden] {
+  display: none;
+}
+
+.memo-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 270px) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 5.25rem);
+  align-items: start;
+}
+
+.memo-aside {
+  position: sticky;
+  top: 1.5rem;
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+}
+
+.memo-sticky-stack {
+  position: relative;
+  min-height: 380px;
+  isolation: isolate;
+}
+
+.memo-sticky {
+  position: absolute;
+  width: min(82%, 220px);
+  min-height: 220px;
+  padding: 1.4rem 1.25rem 1.8rem;
+  border-radius: 0;
+  box-shadow: 7px 8px 0 color-mix(in srgb, var(--p4-purple) 55%, transparent);
+  color: var(--p4-purple);
+  transform: rotate(-4deg);
+}
+
+.memo-sticky--yellow {
+  z-index: 1;
+  top: 0;
+  right: 10%;
+  background: var(--p4-yellow);
+}
+
+.memo-sticky--blue {
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  background: color-mix(in srgb, #b9dbe0 80%, white);
+  transform: rotate(8deg);
+}
+
+.memo-sticky span {
+  color: var(--p4-coral);
+  font: 400 .65rem/1 var(--font-index);
+  letter-spacing: .13em;
+}
+
+.memo-sticky p {
+  margin: .85rem 0 0;
+  font: 600 clamp(.86rem, .8rem + .18vw, 1rem)/1.55 var(--font-body);
+}
+
+.memo-stream {
+  display: grid;
+  align-content: start;
+  gap: 1.25rem;
+  grid-auto-rows: max-content;
+  min-width: 0;
+  padding: .35rem 0 1rem;
+}
+
+.memo-stream-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 1.4rem;
+  align-items: start;
+}
+
+.memo-avatar {
+  display: block;
+  width: 54px;
+  height: 54px;
+  margin-top: 1.3rem;
+  border: 2px solid color-mix(in srgb, white 72%, transparent);
+  border-radius: 50%;
+  background: var(--p4-yellow);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--p4-purple) 22%, transparent);
+  object-fit: cover;
+}
+
+.memo-bubble {
+  position: relative;
+  min-width: 0;
+  padding: clamp(1.35rem, 2.6vw, 2.1rem);
+  border-radius: 26px 31px 24px 29px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 11px 26px color-mix(in srgb, var(--p4-purple) 12%, transparent);
+}
+
+.memo-bubble::before {
+  content: '';
+  position: absolute;
+  top: 1.65rem;
+  left: -14px;
+  width: 16px;
+  height: 18px;
+  background: inherit;
+  clip-path: polygon(100% 0, 100% 100%, 0 48%);
+}
+
+.memo-bubble > time {
+  display: block;
+  margin-bottom: .75rem;
+  color: var(--purple-soft);
+  font: 400 var(--text-sm)/1 var(--font-index);
+  letter-spacing: .04em;
+}
+
+.memo-copy {
+  color: var(--p4-purple);
+  font-size: clamp(1rem, .92rem + .18vw, 1.12rem) !important;
+  line-height: 1.75 !important;
+}
+
+.memo-image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(.55rem, 1.2vw, 1rem);
+  margin-top: 1.2rem;
+}
+
+.memo-image-grid--1 {
+  grid-template-columns: minmax(0, 420px);
+}
+
+.memo-image-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.memo-image-grid a {
+  display: block;
+  overflow: hidden;
+  border-radius: 8px 12px 9px 14px;
+  background: var(--p4-coral);
+}
+
+.memo-image-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  transition: opacity var(--motion-base) var(--ease-standard);
+}
+
+.memo-image-grid a:hover img {
+  opacity: .88;
+}
+
+.memo-bubble footer {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.memo-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem .75rem;
+  color: var(--purple-soft);
+  font-size: var(--text-xs);
+}
+
+.memo-comment-link {
+  flex: none;
+  margin-left: auto;
+  padding-bottom: .14rem;
+  border-bottom: 1px solid currentColor;
+  color: var(--p4-purple);
+  font: 400 .76rem/1 var(--font-index);
+  letter-spacing: .08em;
+}
+
+.junk-thread {
+  width: 100%;
+  margin: 0 0 4rem;
+  --waline-bg-color: transparent;
+  --waline-bg-color-light: color-mix(in srgb, var(--p4-yellow) 55%, transparent);
+  --waline-border-color: color-mix(in srgb, var(--p4-purple) 30%, transparent);
+  --waline-theme-color: var(--p4-coral);
+  --waline-active-color: var(--p4-purple);
+  --waline-color: var(--p4-purple);
+  --waline-font-family: var(--font-body);
+}
+
+.junk-reload {
+  display: block;
+  margin: 0 0 1rem auto;
+  padding-bottom: .2rem;
+  border-bottom: 1px solid currentColor;
+  color: var(--purple-soft);
+  font-size: .72rem;
+  letter-spacing: .1em;
+}
+
+.junk-thread :is([data-waline-root], [data-waline]) {
+  width: 100%;
+  background: transparent !important;
+}
+
+.junk-thread :is(.wl-reaction, .wl-meta-head, .wl-meta-foot, .wl-power, .wl-header, .wl-login-info) {
+  display: none !important;
+}
+
+.junk-thread .wl-footer {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  margin: .5em .75em !important;
+}
+
+.junk-thread .wl-actions {
+  display: flex !important;
+  min-width: 0;
+  flex: 2 !important;
+  align-items: center !important;
+}
+
+.junk-thread .wl-actions .upload,
+.junk-thread .wl-gif-popup {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.junk-thread .wl-info {
+  display: flex !important;
+  flex: 3 !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+.junk-thread .wl-action {
+  display: inline-flex !important;
+  width: 1.5em !important;
+  height: 1.5em !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 2px !important;
+}
+
+.junk-thread .wl-comment {
+  width: 100%;
+  margin: 0 0 2.5rem;
+}
+
+.junk-thread .wl-panel {
+  width: calc(100% - 2px);
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--p4-purple) 42%, transparent) !important;
+  border-radius: 1rem !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.junk-thread .wl-editor {
+  min-height: 7.5rem !important;
+  background: transparent !important;
+  font-size: 1rem !important;
+}
+
+.junk-thread .wl-editor:focus-visible,
+.junk-thread .wl-card .wl-reply:focus-visible {
+  outline: 0;
+}
+
+.junk-thread .wl-panel:focus-within {
+  border-color: color-mix(in srgb, var(--p4-purple) 68%, transparent) !important;
+}
+
+.junk-thread .wl-cards,
+.junk-thread .wl-card-item,
+.junk-thread .wl-card-item .wl-card-item {
+  display: block !important;
+  width: 100%;
+  padding: 0 !important;
+}
+
+.junk-thread .wl-card-item > .wl-user {
+  display: none !important;
+}
+
+.junk-thread .wl-card,
+.junk-thread .wl-card:first-child {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 1.25rem 0 1.35rem !important;
+  border: 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--p4-purple) 28%, transparent) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.junk-thread .wl-card :is(.wl-head, .wl-comment-actions, .wl-meta) {
+  display: none !important;
+}
+
+.junk-thread .junk-post-heading {
+  margin-bottom: .55rem;
+  color: var(--p4-coral);
+  font: 400 .82rem/1.4 var(--font-body);
+}
+
+.junk-thread .wl-card .wl-content {
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--purple);
+  font-size: 1rem !important;
+  line-height: 1.8 !important;
+}
+
+@media (max-width: 900px) {
+  .memos-shell {
     width: 100%;
-    margin: 0 0 4rem;
-    background: transparent;
-  }
-  .junk-reload {
-    display: block;
-    margin: 0 0 1rem auto;
-    padding-bottom: 0.2rem;
-    border-bottom: 1px solid currentColor;
-    color: var(--purple-soft);
-    cursor: pointer;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
+    margin-left: 0;
+    padding: 5.5rem 1.1rem 3rem;
   }
 
-  .memo-feed,
-  .junk-thread {
-    --waline-bg-color: transparent;
-    --waline-bg-color-light: color-mix(
-      in srgb,
-      var(--p4-yellow) 55%,
-      transparent
-    );
-    --waline-border-color: color-mix(
-      in srgb,
-      var(--p4-purple) 30%,
-      transparent
-    );
-    --waline-theme-color: var(--p4-coral);
-    --waline-active-color: var(--p4-purple);
-    --waline-color: var(--p4-purple);
-    --waline-font-family: var(--font-body);
+  .memo-layout {
+    grid-template-columns: minmax(190px, 230px) minmax(0, 1fr);
+    gap: 1.5rem;
   }
-  .memo-feed [data-waline-root],
-  .junk-thread [data-waline-root],
-  .memo-feed [data-waline],
-  .junk-thread [data-waline] {
-    width: 100%;
-    background: transparent !important;
-  }
-  .memo-feed .wl-reaction,
-  .junk-thread .wl-reaction,
-  .memo-feed .wl-meta-head,
-  .junk-thread .wl-meta-head,
-  .memo-feed .wl-meta-foot,
-  .junk-thread .wl-meta-foot,
-  .memo-feed .wl-power,
-  .junk-thread .wl-power {
-    display: none !important;
-  }
-  .memo-feed .wl-header,
-  .junk-thread .wl-header,
-  .memo-feed .wl-login-info,
-  .junk-thread .wl-login-info {
-    display: none !important;
-  }
-  .memo-feed .wl-footer,
-  .junk-thread .wl-footer {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    margin: 0.5em 0.75em !important;
-  }
-  .memo-feed .wl-actions,
-  .junk-thread .wl-actions {
-    display: flex !important;
-    min-width: 0;
-    flex: 2 !important;
-    align-items: center !important;
-  }
-  .memo-feed .wl-actions .upload,
-  .junk-thread .wl-actions .upload {
-    display: none !important;
-  }
-  .memo-feed .wl-info,
-  .junk-thread .wl-info {
-    display: flex !important;
-    flex: 3 !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-  }
-  .memo-feed .wl-action,
-  .junk-thread .wl-action {
-    display: inline-flex !important;
-    width: 1.5em !important;
-    height: 1.5em !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 2px !important;
-  }
-  .memo-feed .wl-gif-popup,
-  .junk-thread .wl-gif-popup {
-    display: none !important;
-    visibility: hidden !important;
+}
+
+@media (max-width: 700px) {
+  .memo-layout {
+    grid-template-columns: 1fr;
   }
 
-  .memo-feed .wl-comment,
-  .junk-thread .wl-comment {
-    width: 100%;
-    margin: 0 0 2.5rem;
-  }
-  .memo-feed .wl-panel {
-    width: 100%;
-    margin: 0;
-    border: 0 !important;
-    border-radius: 1.5rem !important;
-    box-shadow: none !important;
-    background: var(--p4-yellow) !important;
-  }
-  .junk-thread .wl-panel {
-    width: calc(100% - 2px);
-    margin: 0;
-    border: 1px solid color-mix(in srgb, var(--p4-purple) 42%, transparent) !important;
-    border-radius: 1rem !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-  .memo-feed .wl-editor,
-  .junk-thread .wl-editor {
-    min-height: 7.5rem !important;
-    background: transparent !important;
-    font-size: 1rem !important;
-  }
-  .memo-feed .wl-editor:focus-visible,
-  .junk-thread .wl-editor:focus-visible,
-  .memo-feed .wl-card .wl-reply:focus-visible,
-  .junk-thread .wl-card .wl-reply:focus-visible {
-    outline: 0;
-  }
-  .memo-feed .wl-panel:focus-within {
-    box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--p4-purple) 45%, transparent) !important;
-  }
-  .junk-thread .wl-panel:focus-within {
-    border-color: color-mix(in srgb, var(--p4-purple) 68%, transparent) !important;
+  .memo-aside {
+    position: static;
+    padding-top: .75rem;
   }
 
-  .memo-feed .wl-card-item {
+  .memo-sticky-stack {
+    min-height: 300px;
+  }
+
+  .memo-sticky {
+    width: min(58%, 210px);
+    min-height: 175px;
+  }
+
+  .memo-sticky--yellow {
+    right: auto;
+    left: 7%;
+  }
+
+  .memo-sticky--blue {
+    right: 8%;
+  }
+
+  .memo-stream {
+    margin-top: 1rem;
+    padding: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .memo-stream-item {
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: .9rem;
+  }
+
+  .memo-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .memo-bubble {
+    padding: 1.1rem;
+    border-radius: 20px;
+  }
+
+  .memo-bubble::before {
+    top: 1.3rem;
+    left: -10px;
+    width: 12px;
+    height: 14px;
+  }
+
+  .memo-image-grid,
+  .memo-image-grid--2 {
+    grid-template-columns: 1fr;
+  }
+
+  .memo-image-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .memo-image-grid--3 a:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .memo-bubble footer {
     align-items: flex-start;
-    margin-bottom: 1.5rem;
-    padding: 0 !important;
-  }
-  .memo-feed .wl-card-item .wl-card-item {
-    margin: 1rem 0 0;
-    padding: 0 !important;
-  }
-  .memo-feed .wl-card {
-    width: auto !important;
-    margin: 0 !important;
-    padding: 1.1rem 1.35rem !important;
-    border: 0 !important;
-    border-radius: 1.5rem !important;
-    background: var(--p4-yellow) !important;
-  }
-  .memo-feed .wl-card .wl-nick,
-  .memo-feed .wl-card .wl-badge,
-  .memo-feed .wl-card .wl-meta {
-    display: none !important;
-  }
-  .memo-feed .wl-card .wl-comment-actions {
-    display: block !important;
-  }
-  .memo-feed .wl-card .wl-like,
-  .memo-feed .wl-card .wl-rss,
-  .memo-feed .wl-card .wl-delete,
-  .memo-feed .wl-card .wl-edit {
-    display: none !important;
-  }
-  .memo-feed .wl-card .wl-reply svg {
-    display: none !important;
-  }
-  .memo-feed .wl-card .wl-reply::after {
-    content: 'COMMENTS';
-    border-bottom: 1px solid currentColor;
-    color: var(--purple-soft);
-    font-size: 0.72rem;
-    letter-spacing: 0.05em;
-  }
-  .memo-feed .wl-card .wl-reply:focus-visible::after {
-    border-bottom-width: 2px;
-    color: var(--p4-purple);
-  }
-  .memo-feed .wl-card .wl-head {
-    min-height: 1rem;
-  }
-  .memo-feed .wl-card .wl-time {
-    color: var(--purple-soft);
-    font-size: 0.78rem;
-  }
-  .memo-feed .wl-card .wl-content {
-    margin: 0 !important;
-    padding-top: 0.45rem !important;
-    font-size: 1rem !important;
-    line-height: 1.8 !important;
+    flex-direction: column;
   }
 
-  .junk-thread .wl-cards {
-    width: 100%;
+  .memo-comment-link {
+    align-self: flex-end;
   }
-  .junk-thread .wl-card-item,
-  .junk-thread .wl-card-item .wl-card-item {
-    display: block !important;
-    width: 100%;
-    padding: 0 !important;
-  }
-  .junk-thread .wl-card-item > .wl-user {
-    display: none !important;
-  }
-  .junk-thread .wl-card,
-  .junk-thread .wl-card:first-child {
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 1.25rem 0 1.35rem !important;
-    border: 0 !important;
-    border-bottom: 1px solid
-      color-mix(in srgb, var(--p4-purple) 28%, transparent) !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-  .junk-thread .wl-card .wl-head,
-  .junk-thread .wl-card .wl-comment-actions,
-  .junk-thread .wl-card .wl-meta {
-    display: none !important;
-  }
-  .junk-thread .junk-post-heading {
-    margin-bottom: 0.55rem;
-    color: var(--p4-coral);
-    font: 400 0.82rem/1.4 var(--font-body);
-  }
-  .junk-thread .wl-card .wl-content {
-    margin: 0 !important;
-    padding: 0 !important;
-    color: var(--purple);
-    font-size: 1rem !important;
-    line-height: 1.8 !important;
-  }
-
-  @media (max-width: 900px) {
-    .memos-shell {
-      width: 100%;
-      margin-left: 0;
-      padding: 5.5rem 1.1rem 3rem;
-    }
-  }
-  @media (max-width: 560px) {
-    .memo-feed .wl-user {
-      display: none !important;
-    }
-    .memo-feed .wl-card-item {
-      display: block !important;
-    }
-    .memo-feed .wl-card {
-      width: 100% !important;
-    }
-  }
+}

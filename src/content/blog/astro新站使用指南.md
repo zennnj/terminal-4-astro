@@ -181,20 +181,44 @@ Typora 的图片复制目标可配置为：
 
 ## 5. 创建 Memos
 
-Memos 暂无创建脚本，在 `src/content/memos/` 中新建 Markdown：
+直接创建一条纯文字动态：
+
+```bash
+pnpm new:memo "今天想记录的内容"
+```
+
+也可以在 `src/content/memos/` 中新建 Markdown：
 
 ```md
 ---
 date: 2026-08-10
-mood: 随手记
-tags: [生活]
+footnote: 今天的注脚
+images: []
 draft: false
 ---
 
 这里写短动态正文。
 ```
 
-可用字段为 `date`、`mood`、`tags` 和 `draft`。Memos 页面会渲染 Markdown 正文。
+图文动态最多配置三张图片：
+
+```yaml
+images:
+  - src: /images/memos/example-1.png
+    alt: 第一张图片的说明
+  - src: /images/memos/example-2.png
+    alt: 第二张图片的说明
+```
+
+Memo 不需要 `title` 或 `tags`。可用字段为 `date`、可选的 `footnote`、`images` 和 `draft`；`footnote` 会显示在气泡左下角。Memos 页面读取本地 Markdown，动态本身不再使用 Waline；每条动态详情页的 COMMENT 和 JUNK 页面仍使用 Waline。
+
+页面左侧的两张便签和头像配置在：
+
+```text
+src/config/memos.ts
+```
+
+修改 `notes` 可替换两张便签的标签、正文和颜色；修改 `avatar` 可替换动态头像。
 
 ## 6. 创建 Review
 

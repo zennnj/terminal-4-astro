@@ -38,8 +38,9 @@
         button.setAttribute('aria-pressed', String(active));
       });
       panels.forEach((panel) => { panel.hidden = panel.dataset.memoPanel !== view; });
-      const id = view === 'junk' ? 'waline-junk' : 'waline-memos';
-      requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('waline:mount', { detail: { id } })));
+      if (view === 'junk') {
+        requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('waline:mount', { detail: { id: 'waline-junk' } })));
+      }
       const url = new URL(location.href);
       if (view === 'junk') url.searchParams.set('view', 'junk');
       else url.searchParams.delete('view');

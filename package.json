@@ -17,6 +17,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "new:post": "node scripts/new-post.mjs",
+    "new:memo": "node scripts/new-memo.mjs",
     "new:review": "node scripts/new-review.mjs",
     "new:gallery": "node scripts/new-gallery.mjs"
   },

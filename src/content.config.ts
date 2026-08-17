@@ -24,8 +24,11 @@ const memos = defineCollection({
   loader: glob({ base: './src/content/memos', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
     date: z.date(),
-    mood: z.string().optional(),
-    tags: z.array(z.string()).default([]),
+    footnote: z.string().optional(),
+    images: z.array(z.object({
+      src: z.string(),
+      alt: z.string().default(''),
+    })).max(3).default([]),
     draft: z.boolean().default(false),
   }),
 });

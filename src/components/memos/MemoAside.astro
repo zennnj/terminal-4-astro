@@ -1,0 +1,16 @@
+---
+import { memoConfig } from '@/config/memos';
+
+const { notes } = memoConfig;
+---
+
+<aside class="memo-aside" aria-label="Memo notes">
+  <div class="memo-sticky-stack">
+    {notes.map((note) => (
+      <article class:list={['memo-sticky', `memo-sticky--${note.tone}`]}>
+        <span>{note.label}</span>
+        <p>{note.text}</p>
+      </article>
+    ))}
+  </div>
+</aside>

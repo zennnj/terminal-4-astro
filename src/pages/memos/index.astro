@@ -1,19 +1,23 @@
 ---
+import { getCollection } from 'astro:content';
 import IndexPage from '@/layouts/IndexPage.astro';
 import MemoToolbar from '@/components/memos/MemoToolbar.astro';
 import MemoFeedPanel from '@/components/memos/MemoFeedPanel.astro';
 import JunkPanel from '@/components/memos/JunkPanel.astro';
 import MemoInteractions from '@/components/memos/MemoInteractions.astro';
 import { comment } from '@/consts';
+import { memoConfig } from '@/config/memos';
 import '@/styles/pages/memos.css';
 
 const walineReady = comment.type === 'waline' && Boolean(comment.walineConfig.serverUrl);
-const memoAvatar = '/assets/about/selfpic.png';
+const memos = (await getCollection('memos'))
+  .filter((memo) => !memo.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 
 <IndexPage title="Memos" contentClass="memos-shell">
   <MemoToolbar />
-  <MemoFeedPanel enabled={walineReady} avatar={memoAvatar} />
-  <JunkPanel enabled={walineReady} avatar={memoAvatar} />
+  <MemoFeedPanel entries={memos} />
+  <JunkPanel enabled={walineReady} avatar={memoConfig.avatar} />
   <MemoInteractions />
 </IndexPage>
