@@ -3,6 +3,9 @@ import { homeConfig } from '@/config/home';
 import getUrl from '@/utils/getUrl';
 
 const localUrl = (href: string) => (href.startsWith('/') ? getUrl(href) : href);
+const starsFrames = homeConfig.hero.stars.frames.map(getUrl);
+const spiritNormalFrames = homeConfig.hero.spirit.normalFrames.map(getUrl);
+const spiritBlinkFrames = homeConfig.hero.spirit.blinkFrames.map(getUrl);
 const titleLetters = [
   'polygon(0% 0%, 11% 0%, 10.5% 20%, 7% 17%, 5.4% 64%, 1.9% 61%, 3.8% 15%, 0% 13%)',
   'polygon(9.1% 37%, 18.9% 37%, 18.9% 100%, 9.1% 100%)',
@@ -17,6 +20,17 @@ const titleLetters = [
 ---
 
 <section class="home-panel hero-panel" id="home" aria-labelledby="hero-brand" data-home-hero>
+  <img
+    class="hero-stars"
+    src={starsFrames[0]}
+    width="2064"
+    height="1188"
+    alt=""
+    aria-hidden="true"
+    data-frame-sequence
+    data-frames={JSON.stringify(starsFrames)}
+    data-frame-duration="100"
+  />
   <div class="hero-brand" id="hero-brand" data-home-hero-item style="--reveal-index:0">{homeConfig.brand}</div>
   <button class="hero-scroll-cue" id="hero-scroll-cue" type="button" aria-label="Scroll to navigation" aria-controls="explore">
     <span class="hero-caret" aria-hidden="true"></span>
@@ -25,7 +39,20 @@ const titleLetters = [
   <div class="hero-art" aria-label="Terminal 4 main artwork">
     <img class="hero-layer hero-person" src={getUrl(homeConfig.hero.portrait)} width="822" height="930" alt="Purple-haired Terminal 4 character" data-home-hero-item style="--reveal-index:1" />
     <img class="hero-layer hero-stickers" src={getUrl(homeConfig.hero.stickers)} width="1082" height="814" alt="" aria-hidden="true" data-home-hero-item style="--reveal-index:2" />
-    <img class="hero-layer hero-spirit" src={getUrl(homeConfig.hero.spirit)} width="322" height="276" alt="" aria-hidden="true" data-home-hero-item style="--reveal-index:3" />
+    <div class="hero-layer hero-spirit" aria-hidden="true" data-home-hero-item style="--reveal-index:3">
+      <img
+        class="hero-spirit-frame"
+        src={spiritNormalFrames[0]}
+        width="1920"
+        height="1080"
+        alt=""
+        data-frame-sequence
+        data-frames={JSON.stringify(spiritNormalFrames)}
+        data-blink-frames={JSON.stringify(spiritBlinkFrames)}
+        data-normal-cycles={homeConfig.hero.spirit.normalCyclesPerBlink}
+        data-frame-duration="100"
+      />
+    </div>
     <div class="hero-title" data-hero-title role="img" aria-label="Terminal 4">
       <img class="hero-title-final" src={getUrl(homeConfig.hero.title)} width="995" height="211" alt="" aria-hidden="true" />
       {titleLetters.map((clip, index) => (
@@ -114,7 +141,60 @@ const titleLetters = [
     });
   }
 
+  function initHeroSequences() {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll<HTMLImageElement>('[data-frame-sequence]').forEach((image) => {
+      if (image.dataset.ready === 'true') return;
+      image.dataset.ready = 'true';
+
+      const frames = JSON.parse(image.dataset.frames ?? '[]') as string[];
+      const blinkFrames = JSON.parse(image.dataset.blinkFrames ?? '[]') as string[];
+      if (reducedMotion || frames.length < 2) return;
+
+      const normalCycles = Math.max(1, Number(image.dataset.normalCycles) || 1);
+      const timeline = blinkFrames.length
+        ? [...Array.from({ length: normalCycles }, () => frames).flat(), ...blinkFrames]
+        : frames;
+      const frameDuration = Math.max(30, Number(image.dataset.frameDuration) || 100);
+      const sources = [...new Set([...frames, ...blinkFrames])];
+
+      Promise.allSettled(sources.map((source) => new Promise<void>((resolve) => {
+        if (source === image.currentSrc || source === image.src) {
+          resolve();
+          return;
+        }
+        const preload = new Image();
+        preload.onload = () => resolve();
+        preload.onerror = () => resolve();
+        preload.src = source;
+      }))).then(() => {
+        if (!image.isConnected) return;
+        let frameIndex = 0;
+        let previousTime = performance.now();
+
+        const advance = (time: number) => {
+          if (!image.isConnected) return;
+          if (document.hidden) {
+            previousTime = time;
+          } else {
+            const elapsed = time - previousTime;
+            if (elapsed >= frameDuration) {
+              const steps = Math.floor(elapsed / frameDuration);
+              frameIndex = (frameIndex + steps) % timeline.length;
+              image.src = timeline[frameIndex];
+              previousTime += steps * frameDuration;
+            }
+          }
+          requestAnimationFrame(advance);
+        };
+
+        requestAnimationFrame(advance);
+      });
+    });
+  }
+
   document.addEventListener('astro:page-load', initHomeScroll);
   document.addEventListener('astro:page-load', initHeroTitle);
   document.addEventListener('astro:page-load', initHeroDepth);
+  document.addEventListener('astro:page-load', initHeroSequences);
 </script>

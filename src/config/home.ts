@@ -1,9 +1,35 @@
 export const homeConfig = {
   brand: 'TERMINAL4',
   hero: {
+    loader: {
+      frames: [
+        '/assets/home/hero/timeline-loading/loading_0000.png',
+        '/assets/home/hero/timeline-loading/loading_0003.png',
+        '/assets/home/hero/timeline-loading/loading_0006.png',
+      ],
+    },
     portrait: '/assets/home/hero/main-pic.png',
     stickers: '/assets/home/hero/stickers.png',
-    spirit: '/assets/home/hero/omo.png',
+    stars: {
+      frames: [
+        '/assets/home/hero/timeline-stars/stars_0000.png',
+        '/assets/home/hero/timeline-stars/stars_0003.png',
+        '/assets/home/hero/timeline-stars/stars_0006.png',
+      ],
+    },
+    spirit: {
+      normalFrames: [
+        '/assets/home/hero/timeline-omo1/omo1_0000.png',
+        '/assets/home/hero/timeline-omo1/omo1_0003.png',
+        '/assets/home/hero/timeline-omo1/omo1_0006.png',
+      ],
+      blinkFrames: [
+        '/assets/home/hero/timeline-omo2/omo2_0000.png',
+        '/assets/home/hero/timeline-omo2/omo2_0003.png',
+        '/assets/home/hero/timeline-omo2/omo2_0006.png',
+      ],
+      normalCyclesPerBlink: 4,
+    },
     title: '/assets/home/hero/title.png',
   },
   contacts: [

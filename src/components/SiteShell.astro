@@ -3,6 +3,7 @@ import BaseHead from '@/components/BaseHead.astro';
 import { config } from '@/consts';
 import getUrl from '@/utils/getUrl';
 import GlobalFooter from '@/components/GlobalFooter.astro';
+import { homeConfig } from '@/config/home';
 
 interface Props {
   title?: string;
@@ -27,6 +28,7 @@ const {
 const currentPath = Astro.url.pathname;
 const isHomepage = currentPath === '/';
 const usesRailCenteredLayout = !isHomepage && currentPath !== '/about' && currentPath !== '/site';
+const loaderFrames = homeConfig.hero.loader.frames.map(getUrl);
 const navItems = [
   { name: 'Home', href: '/', icon: 'ri-home-5-line', match: (path: string) => path === '/' },
   { name: 'Articles', href: '/articles', icon: 'ri-article-line', match: (path: string) => path.startsWith('/articles') || path.startsWith('/blog') || path.startsWith('/archive') || path.startsWith('/tags') },
@@ -57,7 +59,17 @@ const navItems = [
 
     {isHomepage && (
       <div class="site-loader" id="site-loader" aria-label="Loading homepage" role="status">
-        <img src={getUrl('/loading.png')} alt="" />
+        <div class="site-loader-art" aria-hidden="true">
+          {loaderFrames.map((frame, index) => (
+            <img
+              class:list={['site-loader-frame', { 'is-active': index === 0 }]}
+              src={frame}
+              width="1920"
+              height="1080"
+              alt=""
+            />
+          ))}
+        </div>
       </div>
     )}
     <div class="route-progress" id="route-progress" aria-hidden="true"></div>
@@ -112,18 +124,29 @@ const navItems = [
     const railCursorLabel = document.querySelector<HTMLElement>('#rail-cursor-label');
     const mobileRail = window.matchMedia('(max-width: 900px)');
 
-    if (loader && root.dataset.homeLoaderSeen !== 'true') {
+    if (loader && root.dataset.homeLoaderSeen !== 'true' && loader.dataset.ready !== 'true') {
+      loader.dataset.ready = 'true';
       const shownAt = performance.now();
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const loaderFrames = [...loader.querySelectorAll<HTMLElement>('.site-loader-frame')];
+      let loaderFrame = 0;
+      const loaderTimer = reducedMotion || loaderFrames.length < 2
+        ? undefined
+        : window.setInterval(() => {
+          loaderFrames[loaderFrame]?.classList.remove('is-active');
+          loaderFrame = (loaderFrame + 1) % loaderFrames.length;
+          loaderFrames[loaderFrame]?.classList.add('is-active');
+        }, 100);
       let finished = false;
       const finishLoading = () => {
         if (finished) return;
         finished = true;
-        const remaining = Math.max(0, (reducedMotion ? 0 : 250) - (performance.now() - shownAt));
+        const remaining = Math.max(0, (reducedMotion ? 0 : 300) - (performance.now() - shownAt));
         window.setTimeout(() => {
           loader.classList.add('is-leaving');
           try { sessionStorage.setItem('terminal4-home-loaded', 'true'); } catch (_) {}
           window.setTimeout(() => {
+            if (loaderTimer !== undefined) window.clearInterval(loaderTimer);
             root.dataset.homeLoaderSeen = 'true';
             loader.remove();
             document.dispatchEvent(new CustomEvent('terminal4:home-loader-cleared'));

@@ -60,7 +60,10 @@ public/assets/
   home/hero/                Main1 layered artwork
     main-pic.png            Character layer
     stickers.png            Sticker layer
-    omo.png                 OMO/spirit layer; may later become a GIF
+    timeline-loading/       Three-pose transparent homepage loader sequence
+    timeline-stars/         Three-pose transparent background-star sequence
+    timeline-omo1/          Three-pose transparent OMO normal sequence
+    timeline-omo2/          Three-pose transparent OMO blink sequence
     title.png               TERMINAL4 title layer
   home/navigation/          Main2 images, masks, and outlines
   ui/
@@ -104,10 +107,11 @@ The hero is a single centered `.hero-art` coordinate system. Its centered layers
 
 Layer order:
 
-1. `.hero-person` — character
-2. `.hero-stickers` — stickers with a soft purple drop shadow
-3. `.hero-spirit` — OMO/spirit
-4. `.hero-title` — nine clipped title-letter layers with a hard-edged purple drop shadow
+1. `.hero-stars` — full-panel transparent hand-drawn star sequence
+2. `.hero-person` — character
+3. `.hero-stickers` — stickers with a soft purple drop shadow
+4. `.hero-spirit` — OMO/spirit sequence
+5. `.hero-title` — nine clipped title-letter layers with a hard-edged purple drop shadow
 
 Current placement intent:
 
@@ -115,7 +119,7 @@ Current placement intent:
 - `.hero-panel` uses symmetrical horizontal padding. Never use extra left padding to compensate for the sidebar.
 - `.hero-art` remains horizontally centered. Because the visible layered content occupies roughly `5%–100%` of its internal canvas, the complete coordinate system uses `translateY(-2.5%)` so the visible person/title composition—not the transparent canvas box—is vertically centered.
 - `.hero-art` keeps a fixed `1020 / 940` aspect ratio. Responsive rules may resize the wrapper, but must not independently change its height or reposition/resize the person, stickers, or title.
-- OMO intentionally sits left of the person (`top: 11%`, `left: -6%`) so it does not crowd the character.
+- OMO intentionally sits left of the person (`top: 11%`, `left: -6%`, `width: min(32%, 290px)`) so it remains prominent without crowding the character. Its source frames retain their transparent 1920×1080 canvas; CSS crops their shared alpha bounds into the existing OMO layer. The three unique poses each hold for `100ms`, an accelerated cadence equivalent to playing the original tripled nine-frame source at 30fps. The normal sequence runs four times before the blink sequence runs once.
 - The title keeps `bottom: 0` and `width: 88%` at every viewport size so it overlaps only the lower part of the person, matching the Main1 reference relationship. Its nine layers reuse clipped regions of `title.png` while entering from above in left-to-right order after the homepage loader clears. Once the sequence finishes, the clipped layers switch to one complete `title.png` layer so glyph edges and the zero-blur hard shadow cannot be cut by per-letter masks. The scroll triangle stays independently anchored to the panel bottom.
 - Main1 uses pointer-responsive depth on the character, stickers, OMO, and title at restrained, distinct levels inside the existing coordinate system. Do not add separate rings, dots, light blobs, or other depth-field ornaments behind the supplied artwork. The top brand and side Contact block stay fixed after their entrance animation. Do not replace the current assets with generic demo copy or cards. Touch devices and `prefers-reduced-motion` remain static.
 
@@ -188,7 +192,7 @@ Never implement `.rail-open` by changing `.site-content` width, margin, padding,
 - `MediaFrame.astro` owns stable aspect ratios, lazy/eager loading, decoding, shimmer state, error state, and image fade-in.
 - Standard route CSS belongs in `src/styles/pages/`; route files should primarily load data and compose components.
 - Motion uses `--motion-fast`, `--motion-base`, `--motion-slow`, `--motion-page`, and `--ease-standard`. Page entrance motion uses the shared `--motion-page: 900ms` duration; do not give individual routes a faster or slower page entrance.
-- Every route uses the shared content-reveal transition on initial load and ClientRouter navigation. Ordinary routes rise into place; Homepage is the intentional direction exception: its hero layers, Contact, Main2 heading/cards, and Main3 content all enter downward from above with the same `--motion-page` duration. Homepage sections reveal as independent scroll stages: Main2 quotation first and its four-card group farther down; Main3 About first and Site/Update Log on a deeper desktop trigger line. Mobile Main3 follows the natural stacked positions. Items inside each stage retain short start-time staggering. The Homepage Scroll cue does not move: it fades in at its final position after its configured delay. The fixed bottom-right question trigger remains outside Homepage motion and permanently available. The legacy `loading.png` overlay plays only on the first homepage visit per browser session, then starts the hero and title reveals after it clears. ClientRouter preparation displays a non-blocking 3px coral progress line immediately after navigation begins.
+- Every route uses the shared content-reveal transition on initial load and ClientRouter navigation. Ordinary routes rise into place; Homepage is the intentional direction exception: its hero layers, Contact, Main2 heading/cards, and Main3 content all enter downward from above with the same `--motion-page` duration. Homepage sections reveal as independent scroll stages: Main2 quotation first and its four-card group farther down; Main3 About first and Site/Update Log on a deeper desktop trigger line. Mobile Main3 follows the natural stacked positions. Items inside each stage retain short start-time staggering. The Homepage Scroll cue does not move: it fades in at its final position after its configured delay. The fixed bottom-right question trigger remains outside Homepage motion and permanently available. The transparent `timeline-loading` sequence uses the same accelerated `100ms` pose cadence over a solid `--p4-purple` surface only on the first homepage visit per browser session. CSS crops the shared transparent source bounds into a centered responsive loader stage so the complete LOADING artwork stays visible without modifying the source PNGs. It completes at least one `300ms` loop before retaining the established `.52s` upward exit, then starts the hero and title reveals after it clears. ClientRouter preparation displays a non-blocking 3px coral progress line immediately after navigation begins.
 - All motion must obey the global `prefers-reduced-motion` rule.
 - Static HTML does not need a loading spinner. Use local skeletons only for asynchronously fetched content such as Search or comments.
 
