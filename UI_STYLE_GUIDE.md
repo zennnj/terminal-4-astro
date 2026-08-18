@@ -107,7 +107,7 @@ The hero is a single centered `.hero-art` coordinate system. Its centered layers
 
 Layer order:
 
-1. `.hero-stars` — full-panel transparent hand-drawn star sequence
+1. `.hero-stars` — full-panel transparent hand-drawn star sequence; preserve the complete authored composition without cropping on wider screens
 2. `.hero-person` — character
 3. `.hero-stickers` — stickers with a soft purple drop shadow
 4. `.hero-spirit` — OMO/spirit sequence
