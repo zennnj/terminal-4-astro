@@ -2,15 +2,15 @@
 title: About this site
 description: The story and structure of Terminal 4.
 updates:
-  - date: 2026-8-20
+  - date: '2026-08-20'
     text: 大幅修改布局。加入动画若干。
-  - date: 2026-08-10
+  - date: '2026-08-10'
     text: 统一站点更新日志配置。
-  - date: 2026-08-08
+  - date: '2026-08-08'
     text: 迁移到 Astro，并重新整理文章、随记、评论与画廊结构。
-  - date: 2026-07-29
+  - date: '2026-07-29'
     text: 接入 Waline，新增discuss界面。
-  - date: 2024-07-10
+  - date: '2024-07-10'
     text: 基于 Hexo 框架建成。
 ---
 
