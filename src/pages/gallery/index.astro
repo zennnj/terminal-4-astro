@@ -52,10 +52,21 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
             <dialog class="gallery-dialog" id={dialogId} aria-labelledby={titleId}>
               <div class="dialog-layout">
                 <div class="dialog-image">
+                  <button class="dialog-close" type="button" data-gallery-close aria-label="关闭作品预览"><i class="ri-close-line"></i></button>
+                  <div class="dialog-toolbar" role="group" aria-label="图片缩放控制">
+                    <button type="button" data-gallery-zoom-out aria-label="缩小图片"><i class="ri-zoom-out-line"></i></button>
+                    <button type="button" data-gallery-zoom-reset aria-label="重置图片缩放"><i class="ri-restart-line"></i></button>
+                    <button type="button" data-gallery-zoom-in aria-label="放大图片"><i class="ri-zoom-in-line"></i></button>
+                  </div>
                   <MediaFrame src={work.data.image} alt={work.data.alt ?? work.data.title} aspectRatio="1 / 1" fit="contain" class="dialog-media" />
+                  {galleryItems.length > 1 && (
+                    <>
+                      <button class="dialog-nav dialog-prev" type="button" data-gallery-prev aria-label="上一件作品"><i class="ri-arrow-left-s-line"></i></button>
+                      <button class="dialog-nav dialog-next" type="button" data-gallery-next aria-label="下一件作品"><i class="ri-arrow-right-s-line"></i></button>
+                    </>
+                  )}
                 </div>
                 <aside class="dialog-description">
-                  <button class="dialog-close" type="button" data-gallery-close aria-label="关闭作品预览"><i class="ri-close-line"></i></button>
                   <p class="dialog-kind">{kindLabel(work.data.kind)}</p>
                   <h2 id={titleId}>{work.data.title}</h2>
                   <time datetime={work.data.date.toISOString()}>{work.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
@@ -63,12 +74,6 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
                   {work.data.tags.length > 0 && <p class="dialog-tags">{work.data.tags.map((tag) => <span>#{tag}</span>)}</p>}
                 </aside>
               </div>
-              {galleryItems.length > 1 && (
-                <>
-                  <button class="dialog-nav dialog-prev" type="button" data-gallery-prev aria-label="Previous artwork"><i class="ri-arrow-left-s-line"></i></button>
-                  <button class="dialog-nav dialog-next" type="button" data-gallery-next aria-label="Next artwork"><i class="ri-arrow-right-s-line"></i></button>
-                </>
-              )}
             </dialog>
           </article>
         );
@@ -95,6 +100,22 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
 
     const filterButtons = [...gallery.querySelectorAll<HTMLButtonElement>('[data-filter]')];
     const dialogs = [...gallery.querySelectorAll<HTMLDialogElement>('.gallery-dialog')];
+    const minZoom = 1;
+    const maxZoom = 3;
+    const zoomStep = 0.5;
+    const setDialogZoom = (dialog: HTMLDialogElement, zoom: number) => {
+      const nextZoom = Math.min(maxZoom, Math.max(minZoom, zoom));
+      dialog.dataset.zoom = String(nextZoom);
+      dialog.style.setProperty('--gallery-zoom', String(nextZoom));
+      const atMinimum = nextZoom === minZoom;
+      const atMaximum = nextZoom === maxZoom;
+      const zoomOut = dialog.querySelector<HTMLButtonElement>('[data-gallery-zoom-out]');
+      const zoomReset = dialog.querySelector<HTMLButtonElement>('[data-gallery-zoom-reset]');
+      const zoomIn = dialog.querySelector<HTMLButtonElement>('[data-gallery-zoom-in]');
+      if (zoomOut) zoomOut.disabled = atMinimum;
+      if (zoomReset) zoomReset.disabled = atMinimum;
+      if (zoomIn) zoomIn.disabled = atMaximum;
+    };
     const getBrowsableDialogs = () => dialogs.filter((dialog) => {
       const card = dialog.closest<HTMLElement>('.work-card');
       return card && !card.hidden;
@@ -111,7 +132,9 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
       const currentIndex = available.indexOf(dialog);
       if (currentIndex < 0) return;
       const nextDialog = available[(currentIndex + direction + available.length) % available.length];
+      setDialogZoom(dialog, minZoom);
       dialog.close();
+      setDialogZoom(nextDialog, minZoom);
       nextDialog.showModal();
       lockPageScroll();
     };
@@ -132,6 +155,7 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
       button.addEventListener('click', () => {
         const dialog = document.getElementById(button.dataset.galleryOpen ?? '') as HTMLDialogElement | null;
         if (!dialog) return;
+        setDialogZoom(dialog, minZoom);
         dialog.showModal();
         lockPageScroll();
       });
@@ -141,6 +165,13 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
       dialog.querySelector<HTMLButtonElement>('[data-gallery-close]')?.addEventListener('click', () => dialog.close());
       dialog.querySelector<HTMLButtonElement>('[data-gallery-prev]')?.addEventListener('click', () => switchDialog(dialog, -1));
       dialog.querySelector<HTMLButtonElement>('[data-gallery-next]')?.addEventListener('click', () => switchDialog(dialog, 1));
+      dialog.querySelector<HTMLButtonElement>('[data-gallery-zoom-out]')?.addEventListener('click', () => {
+        setDialogZoom(dialog, Number(dialog.dataset.zoom ?? minZoom) - zoomStep);
+      });
+      dialog.querySelector<HTMLButtonElement>('[data-gallery-zoom-reset]')?.addEventListener('click', () => setDialogZoom(dialog, minZoom));
+      dialog.querySelector<HTMLButtonElement>('[data-gallery-zoom-in]')?.addEventListener('click', () => {
+        setDialogZoom(dialog, Number(dialog.dataset.zoom ?? minZoom) + zoomStep);
+      });
       dialog.addEventListener('click', (event) => {
         if (event.target === dialog) dialog.close();
       });
@@ -150,8 +181,10 @@ const kindLabel = (kind: string) => ({ fanart: 'FAN ART' }[kind] ?? kind.toUpper
         switchDialog(dialog, event.key === 'ArrowLeft' ? -1 : 1);
       });
       dialog.addEventListener('close', () => {
+        setDialogZoom(dialog, minZoom);
         if (!gallery.querySelector('.gallery-dialog[open]')) unlockPageScroll();
       });
+      setDialogZoom(dialog, minZoom);
     });
 
     syncDialogNavigation();

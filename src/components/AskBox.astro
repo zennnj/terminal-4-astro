@@ -8,73 +8,235 @@ interface Props {
 
 const { variant = 'corner', email } = Astro.props;
 const id = `ask-${variant}`;
+const triggerImage =
+  variant === 'corner'
+    ? {
+        src: '/assets/reviews/multigle-orange.png',
+        width: 260,
+        height: 269,
+        alt: '',
+      }
+    : {
+        src: '/assets/reviews/multigle-orange.png',
+        width: 260,
+        height: 269,
+        alt: 'ASK',
+      };
 ---
 
-<button class:list={['ask-trigger', `ask-trigger--${variant}`]} data-ask-open={id} type="button" aria-label="Open question box" aria-haspopup="dialog">
-  <img src={getUrl('/assets/ui/corner-icon.png')} width="103" height="98" alt="ASK" />
+<button
+  class:list={['ask-trigger', `ask-trigger--${variant}`]}
+  data-ask-open={id}
+  type="button"
+  aria-label="Open question box"
+  aria-haspopup="dialog"
+>
+  <img
+    src={getUrl(triggerImage.src)}
+    width={triggerImage.width}
+    height={triggerImage.height}
+    alt={triggerImage.alt}
+  />
 </button>
 
 <dialog class="ask-dialog" id={id} aria-labelledby={`${id}-title`}>
   <div class="ask-dialog-inner">
     <form method="dialog" class="ask-close-form">
-      <button class="ask-close" type="submit" aria-label="Close question box"><i class="ri-close-line"></i></button>
+      <button class="ask-close" type="submit" aria-label="Close question box"
+        ><i class="ri-close-line"></i></button
+      >
     </form>
-    <p class="ask-kicker">ASK ME</p>
-    <h2 id={`${id}-title`}>ANYTHING</h2>
+    <p class="ask-kicker">提问箱</p>
+    <h2 id={`${id}-title`}>建设中，现在点就是跳转到邮箱🤓</h2>
     <form class="ask-form" data-ask-form data-email={email}>
       <label for={`${id}-name`}>YOUR NAME</label>
-      <input id={`${id}-name`} name="name" type="text" autocomplete="name" placeholder="Anonymous is okay" />
+      <input
+        id={`${id}-name`}
+        name="name"
+        type="text"
+        autocomplete="name"
+        placeholder="Anonymous is okay"
+      />
       <label for={`${id}-message`}>QUESTION</label>
-      <textarea id={`${id}-message`} name="message" rows="5" required placeholder="Type your question here..."></textarea>
-      <button class="ask-submit" type="submit">SEND BY EMAIL <i class="ri-arrow-right-up-line"></i></button>
+      <textarea
+        id={`${id}-message`}
+        name="message"
+        rows="5"
+        required
+        placeholder="Type your question here..."></textarea>
+      <button class="ask-submit" type="submit"
+        >SEND BY EMAIL <i class="ri-arrow-right-up-line"></i></button
+      >
     </form>
   </div>
 </dialog>
 
 <script>
   function initAskBoxes() {
-    document.querySelectorAll<HTMLButtonElement>('[data-ask-open]').forEach((launcher) => {
-      if (launcher.dataset.ready === 'true') return;
-      launcher.dataset.ready = 'true';
-      const dialog = document.getElementById(launcher.dataset.askOpen ?? '');
-      if (!(dialog instanceof HTMLDialogElement)) return;
-      const form = dialog.querySelector<HTMLFormElement>('[data-ask-form]');
-      launcher.addEventListener('click', () => dialog.showModal());
-      dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
-      form?.addEventListener('submit', (event) => {
-        event.preventDefault();
-        const data = new FormData(form);
-        const name = String(data.get('name') || 'Anonymous').trim() || 'Anonymous';
-        const message = String(data.get('message') || '').trim();
-        if (!message) return;
-        const subject = encodeURIComponent(`Terminal 4 question from ${name}`);
-        window.location.href = `mailto:${form.dataset.email}?subject=${subject}&body=${encodeURIComponent(message)}`;
-        dialog.close();
+    document
+      .querySelectorAll<HTMLButtonElement>('[data-ask-open]')
+      .forEach((launcher) => {
+        if (launcher.dataset.ready === 'true') return;
+        launcher.dataset.ready = 'true';
+        const dialog = document.getElementById(launcher.dataset.askOpen ?? '');
+        if (!(dialog instanceof HTMLDialogElement)) return;
+        const form = dialog.querySelector<HTMLFormElement>('[data-ask-form]');
+        launcher.addEventListener('click', () => dialog.showModal());
+        dialog.addEventListener('click', (event) => {
+          if (event.target === dialog) dialog.close();
+        });
+        form?.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const data = new FormData(form);
+          const name =
+            String(data.get('name') || 'Anonymous').trim() || 'Anonymous';
+          const message = String(data.get('message') || '').trim();
+          if (!message) return;
+          const subject = encodeURIComponent(
+            `Terminal 4 question from ${name}`,
+          );
+          window.location.href = `mailto:${form.dataset.email}?subject=${subject}&body=${encodeURIComponent(message)}`;
+          dialog.close();
+        });
       });
-    });
   }
   document.addEventListener('astro:page-load', initAskBoxes);
 </script>
 
 <style>
-  .ask-trigger { display: grid; cursor: pointer; place-items: center; }
-  .ask-trigger img { display: block; height: auto; }
-  .ask-trigger--corner { position: fixed; z-index: 100; right: 0; bottom: 0; width: clamp(94px, 7.5vw, 140px); aspect-ratio: 1.12; place-items: end end; padding: 0 clamp(1rem, 1.2vw, 1.25rem) clamp(1rem, 1.2vw, 1.25rem) 0; background: var(--p4-purple); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
-  .ask-trigger--corner img { width: clamp(46px, 3.6vw, 64px); }
-  .ask-trigger--inline { width: clamp(112px, 11vw, 168px); aspect-ratio: 1; border: 3px solid var(--p4-purple); border-radius: 48% 52% 47% 53%; transition: background-color .2s ease, transform .2s ease; }
-  .ask-trigger--inline img { width: 58%; }
-  .ask-trigger--inline:hover, .ask-trigger--inline:focus-visible { background: var(--p4-yellow); transform: rotate(3deg); }
-  .ask-dialog { inset: 50% auto auto 50%; width: min(92vw, 560px); max-width: none; margin: 0; padding: 0; border: 0; overflow: visible; background: transparent; color: var(--p4-purple); transform: translate(-50%, -50%); }
-  .ask-dialog::backdrop { background: rgba(63, 39, 67, .5); backdrop-filter: blur(6px); }
-  .ask-dialog-inner { position: relative; padding: clamp(1.6rem, 4vw, 3rem); border-radius: 48% 52% 47% 53% / 4% 5% 4% 5%; background: var(--p4-yellow); box-shadow: 16px 18px 0 var(--p4-purple); transform: rotate(-1deg); }
-  .ask-close-form { position: absolute; top: 1rem; right: 1rem; }
-  .ask-close { display: grid; width: 42px; aspect-ratio: 1; cursor: pointer; place-items: center; border-radius: 50%; background: var(--p4-purple); color: var(--p4-yellow); font-size: 1.35rem; }
-  .ask-kicker { margin: 0; color: var(--p4-coral); font: 700 1rem/1 var(--font-title); letter-spacing: .1em; }
-  .ask-dialog h2 { margin: .2rem 0 1.75rem; color: var(--p4-coral); font: 700 clamp(2.6rem, 7vw, 4.8rem)/.95 var(--font-title); letter-spacing: -.055em; }
-  .ask-form { display: grid; gap: .55rem; }
-  .ask-form label { margin-top: .5rem; color: var(--p4-purple); font: .72rem/1 var(--font-body); letter-spacing: .14em; }
-  .ask-form input, .ask-form textarea { width: 100%; border: 0; border-bottom: 3px solid var(--p4-purple); border-radius: 0; outline: 0; background: transparent; padding: .7rem .25rem; resize: vertical; }
-  .ask-form input:focus, .ask-form textarea:focus { border-color: var(--p4-coral); }
-  .ask-submit { justify-self: end; margin-top: 1rem; padding: .75rem 1rem; cursor: pointer; border-radius: 999px; background: var(--p4-coral); color: var(--p4-yellow); font: 700 .82rem/1 var(--font-body); letter-spacing: .06em; }
-  @media (max-width: 720px) { .ask-trigger--corner { width: 90px; } }
+  .ask-trigger {
+    display: grid;
+    cursor: pointer;
+    place-items: center;
+  }
+  .ask-trigger img {
+    display: block;
+    height: auto;
+  }
+  .ask-trigger--corner {
+    position: fixed;
+    z-index: 100;
+    right: 0;
+    bottom: 0;
+    width: clamp(94px, 7.5vw, 140px);
+    aspect-ratio: 1.12;
+    padding: 0;
+    background: var(--p4-purple);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  }
+  .ask-trigger--corner img {
+    position: absolute;
+    top: 69.073%;
+    left: 72.387%;
+    width: clamp(41.36px, 3.3vw, 61.6px);
+    height: clamp(41.36px, 3.3vw, 61.6px);
+    object-fit: fill;
+    transform: translate(-50%, -50%);
+  }
+  .ask-trigger--inline {
+    width: clamp(112px, 11vw, 168px);
+    padding: 0;
+    background: transparent;
+    transition: transform 0.2s ease;
+  }
+  .ask-trigger--inline img {
+    width: 100%;
+  }
+  .ask-trigger--inline:hover,
+  .ask-trigger--inline:focus-visible {
+    transform: rotate(3deg) scale(1.03);
+  }
+  .ask-dialog {
+    inset: 50% auto auto 50%;
+    width: min(92vw, 560px);
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+    background: transparent;
+    color: var(--p4-purple);
+    transform: translate(-50%, -50%);
+  }
+  .ask-dialog::backdrop {
+    background: rgba(63, 39, 67, 0.5);
+    backdrop-filter: blur(6px);
+  }
+  .ask-dialog-inner {
+    position: relative;
+    padding: clamp(1.6rem, 4vw, 3rem);
+    border-radius: 48% 52% 47% 53% / 4% 5% 4% 5%;
+    background: var(--p4-yellow);
+    box-shadow: 16px 18px 0 var(--p4-purple);
+    transform: rotate(-1deg);
+  }
+  .ask-close-form {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+  .ask-close {
+    display: grid;
+    width: 42px;
+    aspect-ratio: 1;
+    cursor: pointer;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--p4-purple);
+    color: var(--p4-yellow);
+    font-size: 1.35rem;
+  }
+  .ask-kicker {
+    margin: 0;
+    color: var(--p4-coral);
+    font: 700 1rem/1 var(--font-title);
+    letter-spacing: 0.1em;
+  }
+  .ask-dialog h2 {
+    margin: 0.2rem 0 1.75rem;
+    color: var(--p4-coral);
+    font: 700 clamp(2.6rem, 7vw, 4.8rem)/0.95 var(--font-title);
+    letter-spacing: -0.055em;
+  }
+  .ask-form {
+    display: grid;
+    gap: 0.55rem;
+  }
+  .ask-form label {
+    margin-top: 0.5rem;
+    color: var(--p4-purple);
+    font: 0.72rem/1 var(--font-body);
+    letter-spacing: 0.14em;
+  }
+  .ask-form input,
+  .ask-form textarea {
+    width: 100%;
+    border: 0;
+    border-bottom: 3px solid var(--p4-purple);
+    border-radius: 0;
+    outline: 0;
+    background: transparent;
+    padding: 0.7rem 0.25rem;
+    resize: vertical;
+  }
+  .ask-form input:focus,
+  .ask-form textarea:focus {
+    border-color: var(--p4-coral);
+  }
+  .ask-submit {
+    justify-self: end;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-radius: 999px;
+    background: var(--p4-coral);
+    color: var(--p4-yellow);
+    font: 700 0.82rem/1 var(--font-body);
+    letter-spacing: 0.06em;
+  }
+  @media (max-width: 720px) {
+    .ask-trigger--corner {
+      width: 90px;
+    }
+  }
 </style>

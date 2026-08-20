@@ -23,7 +23,7 @@ about:
     - name: 黄金神威
       author: 野田悟
       category: anime
-    - name: "Kingdom Come: Deliverance"
+    - name: "Kingdom Come: Deliverance 2"
       author: Warhorse Studios
       category: game
     - name: 细胞神曲
@@ -57,24 +57,31 @@ about:
       author: Capcom
       category: game
   other:
-    - label: 关于上面，喜欢的作品太多我也填得很艰难orz，最后重点还是放在INFLUENCE，要么在人生中非常早期遇到产生了巨大影响，要么是陪我度过了特殊/艰难时期，仅仅从个人喜好上来说有很多都没有上榜。
+    - label: 关于上面
+      value: 喜欢的作品太多我也填得很艰难orz，最后重点还是放在INFLUENCE，要么在人生中非常早期遇到产生了巨大影响，要么是陪我度过了特殊/艰难时期，仅仅从个人喜好上来说有很多都没有上榜。
     - label: 如果你想知道更多
       value: https://lit.link/zh-tw/a3ync
       href: https://lit.link/zh-tw/a3ync
     - label: 明日方舟账号
       value: A3yNc#6968
+    - label: 本页面依然在建设中
+      value: 后续会修改布局
   fun:
-    - title: 最近画了什么？
-      description: 这里先放几张示例图，之后直接替换本文件中的图片路径即可。
+    - title: 现在好像只能放三张图
       images:
-        - /gallery/sample-terminal.png
-        - /gallery/sample-spirit.png
-        - /gallery/sample-archive.png
-    - title: 一些没有归档的小东西
-      description: 折叠栏支持多个分组，也可以只保留图片。
+        - /assets/about/imports/9d0ae1854550d675d67449b26a5b2557.jpg
+        - /assets/about/imports/493504221259738153c999421ce16e42.jpg
+        - /assets/about/imports/c194833cc783d34e46c1b8d7c112d3cc.jpg
+    - title: 下次修复一下
       images:
-        - /assets/home/navigation/image-2.png
-        - /assets/home/navigation/image-4.png
+        - /assets/about/imports/1858f0a7fcd2b738ee53d4c216ea5adc.jpg
+        - /assets/about/imports/b8ebbb6bgy1ghro33p58ej2068068glo.jpg
+        - /assets/about/imports/ea0a4ad41dae94a5cd1af4c18202d024.gif
+    - title: 好想放100张图（。。
+      images:
+        - /assets/about/imports/7e43467d5b12d0ab033c2bef95732c1b.jpg
+        - /assets/about/imports/G_AwrrRWUAAZa9i.jpg
+        - /assets/about/imports/K1F6})BG)FD)SD}W5QVXN`R.jpg
 ---
 
 hi👋我是 a3ync=async=异步。

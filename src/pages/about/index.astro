@@ -1,5 +1,6 @@
 ---
 import { getEntry, render } from 'astro:content';
+import '@fancyapps/ui/dist/fancybox/fancybox.css';
 import IndexPage from '@/layouts/IndexPage.astro';
 import AskBox from '@/components/AskBox.astro';
 import { getReviewAccentColor } from '@/config/reviews';
@@ -147,11 +148,21 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
                 {group.description && <p>{group.description}</p>}
                 <div class="fun-images">
                   {group.images.map((image, imageIndex) => (
-                    <img
-                      src={getUrl(image)}
-                      alt={`${group.title} ${imageIndex + 1}`}
-                      loading="lazy"
-                    />
+                    <a
+                      class="fun-image-link"
+                      href={getUrl(image)}
+                      data-about-fun-image
+                      data-fancybox="about-fun"
+                      data-caption={`${group.title} ${imageIndex + 1}`}
+                      aria-label={`放大查看：${group.title} ${imageIndex + 1}`}
+                    >
+                      <img
+                        src={getUrl(image)}
+                        alt={`${group.title} ${imageIndex + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </a>
                   ))}
                 </div>
               </div>
@@ -162,6 +173,12 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
     </section>
   </article>
 </IndexPage>
+
+<script>
+  import { Fancybox } from '@fancyapps/ui';
+
+  Fancybox.bind('[data-about-fun-image]');
+</script>
 
 <style>
   :global(.site-content.about-shell) {
@@ -343,6 +360,14 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
     align-items: center;
     gap: 1.5rem;
   }
+  .fun-section {
+    display: block;
+  }
+  .fun-section > h2 {
+    width: auto;
+    margin-bottom: 1.25rem;
+    justify-self: auto;
+  }
   .fun-accordions {
     display: grid;
     min-width: 0;
@@ -381,12 +406,20 @@ const playlistUrl = `https://music.163.com/outchain/player?type=0&id=${encodeURI
   .fun-images {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
     gap: 1rem;
   }
+  .fun-image-link {
+    display: block;
+    min-width: 0;
+    cursor: zoom-in;
+  }
   .fun-images img {
+    display: block;
     width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
+    height: auto;
+    aspect-ratio: auto;
+    object-fit: contain;
     border-radius: 2% 4% 3% 5%;
   }
   @media (max-width: 900px) {
