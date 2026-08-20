@@ -4,7 +4,6 @@ import IndexPage from '@/layouts/IndexPage.astro';
 import ReviewHeader from '@/components/reviews/ReviewHeader.astro';
 import LatestReview from '@/components/reviews/LatestReview.astro';
 import ReviewDirectory from '@/components/reviews/ReviewDirectory.astro';
-import ReviewMascot from '@/components/reviews/ReviewMascot.astro';
 import '@/styles/pages/reviews.css';
 
 const reviews = (await getCollection('reviews'))
@@ -16,5 +15,4 @@ const reviews = (await getCollection('reviews'))
   <ReviewHeader />
   <LatestReview review={reviews[0]} {reviews} />
   <ReviewDirectory {reviews} />
-  <ReviewMascot />
 </IndexPage>

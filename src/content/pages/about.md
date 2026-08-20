@@ -4,7 +4,7 @@ description: 关于 a3ync、喜欢的作品和一些有趣的东西。
 about:
   portrait: /assets/about/selfpic.png
   playlist:
-    neteasePlaylistId: '18247618371'
+    neteasePlaylistId: "18247618371"
     autoplay: false
   contacts:
     - name: GitHub
@@ -23,23 +23,41 @@ about:
     - name: 黄金神威
       author: 野田悟
       category: anime
-    - name: 'Kingdom Come: Deliverance'
+    - name: "Kingdom Come: Deliverance"
+      author: Warhorse Studios
       category: game
-    - name: 银翼杀手 2049
-      author: Denis Villeneuve
-      category: movie
-    - name: 迷宫饭
-      author: 九井谅子
+    - name: 细胞神曲
+      author: 鱶尾工業
+      category: game
+    - name: 植物精灵
+      author: Amanita Design
+      category: game
+    - name: Night in the Woods
+      author: Infinite Fall
+      category: game
+    - name: 斉木楠雄のΨ難
+      author: 麻生周一
       category: anime
-    - name: 页面还在修改
-      author: 我
-      category: book
-    - name: The Stanley Parable
+    - name: One Piece
+      author: 尾田荣一郎
+      category: anime
+    - name: 少女☆歌剧 Revue Starlight
+      author: KINEMA CITRUS
+      category: movie
+    - name: HUNTER X HUNTER
+      author: 富坚义博
+      category: anime
+    - name: とある科学の超電磁砲
+      author: 冬川基
+      category: anime
+    - name: Don't Starve Together
+      author: Klei Entertainment
       category: game
-    - name: Interface
-      author: umami
-      category: video
+    - name: 幽灵诡计
+      author: Capcom
+      category: game
   other:
+    - label: 关于上面，喜欢的作品太多我也填得很艰难orz，最后重点还是放在INFLUENCE，要么在人生中非常早期遇到产生了巨大影响，要么是陪我度过了特殊/艰难时期，仅仅从个人喜好上来说有很多都没有上榜。
     - label: 如果你想知道更多
       value: https://lit.link/zh-tw/a3ync
       href: https://lit.link/zh-tw/a3ync
