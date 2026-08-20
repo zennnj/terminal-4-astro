@@ -1,5 +1,5 @@
 ---
-title: Late Night Video Essay
+originalName: Late Night Video Essay
 date: 2026-05-18
 type: video
 status: completed

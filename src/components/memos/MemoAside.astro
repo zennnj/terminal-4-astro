@@ -1,13 +1,15 @@
 ---
 import { memoConfig } from '@/config/memos';
+import getUrl from '@/utils/getUrl';
 
 const { notes } = memoConfig;
 ---
 
 <aside class="memo-aside" aria-label="Memo notes">
-  <div class="memo-sticky-stack">
-    {notes.map((note) => (
-      <article class:list={['memo-sticky', `memo-sticky--${note.tone}`]}>
+  <div class="memo-notes-collage">
+    <img src={getUrl('/assets/memos/notes.png')} width="623" height="672" alt="" aria-hidden="true" />
+    {notes.map((note, index) => (
+      <article class:list={['memo-note-copy', index === 0 ? 'memo-note-copy--top' : 'memo-note-copy--bottom']}>
         <span>{note.label}</span>
         <p>{note.text}</p>
       </article>

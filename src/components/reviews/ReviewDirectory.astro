@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import getUrl from '@/utils/getUrl';
 import { getReviewAccentColor } from '@/config/reviews';
+import { getReviewDisplayName } from '@/utils/reviews';
 
 interface Props { reviews: CollectionEntry<'reviews'>[]; }
 const { reviews } = Astro.props;
@@ -24,7 +25,7 @@ const types = [
     <a class="review-row" data-review-type={review.data.type} href={getUrl(`/reviews/${review.id}`)}>
       <span class="review-color" style={`--accent:${getReviewAccentColor(review.data.type)}`} aria-hidden="true">•</span>
       <span class="review-name">
-        <strong>{review.data.title}</strong>
+        <strong>{getReviewDisplayName(review.data)}</strong>
         {review.data.creator && <span class="review-creator">({review.data.creator})</span>}
       </span>
       <time datetime={review.data.date.toISOString()}>{review.data.date.getFullYear()}.{String(review.data.date.getMonth() + 1).padStart(2, '0')}</time>

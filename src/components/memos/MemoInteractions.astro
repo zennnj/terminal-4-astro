@@ -3,11 +3,40 @@
     const buttons = [...document.querySelectorAll('[data-memo-view]')].filter((item): item is HTMLButtonElement => item instanceof HTMLButtonElement);
     const panels = [...document.querySelectorAll('[data-memo-panel]')].filter((item): item is HTMLElement => item instanceof HTMLElement);
     const reload = document.querySelector('#junk-reload');
+    let junkDates: string[] = [];
+    let junkDatesRequest: Promise<string[]> | null = null;
 
-    const decorateJunk = () => {
+    const loadJunkDates = (root: HTMLElement, cardCount: number) => {
+      if (junkDates.length === cardCount) return Promise.resolve(junkDates);
+      if (junkDatesRequest) return junkDatesRequest;
+      const params = new URLSearchParams({
+        path: root.dataset.walinePath || '/discuss/',
+        page: '1',
+        pageSize: String(Math.max(50, cardCount)),
+      });
+      junkDatesRequest = fetch(`/waline-api/comment?${params}`)
+        .then((response) => response.ok ? response.json() : Promise.reject(new Error(`Unable to load Junk dates (${response.status})`)))
+        .then((payload: { data?: Array<{ insertedAt?: string }> }) => {
+          junkDates = (payload.data ?? []).map((item) => item.insertedAt ?? '');
+          return junkDates;
+        })
+        .catch(() => junkDates)
+        .finally(() => { junkDatesRequest = null; });
+      return junkDatesRequest;
+    };
+
+    const decorateJunk = async () => {
       const root = document.querySelector('#waline-junk');
       if (!(root instanceof HTMLElement)) return;
+      const relativeTimeWindow = 24 * 60 * 60 * 1000;
+      const padDatePart = (value: number) => String(value).padStart(2, '0');
+      const formatDate = (date: Date) => [
+        date.getFullYear(),
+        padDatePart(date.getMonth() + 1),
+        padDatePart(date.getDate()),
+      ].join('-') + ` ${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}:${padDatePart(date.getSeconds())}`;
       const cards = [...root.querySelectorAll('.wl-card')].filter((item): item is HTMLElement => item instanceof HTMLElement);
+      const dates = await loadJunkDates(root, cards.length);
       const countText = root.querySelector('.wl-count')?.textContent ?? '';
       const parsedTotal = Number.parseInt(countText.match(/\d+/)?.[0] ?? '', 10);
       const total = Number.isFinite(parsedTotal) ? parsedTotal : cards.length;
@@ -18,19 +47,33 @@
           heading.className = 'junk-post-heading';
           card.prepend(heading);
         }
+        let dateOutput = heading.querySelector<HTMLTimeElement>('.junk-post-date');
+        if (!(dateOutput instanceof HTMLTimeElement)) {
+          dateOutput = document.createElement('time');
+          dateOutput.className = 'junk-post-date';
+          heading.append(dateOutput);
+        }
+        let numberOutput = heading.querySelector<HTMLElement>('.junk-post-number');
+        if (!(numberOutput instanceof HTMLElement)) {
+          numberOutput = document.createElement('span');
+          numberOutput.className = 'junk-post-number';
+          heading.append(numberOutput);
+        }
         const time = card.querySelector('.wl-time');
-        const rawDate = time?.getAttribute('title') || time?.getAttribute('datetime') || '';
+        const rawDate = dates[index] || time?.getAttribute('title') || time?.getAttribute('datetime') || '';
         const date = rawDate ? new Date(rawDate.replace(' ', 'T')) : null;
-        const dateLabel = date && !Number.isNaN(date.valueOf())
-          ? `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
-          : (time?.textContent?.trim() ?? '');
-        const label = `#${Math.max(1, total - index)}${dateLabel ? `  ${dateLabel}` : ''}`;
-        if (heading.textContent !== label) heading.textContent = label;
+        const hasValidDate = date !== null && !Number.isNaN(date.valueOf());
+        const isOlderThanOneDay = date !== null && hasValidDate && Date.now() - date.valueOf() >= relativeTimeWindow;
+        const dateLabel = isOlderThanOneDay ? formatDate(date) : (time?.textContent?.trim() ?? '');
+        if (dateOutput.textContent !== dateLabel) dateOutput.textContent = dateLabel;
+        if (date !== null && hasValidDate) dateOutput.dateTime = date.toISOString();
+        const numberLabel = `#${Math.max(1, total - index)}`;
+        if (numberOutput.textContent !== numberLabel) numberOutput.textContent = numberLabel;
       });
     };
 
     const junkRoot = document.querySelector('#waline-junk');
-    if (junkRoot) new MutationObserver(decorateJunk).observe(junkRoot, { childList: true, subtree: true });
+    if (junkRoot) new MutationObserver(() => { void decorateJunk(); }).observe(junkRoot, { childList: true, subtree: true });
     const setView = (view: string) => {
       buttons.forEach((button) => {
         const active = button.dataset.memoView === view;
@@ -47,7 +90,11 @@
       history.replaceState(history.state, '', url);
     };
     buttons.forEach((button) => button.addEventListener('click', () => setView(button.dataset.memoView ?? 'memos')));
-    if (reload instanceof HTMLButtonElement) reload.addEventListener('click', () => window.dispatchEvent(new CustomEvent('waline:mount', { detail: { id: 'waline-junk', force: true } })));
+    if (reload instanceof HTMLButtonElement) reload.addEventListener('click', () => {
+      junkDates = [];
+      junkDatesRequest = null;
+      window.dispatchEvent(new CustomEvent('waline:mount', { detail: { id: 'waline-junk', force: true } }));
+    });
     setView(new URLSearchParams(location.search).get('view') === 'junk' ? 'junk' : 'memos');
   }
   document.addEventListener('astro:page-load', initMemoViews);

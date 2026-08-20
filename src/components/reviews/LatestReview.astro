@@ -1,50 +1,75 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { render } from 'astro:content';
 import getUrl from '@/utils/getUrl';
-import { getReviewAccentColor, getReviewTypeLabel } from '@/config/reviews';
+import { getReviewTypeChineseLabel } from '@/config/reviews';
+import { formatFormalChineseDate, getReviewBodyExcerpt, getReviewDisplayName, toTraditionalReviewText } from '@/utils/reviews';
 
-interface Props { review?: CollectionEntry<'reviews'>; }
-const { review } = Astro.props;
-const ReviewContent = review ? (await render(review)).Content : null;
+interface Props {
+  review?: CollectionEntry<'reviews'>;
+  reviews: CollectionEntry<'reviews'>[];
+}
+
+const { review, reviews } = Astro.props;
+const displayName = review ? toTraditionalReviewText(getReviewDisplayName(review.data)) : '暫無評論';
+const chineseDate = review ? formatFormalChineseDate(review.data.date) : null;
+const traditionalExcerpt = review
+  ? toTraditionalReviewText(getReviewBodyExcerpt(review.body) || '這篇評論還沒有正文。')
+  : '';
+const traditionalType = review ? toTraditionalReviewText(getReviewTypeChineseLabel(review.data.type)) : '';
+const reviewPaths = reviews.map((item) => getUrl(`/reviews/${item.id}`));
+const fallbackPath = reviewPaths[0] ?? getUrl('/reviews');
 ---
 
-<section class="recent-review" aria-label="Latest review">
+<section class="recent-review" aria-label="最近一篇評論">
+  <div class="recent-burst" aria-hidden="true">
+    <img src={getUrl('/assets/reviews/multigle-orange.png')} width="260" height="269" alt="" />
+    <svg viewBox="0 0 260 269">
+      <defs><path id="recently-circle" d="M 68 135 A 62 62 0 1 1 192 135 A 62 62 0 1 1 68 135" /></defs>
+      <text textLength="382" lengthAdjust="spacing"><textPath href="#recently-circle" startOffset="1%">RECENTLY · RECENTLY ·</textPath></text>
+    </svg>
+  </div>
+
+  <img class="recent-white-burst" src={getUrl('/assets/reviews/multigle-white.png')} width="522" height="550" alt="" aria-hidden="true" />
+
   {review ? (
-    <a class="recent-card" href={getUrl(`/reviews/${review.id}`)}>
-      <span class="latest-badge">Latest</span>
-      <div class="recent-heading">
-        <strong>{review.data.title}{review.data.creator && <span> ({review.data.creator})</span>}</strong>
-        <span class="recent-type"><i style={`--accent:${getReviewAccentColor(review.data.type)}`} />{getReviewTypeLabel(review.data.type)}</span>
-      </div>
-      <div class="recent-excerpt markdown-body">{ReviewContent && <ReviewContent />}</div>
-      <span class="recent-more">READ MORE &gt;&gt;&gt;</span>
+    <a class="recent-ticket" href={getUrl(`/reviews/${review.id}`)} lang="zh-Hant">
+      <span class="recent-title">{displayName}</span>
+      <time class="recent-date" datetime={review.data.date.toISOString()}>
+        <span>{chineseDate?.year}</span><span>{chineseDate?.monthDay}</span>
+      </time>
+      <p class="recent-summary">{traditionalExcerpt}</p>
+      <span class="recent-type" aria-label={`類型：${traditionalType}`}>
+        {[...traditionalType].map((character) => <span>{character}</span>)}
+      </span>
     </a>
   ) : (
-    <div class="recent-card is-empty"><span class="latest-badge">Latest</span><div class="recent-heading"><strong>NO REVIEW YET</strong></div></div>
+    <div class="recent-ticket is-empty" lang="zh-Hant"><span class="recent-title">暫無評論</span></div>
   )}
+
+  <a class="random-review" href={fallbackPath} data-random-review>
+    <img src={getUrl('/assets/reviews/label.png')} width="318" height="52" alt="" />
+    <span>Random Review</span>
+  </a>
+  <script is:inline type="application/json" data-review-paths set:html={JSON.stringify(reviewPaths)} />
 </section>
 
 <script>
-  function initLatestReviewTilt() {
-    const cards = [...document.querySelectorAll<HTMLElement>('.recent-card:not(.is-empty)')];
-    cards.forEach((card) => {
-      if (card.dataset.tiltReady === 'true') return;
-      card.dataset.tiltReady = 'true';
-      card.addEventListener('pointermove', (event) => {
-        if (event.pointerType === 'touch') return;
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--tilt-x', `${((event.clientY - rect.top) / rect.height - .5) * -4}deg`);
-        card.style.setProperty('--tilt-y', `${((event.clientX - rect.left) / rect.width - .5) * 5}deg`);
-        card.style.setProperty('--glow-x', `${((event.clientX - rect.left) / rect.width) * 100}%`);
-        card.style.setProperty('--glow-y', `${((event.clientY - rect.top) / rect.height) * 100}%`);
-      });
-      card.addEventListener('pointerleave', () => {
-        card.style.removeProperty('--tilt-x');
-        card.style.removeProperty('--tilt-y');
+  function bindRandomReview() {
+    document.querySelectorAll<HTMLElement>('.recent-review').forEach((section) => {
+      if (section.dataset.randomBound === 'true') return;
+      section.dataset.randomBound = 'true';
+      const link = section.querySelector<HTMLAnchorElement>('[data-random-review]');
+      const data = section.querySelector<HTMLScriptElement>('[data-review-paths]');
+      if (!link || !data) return;
+      let paths: string[] = [];
+      try { paths = JSON.parse(data.textContent ?? '[]'); } catch { paths = []; }
+      link.addEventListener('click', (event) => {
+        if (paths.length === 0) return;
+        event.preventDefault();
+        window.location.assign(paths[Math.floor(Math.random() * paths.length)]);
       });
     });
   }
 
-  document.addEventListener('astro:page-load', initLatestReviewTilt);
+  document.addEventListener('astro:page-load', bindRandomReview);
 </script>

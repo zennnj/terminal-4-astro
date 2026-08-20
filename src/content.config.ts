@@ -49,11 +49,12 @@ const gallery = defineCollection({
 const reviews = defineCollection({
   loader: glob({ base: './src/content/reviews', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
-    title: z.string(),
+    name: z.string().optional(),
+    originalName: z.string().optional(),
     date: z.date(),
     type: z.enum(['game', 'anime', 'movie', 'video', 'book']),
     status: z.string().default('completed'),
-    rating: z.number().min(0).max(10).optional(),
+    verdict: z.string().optional(),
     cover: z.string().optional(),
     creator: z.string().optional(),
     summary: z.string().optional(),
@@ -63,6 +64,8 @@ const reviews = defineCollection({
     })).default([]),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+  }).refine((review) => review.name || review.originalName, {
+    message: 'A review requires either name or originalName.',
   }),
 });
 

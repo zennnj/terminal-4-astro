@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import PageHeader from '@/components/ui/PageHeader.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
 import MemoAside from './MemoAside.astro';
+import MemoPaperDecoration from './MemoPaperDecoration.astro';
 import MemoCard from './MemoCard.astro';
 import { memoConfig } from '@/config/memos';
 
@@ -11,7 +12,8 @@ const { entries } = Astro.props;
 ---
 
 <section data-memo-panel="memos">
-  <PageHeader title="MEMOS" eyebrow={memoConfig.eyebrow} description={memoConfig.description} compact />
+  <PageHeader title="MEMOS" eyebrow={memoConfig.eyebrow} description={memoConfig.description} />
+  <MemoPaperDecoration />
   <div class="memo-layout">
     <MemoAside />
     <div class="memo-stream" aria-label="Local memo feed">

@@ -1,9 +1,10 @@
 ---
-title: 作品名称
+name: 中文名或常用译名
+originalName: Original title
 date: 2026-08-08
 type: game
 status: completed
-rating: 8
+verdict: 值得一看
 cover: /reviews/example.jpg
 creator: Author or director
 summary: 一句话概括最终感想。

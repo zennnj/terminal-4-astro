@@ -254,11 +254,12 @@ pnpm new:review "作品名称" --type movie --dry-run
 
 ```md
 ---
-title: "Death Stranding"
+name: "死亡搁浅"
+originalName: "Death Stranding"
 date: 2026-08-10
 type: game
 status: completed
-rating: 8.8
+verdict: 值得一玩
 cover: /reviews/death-stranding.png
 creator: Hideo Kojima
 summary: A long and quiet journey about distance and connection.
@@ -274,7 +275,7 @@ draft: false
 这里写完整的最终 Review。
 ```
 
-封面可以放在 `public/reviews/`。`rating` 可以省略；填写时必须在 0～10 之间。Review 的 `draft: true` 在开发和生产页面中都会被过滤。
+封面可以放在 `public/reviews/`。`name` 和 `originalName` 至少填写一个，页面优先显示 `name`。`verdict` 可以省略，也可以自由填写“值得一看”“可以一看”等文字评价，不再使用数字评分。Review 首页票券的中间区域会摘取 Markdown 正文的第一个非空段落。Review 的 `draft: true` 在开发和生产页面中都会被过滤。
 
 Review 类型的显示名称与颜色统一配置在：
 

@@ -6,12 +6,10 @@ export const memoConfig = {
     {
       label: "CURRENTLY",
       text: "七月新番真好看。好久没有一个季度看这么多动画了。",
-      tone: "yellow",
     },
     {
       label: "REMINDER",
       text: "缓慢建设中····",
-      tone: "blue",
     }
   ],
 } as const;

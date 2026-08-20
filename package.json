@@ -39,6 +39,7 @@
     "hastscript": "^9.0.1",
     "lodash-es": "^4.18.1",
     "mdast-util-to-string": "^4.0.0",
+    "opencc-js": "^1.4.1",
     "reading-time": "^1.5.0",
     "remark-directive": "^4.0.0",
     "remixicon": "^4.9.1",

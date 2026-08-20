@@ -127,6 +127,22 @@
   font-weight: 700;
 }
 
+@font-face {
+  font-family: "Xiangcui Kesong";
+  src: url('/assets/fonts/香萃刻宋.ttf') format('truetype');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Rockwell Review";
+  src: url('/assets/fonts/ROCK.TTF') format('truetype');
+  font-display: swap;
+  font-style: normal;
+  font-weight: 400;
+}
+
 /**
 覆写tailwindcss 默认样式
  */
@@ -295,6 +311,13 @@ menu {
   line-height: inherit;
 }
 
+/* CJK body fonts often have no dedicated italic face. Re-enable synthetic
+   slant only for authored Markdown emphasis so `*text*` remains visible. */
+.markdown-body em {
+  font-style: italic;
+  font-synthesis: style;
+}
+
 /* 修改waline评论侧边栏样式 */
 .waline-comment-content-author {
   text-align: end;
@@ -424,6 +447,8 @@ menu {
   --font-body: var(--font-sans-cjk);
   --font-about-copy: "Maoken Yanbo Song", "Songti SC", "Noto Serif SC", serif;
   --font-article-title: var(--font-heading-cjk);
+  --font-review-ticket: "Xiangcui Kesong", "Songti SC", "Noto Serif SC", serif;
+  --font-rockwell: "Rockwell Review", Rockwell, Georgia, serif;
   --text-xs: .78rem;
   --text-sm: .875rem;
   --text-base: 1rem;
@@ -950,8 +975,9 @@ body.site-body:not(.home-page) .markdown-body blockquote {
 }
 
 body.site-body:not(.home-page) .markdown-body :not(pre)>code {
-  background: var(--p4-yellow);
-  color: var(--p4-coral);
+  border: 1px solid color-mix(in srgb, var(--p4-purple) 18%, transparent);
+  background: color-mix(in srgb, var(--p4-gray) 58%, white);
+  color: var(--p4-purple);
 }
 
 body.site-body:not(.home-page) input,

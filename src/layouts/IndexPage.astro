@@ -15,6 +15,7 @@ const { frontmatter = { comment: false, donate: false }, contentClass = '', body
 ---
 
 <SiteShell title={Astro.props.title} description={Astro.props.description} contentClass={contentClass} bodyClass={bodyClass}>
+  <Fragment slot="viewport-decoration"><slot name="viewport-decoration" /></Fragment>
   <slot />
   {donate.enable && frontmatter.donate && <Donate />}
   {comment.enable && frontmatter.comment && <Comment />}

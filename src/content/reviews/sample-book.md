@@ -1,9 +1,9 @@
 ---
-title: The Left Hand of Darkness
+originalName: The Left Hand of Darkness
 date: 2026-04-02
 type: book
 status: completed
-rating: 9
+verdict: 值得一读
 creator: Ursula K. Le Guin
 summary: A sample book entry used to check longer names, the purple marker, and filtering behavior.
 notes: []

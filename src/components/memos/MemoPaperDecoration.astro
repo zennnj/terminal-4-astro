@@ -1,0 +1,31 @@
+---
+import getUrl from '@/utils/getUrl';
+
+const writeFrames = [0, 3, 6].map((index) => getUrl(`/assets/memos/_write_${String(index).padStart(4, '0')}.png`));
+---
+
+<aside class="memo-paper-viewport" aria-hidden="true">
+  <img
+    class="memo-paper-background"
+    src={getUrl('/assets/memos/paper-background.png')}
+    width="739"
+    height="773"
+    alt=""
+  />
+</aside>
+<div class="memo-write-viewport" aria-hidden="true">
+  <div class="memo-write-decoration">
+    <div class="memo-write-animation">
+      {writeFrames.map((frame, index) => (
+        <img
+          class="memo-write-frame"
+          src={frame}
+          width="538"
+          height="424"
+          alt=""
+          style={`--memo-write-index: ${index}`}
+        />
+      ))}
+    </div>
+  </div>
+</div>

@@ -1,9 +1,9 @@
 ---
-title: The Quiet Station
+originalName: The Quiet Station
 date: 2026-06-12
 type: movie
 status: completed
-rating: 8
+verdict: 可以一看
 cover: /reviews/sample-film.png
 creator: Sample Director
 summary: A fictional film entry for checking the green category marker and review detail layout.

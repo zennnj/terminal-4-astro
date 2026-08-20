@@ -8,14 +8,14 @@ const typeArgument = args.find((arg) => arg.startsWith('--type='));
 const typeIndex = args.indexOf('--type');
 const type = typeArgument?.slice('--type='.length) || (typeIndex >= 0 ? args[typeIndex + 1] : 'game');
 const consumedTypeValue = typeIndex >= 0 ? args[typeIndex + 1] : undefined;
-const title = args.find((arg) => !arg.startsWith('--') && arg !== consumedTypeValue);
+const name = args.find((arg) => !arg.startsWith('--') && arg !== consumedTypeValue);
 
 if (args.includes('--help')) {
   console.log('Usage: pnpm new:review "Work title" [--type game|anime|movie|video|book] [--dry-run]');
   process.exit(0);
 }
 
-if (!title) {
+if (!name) {
   console.error('Usage: pnpm new:review "Work title" [--type game|anime|movie|video|book] [--dry-run]');
   process.exit(1);
 }
@@ -25,15 +25,17 @@ if (!REVIEW_TYPES.includes(type)) {
   process.exit(1);
 }
 
-const fileName = safeFileName(title);
+const fileName = safeFileName(name);
 const relativePath = path.join('src', 'content', 'reviews', `${fileName}.md`);
 const content = `---
-title: ${yamlString(title)}
+name: ${yamlString(name)}
+originalName: ""
 date: ${today()}
 type: ${type}
 status: completed
 creator: ""
 summary: ""
+verdict: ""
 notes: []
 tags: []
 draft: true

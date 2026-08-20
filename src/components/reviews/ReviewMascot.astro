@@ -1,0 +1,46 @@
+---
+import getUrl from '@/utils/getUrl';
+
+const frames = ['0000', '0003', '0006'];
+---
+
+<aside class="review-mascot" aria-hidden="true" data-review-mascot>
+  <div class="review-mascot-stage">
+    {frames.map((frame, index) => <img class:list={['mascot-frame', { 'is-active': index === 0 }]} data-mascot-person src={getUrl(`/assets/reviews/_coolomo_${frame}.png`)} width="538" height="424" alt="" />)}
+    {frames.map((frame) => <img class="mascot-frame" data-mascot-text="know" src={getUrl(`/assets/reviews/_DontUKnow_${frame}.png`)} width="538" height="424" alt="" />)}
+    {frames.map((frame) => <img class="mascot-frame" data-mascot-text="game" src={getUrl(`/assets/reviews/_GamaeIsLife_${frame}.png`)} width="538" height="424" alt="" />)}
+  </div>
+</aside>
+
+<script>
+  function initReviewMascot() {
+    document.querySelectorAll<HTMLElement>('[data-review-mascot]').forEach((mascot) => {
+      if (mascot.dataset.ready === 'true') return;
+      mascot.dataset.ready = 'true';
+      const people = [...mascot.querySelectorAll<HTMLElement>('[data-mascot-person]')];
+      const know = [...mascot.querySelectorAll<HTMLElement>('[data-mascot-text="know"]')];
+      const game = [...mascot.querySelectorAll<HTMLElement>('[data-mascot-text="game"]')];
+      if (people.length < 2) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        know.forEach((item) => item.classList.remove('is-active'));
+        game.forEach((item) => item.classList.remove('is-active'));
+        return;
+      }
+      let frame = 0;
+      let loop = 0;
+      const showFrame = (items: HTMLElement[], index: number, visible: boolean) => items.forEach((item, itemIndex) => {
+        item.classList.toggle('is-active', visible && itemIndex === index);
+      });
+      const timer = window.setInterval(() => {
+        frame = (frame + 1) % people.length;
+        if (frame === 0) loop = (loop + 1) % 16;
+        showFrame(people, frame, true);
+        showFrame(game, frame, loop >= 8 && loop < 12);
+        showFrame(know, frame, loop >= 12);
+      }, 100);
+      document.addEventListener('astro:before-swap', () => window.clearInterval(timer), { once: true });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initReviewMascot);
+</script>

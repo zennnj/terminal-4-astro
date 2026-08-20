@@ -4,6 +4,7 @@ import IndexPage from '@/layouts/IndexPage.astro';
 import BackLink from '@/components/ui/BackLink.astro';
 import PageHeader from '@/components/ui/PageHeader.astro';
 import MediaFrame from '@/components/ui/MediaFrame.astro';
+import { getReviewDisplayName } from '@/utils/reviews';
 
 export async function getStaticPaths() {
   const reviews = (await getCollection('reviews')).filter((review) => !review.data.draft);
@@ -13,21 +14,23 @@ export async function getStaticPaths() {
 const { review } = Astro.props;
 const { Content } = await render(review);
 const typeLabel = ({ anime: 'ANI/COMIC' } as Record<string, string>)[review.data.type] ?? review.data.type.toUpperCase();
+const displayName = getReviewDisplayName(review.data);
 ---
 
-<IndexPage title={review.data.title} contentClass="review-detail-shell">
+<IndexPage title={displayName} contentClass="review-detail-shell">
   <BackLink href="/reviews" label="REVIEW" />
   <article class="review-detail">
-    <PageHeader title={review.data.title} eyebrow={`${typeLabel} REVIEW`} detail compact />
+    <PageHeader title={displayName} eyebrow={`${typeLabel} REVIEW`} detail compact />
     <div class="review-overview">
-      <MediaFrame class="detail-cover" src={review.data.cover} alt={review.data.title} aspectRatio="4 / 5" />
+      <MediaFrame class="detail-cover" src={review.data.cover} alt={displayName} aspectRatio="4 / 5" />
       <dl>
-        <div><dt>NAME</dt><dd>{review.data.title}</dd></div>
+        <div><dt>NAME</dt><dd>{displayName}</dd></div>
+        {review.data.name && review.data.originalName && <div><dt>ORIGINAL NAME</dt><dd>{review.data.originalName}</dd></div>}
         <div><dt>TYPE</dt><dd>{typeLabel}</dd></div>
         <div><dt>AUTHOR / DIRECTOR</dt><dd>{review.data.creator ?? '—'}</dd></div>
         <div><dt>DESCRIPTION</dt><dd>{review.data.summary ?? 'No description yet.'}</dd></div>
         <div><dt>DATE</dt><dd>{review.data.date.getFullYear()}.{review.data.date.getMonth() + 1}</dd></div>
-        {review.data.rating !== undefined && <div><dt>RATING</dt><dd>{review.data.rating} / 10</dd></div>}
+        {review.data.verdict && <div><dt>VERDICT</dt><dd>{review.data.verdict}</dd></div>}
       </dl>
     </div>
 

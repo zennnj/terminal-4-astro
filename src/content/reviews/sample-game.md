@@ -1,12 +1,13 @@
 ---
-title: Death Stranding
+name: 死亡搁浅
+originalName: Death Stranding
 date: 2026-08-08
 type: game
 status: completed
-rating: 8.8
+verdict: 值得一玩
 cover: /reviews/sample-game.png
 creator: Hideo Kojima
-summary: A long and quiet journey about distance, connection, and learning to keep moving.
+summary: 这是描述，这是一个很好玩的游戏。赛博送快递太开心了，我的期末周被这个游戏给毁了。你要怎么跟我小岛秀夫，到底有什么魔力呢？
 notes:
   - date: Chapter 3
     text: The slow rhythm starts to feel deliberate rather than inconvenient.
