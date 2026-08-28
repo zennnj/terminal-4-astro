@@ -53,6 +53,18 @@
   transform: translateX(-50%);
 }
 
+.recent-title.is-multiline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(.85rem, 1.75vw, 1.75rem);
+  line-height: .95;
+  text-align: center;
+}
+
+.recent-title.is-multiline > span { display: block; }
+
 .recent-date {
   position: absolute;
   top: 47%;
@@ -298,6 +310,7 @@
   .recent-review { margin-left: 0; padding-bottom: 5rem; }
   .recent-ticket { min-height: 220px; aspect-ratio: auto; }
   .recent-title { top: 8%; left: 43%; height: 31%; max-width: 66%; font-size: clamp(1.75rem, 8vw, 3rem); }
+  .recent-title.is-multiline { font-size: clamp(.875rem, 4vw, 1.5rem); }
   .recent-date { top: 43%; font-size: clamp(1.15rem, 5vw, 1.75rem); }
   .recent-summary { top: 47%; right: 19%; font-size: clamp(.82rem, 3vw, 1rem); -webkit-line-clamp: 4; }
   .recent-type { font-size: clamp(1.15rem, 5vw, 1.7rem); }

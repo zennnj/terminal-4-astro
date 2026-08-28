@@ -4,6 +4,7 @@ import IndexPage from '@/layouts/IndexPage.astro';
 import BackLink from '@/components/ui/BackLink.astro';
 import PageHeader from '@/components/ui/PageHeader.astro';
 import MediaFrame from '@/components/ui/MediaFrame.astro';
+import Toc from '@/components/Toc.astro';
 import { getReviewDisplayName } from '@/utils/reviews';
 
 export async function getStaticPaths() {
@@ -12,7 +13,9 @@ export async function getStaticPaths() {
 }
 
 const { review } = Astro.props;
-const { Content } = await render(review);
+const { Content, headings } = await render(review);
+const tocHeadings = headings.filter((heading) => heading.depth >= 1 && heading.depth <= 4);
+const hasToc = tocHeadings.length > 0;
 const typeLabel = ({ anime: 'ANI/COMIC' } as Record<string, string>)[review.data.type] ?? review.data.type.toUpperCase();
 const displayName = getReviewDisplayName(review.data);
 ---
@@ -35,7 +38,13 @@ const displayName = getReviewDisplayName(review.data);
     </div>
 
     {review.data.notes.length > 0 && <section class="detail-notes"><h2>NOTES</h2>{review.data.notes.map((note) => <blockquote><time>{note.date}</time><p>{note.text}</p></blockquote>)}</section>}
-    <section class="final-review"><h2>REVIEW</h2><div class="markdown-body"><Content /></div></section>
+    <section class="final-review">
+      <h2>REVIEW</h2>
+      <div class:list={['review-content-layout', { 'has-toc': hasToc }]}>
+        <div class="markdown-body"><Content /></div>
+        {hasToc && <aside class="review-toc"><Toc headings={tocHeadings} /></aside>}
+      </div>
+    </section>
   </article>
 </IndexPage>
 
@@ -51,6 +60,10 @@ const displayName = getReviewDisplayName(review.data);
   .detail-notes blockquote { margin: .6rem 0; padding: .7rem .9rem; border-left: 2px solid var(--p4-coral); background: color-mix(in srgb, var(--p4-yellow) 72%, transparent); }
   .detail-notes time { color: var(--purple-soft); font-size: .8rem; }.detail-notes p { margin: .35rem 0 0; }
   .final-review .markdown-body { max-width: var(--reading-width); }
-  @media (max-width: 900px) { :global(.review-detail-shell) { width: 100%; margin-left: 0; padding: 5.5rem 1.1rem 3rem; }.review-overview { grid-template-columns: 1fr; }:global(.detail-cover) { width: min(100%, 430px); } }
+  .review-content-layout.has-toc { display: grid; grid-template-columns: minmax(0, var(--reading-width)) minmax(210px, 240px); gap: clamp(2rem, 3.5vw, 3.5rem); align-items: start; justify-content: space-between; }
+  .review-content-layout.has-toc .markdown-body { max-width: none; }
+  .review-toc { position: relative; min-width: 0; align-self: stretch; }
+  @media (max-width: 1180px) and (min-width: 901px) { .review-content-layout.has-toc { grid-template-columns: minmax(0, 1fr) minmax(190px, 220px); gap: var(--space-6); } }
+  @media (max-width: 900px) { :global(.review-detail-shell) { width: 100%; margin-left: 0; padding: 5.5rem 1.1rem 3rem; }.review-overview { grid-template-columns: 1fr; }:global(.detail-cover) { width: min(100%, 430px); }.review-content-layout.has-toc { grid-template-columns: 1fr; }.review-toc { grid-row: 1; margin-bottom: 1.5rem; }.review-toc :global(.toc-container) { position: relative; top: auto; max-height: min(54svh, 520px); } }
   @media (max-width: 560px) { .review-overview dl > div { grid-template-columns: 1fr; gap: .25rem; } }
 </style>

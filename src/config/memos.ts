@@ -9,7 +9,7 @@ export const memoConfig = {
     },
     {
       label: "REMINDER",
-      text: "缓慢建设中····",
+      text: "XWDRqCi1PZ0Br77hiaNCKzkaUsVH4dBo8IL286FY",
     }
   ],
 } as const;

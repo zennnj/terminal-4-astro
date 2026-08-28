@@ -13,8 +13,8 @@ import getUrl from '@/utils/getUrl';
     {homeConfig.navigation.items.map((item, index) => (
       <a class="portal-link" href={getUrl(item.href)} data-home-reveal-item style={`--reveal-index:${index}`}>
         <span class="portal-art" style={`--portal-mask: url("${getUrl(item.mask)}")`}>
-          <img class="portal-image" src={getUrl(item.image)} alt="" loading="eager" />
-          <img class="portal-outline" src={getUrl(item.outline)} alt="" aria-hidden="true" loading="eager" />
+          <img class="portal-image" src={getUrl(item.image)} alt="" loading="lazy" decoding="async" fetchpriority="low" />
+          <img class="portal-outline" src={getUrl(item.outline)} alt="" aria-hidden="true" loading="lazy" decoding="async" fetchpriority="low" />
         </span>
         <span class="portal-label">{item.label}</span>
       </a>

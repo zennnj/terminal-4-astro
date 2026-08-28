@@ -3,9 +3,9 @@ export const homeConfig = {
   hero: {
     loader: {
       frames: [
-        '/assets/home/hero/timeline-loading/loading_0000.png',
-        '/assets/home/hero/timeline-loading/loading_0003.png',
-        '/assets/home/hero/timeline-loading/loading_0006.png',
+        '/assets/home/hero/timeline-loading/display_0000.png',
+        '/assets/home/hero/timeline-loading/display_0003.png',
+        '/assets/home/hero/timeline-loading/display_0006.png',
       ],
     },
     portrait: '/assets/home/hero/main-pic.png',
@@ -19,14 +19,14 @@ export const homeConfig = {
     },
     spirit: {
       normalFrames: [
-        '/assets/home/hero/timeline-omo1/omo1_0000.png',
-        '/assets/home/hero/timeline-omo1/omo1_0003.png',
-        '/assets/home/hero/timeline-omo1/omo1_0006.png',
+        '/assets/home/hero/timeline-omo1/display_0000.png',
+        '/assets/home/hero/timeline-omo1/display_0003.png',
+        '/assets/home/hero/timeline-omo1/display_0006.png',
       ],
       blinkFrames: [
-        '/assets/home/hero/timeline-omo2/omo2_0000.png',
-        '/assets/home/hero/timeline-omo2/omo2_0003.png',
-        '/assets/home/hero/timeline-omo2/omo2_0006.png',
+        '/assets/home/hero/timeline-omo2/display_0000.png',
+        '/assets/home/hero/timeline-omo2/display_0003.png',
+        '/assets/home/hero/timeline-omo2/display_0006.png',
       ],
       normalCyclesPerBlink: 4,
     },

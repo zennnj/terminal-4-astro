@@ -11,6 +11,16 @@ interface Props {
 
 const { review, reviews } = Astro.props;
 const displayName = review ? toTraditionalReviewText(getReviewDisplayName(review.data)) : '暫無評論';
+const titleCharacters = [...displayName];
+const titleVisualLength = titleCharacters.reduce(
+  (length, character) => length + (/^[\u0000-\u007f]$/.test(character) ? 0.55 : 1),
+  0,
+);
+const splitTitle = titleVisualLength > 10;
+const titleMidpoint = Math.ceil(titleCharacters.length / 2);
+const titleLines = splitTitle
+  ? [titleCharacters.slice(0, titleMidpoint).join(''), titleCharacters.slice(titleMidpoint).join('')]
+  : [displayName];
 const chineseDate = review ? formatFormalChineseDate(review.data.date) : null;
 const traditionalExcerpt = review
   ? toTraditionalReviewText(getReviewBodyExcerpt(review.body) || '這篇評論還沒有正文。')
@@ -33,7 +43,9 @@ const fallbackPath = reviewPaths[0] ?? getUrl('/reviews');
 
   {review ? (
     <a class="recent-ticket" href={getUrl(`/reviews/${review.id}`)} lang="zh-Hant">
-      <span class="recent-title">{displayName}</span>
+      <span class:list={['recent-title', { 'is-multiline': splitTitle }]}>
+        {titleLines.map((line) => <span>{line}</span>)}
+      </span>
       <time class="recent-date" datetime={review.data.date.toISOString()}>
         <span>{chineseDate?.year}</span><span>{chineseDate?.monthDay}</span>
       </time>

@@ -64,9 +64,11 @@ const navItems = [
             <img
               class:list={['site-loader-frame', { 'is-active': index === 0 }]}
               src={frame}
-              width="1920"
-              height="1080"
+              width="745"
+              height="480"
               alt=""
+              decoding="async"
+              fetchpriority="high"
             />
           ))}
         </div>
@@ -127,22 +129,39 @@ const navItems = [
 
     if (loader && root.dataset.homeLoaderSeen !== 'true' && loader.dataset.ready !== 'true') {
       loader.dataset.ready = 'true';
-      const shownAt = performance.now();
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const loaderFrames = [...loader.querySelectorAll<HTMLElement>('.site-loader-frame')];
+      const loaderFrames = [...loader.querySelectorAll<HTMLImageElement>('.site-loader-frame')];
+      const criticalImages = [...document.querySelectorAll<HTMLImageElement>('[data-home-critical]')];
+      const waitForImage = (image: HTMLImageElement) => new Promise<void>((resolve) => {
+        const decode = () => {
+          if (typeof image.decode !== 'function') return resolve();
+          image.decode().catch(() => undefined).then(() => resolve());
+        };
+        if (image.complete) return decode();
+        image.addEventListener('load', decode, { once: true });
+        image.addEventListener('error', () => resolve(), { once: true });
+      });
+
       let loaderFrame = 0;
-      const loaderTimer = reducedMotion || loaderFrames.length < 2
-        ? undefined
-        : window.setInterval(() => {
+      let loaderTimer: number | undefined;
+      let animationStartedAt = performance.now();
+      let animationStarted = false;
+      let finished = false;
+      const startLoaderAnimation = () => {
+        if (finished || reducedMotion || loaderFrames.length < 2) return;
+        animationStarted = true;
+        animationStartedAt = performance.now();
+        loaderTimer = window.setInterval(() => {
           loaderFrames[loaderFrame]?.classList.remove('is-active');
           loaderFrame = (loaderFrame + 1) % loaderFrames.length;
           loaderFrames[loaderFrame]?.classList.add('is-active');
         }, 100);
-      let finished = false;
+      };
       const finishLoading = () => {
         if (finished) return;
         finished = true;
-        const remaining = Math.max(0, (reducedMotion ? 0 : 300) - (performance.now() - shownAt));
+        const minimumAnimation = reducedMotion || !animationStarted ? 0 : 300;
+        const remaining = Math.max(0, minimumAnimation - (performance.now() - animationStartedAt));
         window.setTimeout(() => {
           loader.classList.add('is-leaving');
           try { sessionStorage.setItem('terminal4-home-loaded', 'true'); } catch (_) {}
@@ -154,11 +173,11 @@ const navItems = [
           }, reducedMotion ? 20 : 560);
         }, remaining);
       };
-      if (document.readyState === 'complete') finishLoading();
-      else {
-        window.addEventListener('load', finishLoading, { once: true });
-        window.setTimeout(finishLoading, 1600);
-      }
+
+      const loaderReady = Promise.allSettled(loaderFrames.map(waitForImage)).then(startLoaderAnimation);
+      const criticalReady = Promise.allSettled(criticalImages.map(waitForImage));
+      Promise.all([loaderReady, criticalReady]).then(finishLoading);
+      window.setTimeout(finishLoading, reducedMotion ? 0 : 1000);
     }
 
     if (!toggle) return;
